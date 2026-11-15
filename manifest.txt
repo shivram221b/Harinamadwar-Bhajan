@@ -1,0 +1,7 @@
+version=1
+file=songs.txt
+file=songs_ta.txt
+file=songs_kn.txt
+file=songs_sa.txt
+file=meanings_ta.txt
+file=audio.txt
