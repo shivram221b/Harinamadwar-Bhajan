@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '3.0';
+const WEB_VERSION = '3.1';
 // The two books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -370,22 +370,6 @@ function setScale(v) {
   prefs.scale = v;
   applyLook();
 }
-
-// swipe left / right moves between Lyrics, Meaning and Audio
-(function swipe() {
-  let x0 = 0, y0 = 0, t0 = 0, multi = false;
-  const el = $('pages');
-  el.addEventListener('touchstart', e => { multi = e.touches.length > 1; x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; t0 = Date.now(); }, { passive: true });
-  el.addEventListener('touchmove', e => { if (e.touches.length > 1) multi = true; }, { passive: true });
-  el.addEventListener('touchend', e => {
-    if (multi) return;
-    const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
-    if (Date.now() - t0 < 600 && Math.abs(dx) > 80 && Math.abs(dx) > 2 * Math.abs(dy)) {
-      if (dx < 0 && tab < 2) selectTab(tab + 1);
-      else if (dx > 0 && tab > 0) selectTab(tab - 1);
-    }
-  }, { passive: true });
-})();
 
 // pinch with two fingers changes the text size (instead of zooming the whole page)
 (function pinch() {
