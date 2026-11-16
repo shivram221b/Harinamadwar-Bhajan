@@ -145,7 +145,7 @@ function norm(s) {
 function applyLook() {
   document.body.classList.toggle('night', prefs.night);
   document.documentElement.style.setProperty('--scale', prefs.scale);
-  const bar = prefs.night ? '#7C2D12' : '#C2410C';
+  const bar = prefs.night ? '#18325E' : '#1D4E9E';
   document.querySelector('meta[name=theme-color]').setAttribute('content', bar);
 }
 
@@ -158,7 +158,7 @@ function toast(msg) {
 
 // ---------- views ----------
 function showView(id) {
-  for (const v of ['v-home', 'v-index', 'v-song', 'v-settings']) $(v).classList.toggle('hidden', v !== id);
+  for (const v of ['v-home', 'v-about', 'v-index', 'v-song', 'v-settings']) $(v).classList.toggle('hidden', v !== id);
 }
 
 // ---------- index ----------
@@ -462,6 +462,8 @@ window.addEventListener('popstate', () => {
     const s = songs.find(x => x.number === n);
     if (s) { showView('v-song'); showSong(s.pos); return; }
   }
+  if (!$('v-about').classList.contains('hidden')) { showView('v-home'); return; }
+  if (location.hash === '#about') { openAbout(true); return; }
   if (!$('v-song').classList.contains('hidden')) closeSong();
   else if (!$('v-settings').classList.contains('hidden')) closeSettings();
 });
@@ -507,11 +509,20 @@ async function openBook(id, songNumber) {
   loadAudio();
 }
 
+// ---------- about ----------
+function openAbout(fromLink) {
+  if (!fromLink) history.pushState(null, '', '#about');
+  showView('v-about'); $('about-scroll').scrollTop = 0;
+}
+$('btn-about').onclick = () => openAbout();
+$('btn-about-back').onclick = () => { if (location.hash === '#about') history.back(); else showView('v-home'); };
+
 // ---------- start ----------
 async function start() {
   applyLook();
   const [b, n] = fromHash();
   if (b) await openBook(b.id, n);
+  else if (location.hash === '#about') openAbout(true);
   else showView('v-home');
   if (!prefs.setupDone) openSettings();
 }
