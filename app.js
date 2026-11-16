@@ -115,16 +115,19 @@ async function loadText(file) {
 const lyricsFile = lang => 'songs_' + lang + '.txt';
 const meaningFile = lang => (lang === 'kn' ? 'meanings_kn.txt' : lang === 'ta' ? 'meanings_ta.txt' : 'meanings_en.txt');
 
-async function loadAudio() {
-  if (audioMaps[book.id]) return audioMaps[book.id];
-  const audioMap = audioMaps[book.id] = new Map();
-  try {
-    for (const line of (await fetchText(bf('audio.txt'))).split('\n')) {
-      const bar = line.indexOf('|');
-      if (bar > 0) audioMap.set(line.slice(0, bar).trim(), line.slice(bar + 1).trim());
-    }
-  } catch (e) {}
-  return audioMap;
+function loadAudio() {
+  // one shared promise per book, so a second caller never sees a half-filled list
+  if (!audioMaps[book.id]) {
+    audioMaps[book.id] = fetchText(bf('audio.txt')).then(txt => {
+      const m = new Map();
+      for (const line of txt.split('\n')) {
+        const bar = line.indexOf('|');
+        if (bar > 0) m.set(line.slice(0, bar).trim(), line.slice(bar + 1).trim());
+      }
+      return m;
+    }).catch(() => new Map());
+  }
+  return audioMaps[book.id];
 }
 function audioUrl(path) {
   if (!path) return null;
