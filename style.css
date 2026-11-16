@@ -57,6 +57,17 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .row-sub { font-size: 14px; color: var(--muted); margin-top: 3px; }
 .empty { text-align: center; color: var(--muted); padding: 40px 20px; font-size: 18px; }
 
+/* ---------- home ---------- */
+.home { max-width: 520px; margin: 0 auto; padding: 18px 20px calc(40px + env(safe-area-inset-bottom)); text-align: center; }
+.home-logo { width: 128px; height: 128px; border-radius: 28px; box-shadow: 0 4px 14px rgba(0,0,0,.18); }
+.home-name { color: var(--chap-text); font-size: 26px; margin: 16px 0 4px; }
+.home-hint { color: var(--muted); font-size: 17px; margin: 0 0 22px; }
+.book-card { display: block; width: 100%; text-align: left; margin-bottom: 16px; padding: 20px 22px; border-radius: 18px;
+  background: var(--chap-bg); border: 2px solid var(--divider); }
+.book-card:active { border-color: var(--bar); }
+.book-name { display: block; font-size: 22px; font-weight: 700; color: var(--chap-text); }
+.book-sub { display: block; font-size: 16px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+
 /* ---------- song ---------- */
 .song-head { padding: 2px 20px 10px; }
 .song-head h2 { margin: 0; font-size: calc(23px * min(var(--scale), 1.5)); line-height: 1.25; }
@@ -69,6 +80,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .meaning { font-size: calc(var(--body) * 0.92); }
 .meaning b { color: var(--chap-text); display: inline-block; margin-top: .5em; }
 .note { color: var(--muted); font-style: italic; }
+.meaning b.mh { font-size: 1.08em; margin-top: .2em; }
+.meaning .vl { font-weight: 700; display: inline-block; margin-top: .4em; }
+.meaning .lb { font-weight: 700; color: var(--chap-text); }
 .foot { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;
   background: var(--bar); padding: 4px 8px calc(4px + env(safe-area-inset-bottom)); color: var(--on-bar-soft); font-size: 15px; }
 .foot .text-btn[disabled] { opacity: .4; }

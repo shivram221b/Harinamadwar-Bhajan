@@ -3,7 +3,14 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '1.0';
+const WEB_VERSION = '2.0';
+// The two books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/).
+const BOOKS = {
+  dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
+  ashta: { id: 'ashta', base: 'ashtapathy/', hash: '#ashta/', title: 'Śrī Gīta Govindam', search: 'Search: aṣṭapadi no. or title', unit: 'aṣṭapadis' },
+};
+let book = BOOKS.dns;
+const loaded = {}; // book id -> {songs, indexItems}
 const LANGS = [
   { code: 'en', label: 'English', name: 'English' },
   { code: 'ta', label: 'தமிழ்', name: 'Tamil' },
@@ -30,6 +37,7 @@ const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&
 
 // ---------- content ----------
 const files = {};
+const bf = name => book.base + name; // file of the open book
 function fetchText(name) {
   if (!files[name]) {
     files[name] = fetch(name, { cache: 'no-cache' })
@@ -42,7 +50,7 @@ function fetchText(name) {
 let songs = [];      // {number,title,raga,page,lyrics,chapter,displayTitle,displayRaga,pos}
 let indexItems = []; // {type:'chap', heading} | {type:'song', song}
 const texts = {};    // lang -> Map(number -> {title,raga,body})
-let audioMap = null;
+const audioMaps = {};
 
 const part = (h, i) => (h.length > i ? h[i].trim() : '');
 
@@ -98,19 +106,20 @@ function parseBlocks(txt) {
 }
 
 async function loadText(file) {
-  if (!texts[file]) {
-    try { texts[file] = parseBlocks(await fetchText(file)); } catch (e) { texts[file] = new Map(); }
+  const key = bf(file);
+  if (!texts[key]) {
+    try { texts[key] = parseBlocks(await fetchText(key)); } catch (e) { texts[key] = new Map(); }
   }
-  return texts[file];
+  return texts[key];
 }
 const lyricsFile = lang => 'songs_' + lang + '.txt';
 const meaningFile = lang => (lang === 'kn' ? 'meanings_kn.txt' : lang === 'ta' ? 'meanings_ta.txt' : 'meanings_en.txt');
 
 async function loadAudio() {
-  if (audioMap) return audioMap;
-  audioMap = new Map();
+  if (audioMaps[book.id]) return audioMaps[book.id];
+  const audioMap = audioMaps[book.id] = new Map();
   try {
-    for (const line of (await fetchText('audio.txt')).split('\n')) {
+    for (const line of (await fetchText(bf('audio.txt'))).split('\n')) {
       const bar = line.indexOf('|');
       if (bar > 0) audioMap.set(line.slice(0, bar).trim(), line.slice(bar + 1).trim());
     }
@@ -120,7 +129,7 @@ async function loadAudio() {
 function audioUrl(path) {
   if (!path) return null;
   if (path.startsWith('http')) return path;
-  return path.split('/').map(encodeURIComponent).join('/');
+  return book.base + path.split('/').map(encodeURIComponent).join('/');
 }
 
 // ---------- search ----------
@@ -146,7 +155,7 @@ function toast(msg) {
 
 // ---------- views ----------
 function showView(id) {
-  for (const v of ['v-index', 'v-song', 'v-settings']) $(v).classList.toggle('hidden', v !== id);
+  for (const v of ['v-home', 'v-index', 'v-song', 'v-settings']) $(v).classList.toggle('hidden', v !== id);
 }
 
 // ---------- index ----------
@@ -200,9 +209,19 @@ function splitSummary(text) {
 
 const HEADS = /^(Word meanings?|Word by word meaning|Detailed meaning|Simple \(and complete\) meaning|Summary meaning|Spiritual meaning|Spiritual significance|Overall essence|Key spiritual highlight|A beautiful closing.*|A closing line.*|Takeaways for the upanyasam|Meaning, verse by verse|The shloka|The abhang|Pallavi|Anupallavi|Charanam ?\d*|ಪದಾರ್ಥ|ಪದಶಃ ಅರ್ಥ|ವಿಸ್ತೃತ ಅರ್ಥ|ಸರಳ ಮತ್ತು ಸಂಪೂರ್ಣ ಅರ್ಥ|ಒಟ್ಟು ಅರ್ಥ|ಆಧ್ಯಾತ್ಮಿಕ (ಅರ್ಥ|ಮಹತ್ವ)|ಸಂಪೂರ್ಣ .*ಸಾರ|ಮುಖ್ಯ ಆಧ್ಯಾತ್ಮಿಕ ವಿಶೇಷತೆ|ಉಪನ್ಯಾಸ.*|ಮುಕ್ತಾಯದ ಸಾಲು|ಪದ್ಯವಾರು ಅರ್ಥ|ಪಲ್ಲವಿ|ಅನುಪಲ್ಲವಿ|.*ಚರಣ|ಶ್ಲೋಕ|ಅಭಂಗ|சொல் வாரியாக.*|மொத்த அர்த்தம்.*|ஆன்மீக முக்கியத்துவம்.*|உபந்யாச.*|முடிவு வரி|பதவுரை|சாராம்சம்|முக்கியத்துவம்|பொருள்|பல்லவி|அனுபல்லவி|சரணம்.*)$/;
 
+// Ashtapathy meanings: section headings, the first line of each verse, and the labels inside a verse
+const A_HEADS = /^(Summary|Upanyasam take-away|Detailed meaning.*|ஸங்க்ஷேபமான அர்த்தம்|உபந்யாஸ ஸாரம்.*|விஸ்தாரமான அர்த்தம்.*|ಸಾರಾಂಶ|ಉಪನ್ಯಾಸ ಸಾರ.*|ವಿಸ್ತೃತ ಅರ್ಥ.*)$/;
+const A_LABEL = /^(Meaning:|Key message:|அர்த்தம்:|கருத்து:|ಅರ್ಥ:|ಮುಖ್ಯ ಸಂದೇಶ:)/;
 function meaningHtml(text) {
   return text.split('\n').map(l => {
     const t = l.trim();
+    if (book.id === 'ashta') {
+      if (A_HEADS.test(t)) return `<b class="mh">${esc(t)}</b>`;
+      if (/^\d+\. /.test(t)) return `<span class="vl">${esc(t)}</span>`;
+      const m = t.match(A_LABEL);
+      if (m) return `<span class="lb">${esc(m[1])}</span>${esc(t.slice(m[1].length))}`;
+      return esc(l);
+    }
     return t && t.length < 70 && HEADS.test(t) ? `<b>${esc(l)}</b>` : esc(l);
   }).join('\n');
 }
@@ -256,7 +275,7 @@ async function showSong(pos, keepTab) {
 
   selectTab(keepTab ? tab : 0);
   $('song-scroll').scrollTop = 0;
-  const h = '#song/' + s.number;
+  const h = book.hash + s.number;
   if (location.hash !== h) history.replaceState(null, '', h);
 }
 
@@ -271,7 +290,7 @@ function selectTab(t) {
 
 function openSong(pos) {
   indexScroll = $('index-scroll').scrollTop;
-  history.pushState(null, '', '#song/' + songs[pos].number);
+  history.pushState(null, '', book.hash + songs[pos].number);
   pushedSong = true;
   showView('v-song');
   showSong(pos);
@@ -281,7 +300,7 @@ function closeSong() {
   stopAudio();
   keepAwake(false);
   pushedSong = false;
-  if (location.hash.startsWith('#song')) history.replaceState(null, '', location.pathname + location.search);
+  if (location.hash.startsWith(book.hash)) history.replaceState(null, '', location.pathname + location.search);
   showView('v-index');
   // highlight where we were: scroll the current song into view
   const row = document.querySelector(`.row[data-pos="${cur}"]`);
@@ -379,7 +398,7 @@ $('sheet').addEventListener('click', e => { if (e.target.id === 'sheet') $('shee
 // ---------- settings ----------
 let settingsFrom = 'v-index';
 function openSettings() {
-  settingsFrom = $('v-song').classList.contains('hidden') ? 'v-index' : 'v-song';
+  settingsFrom = ['v-home', 'v-index', 'v-song'].find(v => !$(v).classList.contains('hidden')) || 'v-home';
   const grid = $('lang-grid');
   const pick = code => { prefs.lang = code; langButtons(grid, pick); };
   langButtons(grid, pick);
@@ -389,16 +408,16 @@ function openSettings() {
   const standalone = window.navigator.standalone || matchMedia('(display-mode: standalone)').matches;
   $('install-h').classList.toggle('hidden', standalone);
   $('install-text').classList.toggle('hidden', standalone);
-  fetchText('manifest.txt').then(t => {
-    const v = (t.match(/version=(\d+)/) || [])[1] || '?';
-    $('version-info').textContent = 'Web app ' + WEB_VERSION + '  ·  Songs and meanings version ' + v;
-  }).catch(() => { $('version-info').textContent = 'Web app ' + WEB_VERSION; });
+  const ver = f => fetchText(f).then(t => (t.match(/version=(\d+)/) || [])[1] || '?').catch(() => '?');
+  Promise.all([ver('manifest.txt'), ver('ashtapathy/manifest.txt')]).then(([a, b]) => {
+    $('version-info').textContent = 'Web app ' + WEB_VERSION + '  ·  Divyanama content ' + a + '  ·  Ashtapathy content ' + b;
+  });
   showView('v-settings');
 }
 function closeSettings() {
   prefs.setupDone = true;
   showView(settingsFrom);
-  renderIndex($('search-input').value);
+  if (settingsFrom !== 'v-home') renderIndex($('search-input').value);
   if (settingsFrom === 'v-song') showSong(cur, true);
 }
 $('size-range').addEventListener('input', e => setScale(e.target.value / 100));
@@ -410,6 +429,9 @@ $('btn-search').onclick = openSearch;
 $('btn-close-search').onclick = closeSearch;
 $('search-input').addEventListener('input', e => renderIndex(e.target.value));
 $('btn-settings').onclick = openSettings;
+$('btn-home-settings').onclick = openSettings;
+$('btn-books').onclick = goHome;
+document.querySelectorAll('.book-card').forEach(b => { b.onclick = () => openBook(b.dataset.book); });
 $('btn-settings-back').onclick = closeSettings;
 $('btn-done').onclick = closeSettings;
 $('song-list').addEventListener('click', e => {
@@ -425,9 +447,15 @@ $('btn-lang').onclick = chooseLanguage;
 $('btn-play').onclick = togglePlay;
 document.querySelectorAll('.tab').forEach(b => { b.onclick = () => selectTab(+b.dataset.tab); });
 
+// which book and song a link like …/#song/2.6.4 or …/#ashta/1.2 points to
+function fromHash() {
+  for (const b of Object.values(BOOKS)) if (location.hash.startsWith(b.hash)) return [b, decodeURIComponent(location.hash.slice(b.hash.length))];
+  return [null, null];
+}
+
 window.addEventListener('popstate', () => {
-  if (location.hash.startsWith('#song/')) {
-    const n = decodeURIComponent(location.hash.slice(6));
+  const [b, n] = fromHash();
+  if (b && b === book) {
     const s = songs.find(x => x.number === n);
     if (s) { showView('v-song'); showSong(s.pos); return; }
   }
@@ -435,29 +463,54 @@ window.addEventListener('popstate', () => {
   else if (!$('v-settings').classList.contains('hidden')) closeSettings();
 });
 
-// ---------- start ----------
-async function start() {
-  applyLook();
-  try {
-    parseSongs(await fetchText('songs.txt'));
-  } catch (e) {
-    $('loading').textContent = 'Could not load the songs. Please connect to the internet once and open the app again.';
-    return;
+// ---------- books ----------
+function goHome() {
+  if ($('search-row').classList.contains('hidden') === false) closeSearch();
+  showView('v-home');
+}
+
+async function openBook(id, songNumber) {
+  book = BOOKS[id];
+  store.set('book', id);
+  $('book-title').textContent = book.title;
+  $('search-input').placeholder = book.search;
+  $('empty').textContent = 'No ' + book.unit + ' found';
+  $('search-input').value = '';
+  $('search-row').classList.add('hidden'); $('title-row').classList.remove('hidden');
+  showView('v-index');
+  if (!loaded[id]) {
+    $('song-list').innerHTML = '';
+    $('loading').classList.remove('hidden');
+    try {
+      parseSongs(await fetchText(bf('songs.txt')));
+      loaded[id] = { songs, indexItems };
+    } catch (e) {
+      $('loading').textContent = 'Could not load. Please connect to the internet once and open the app again.';
+      return;
+    }
   }
+  ({ songs, indexItems } = loaded[id]);
   $('loading').classList.add('hidden');
   await renderIndex('');
-  // open a song directly from a link like …/#song/2.6.4
-  if (location.hash.startsWith('#song/')) {
-    const n = decodeURIComponent(location.hash.slice(6));
-    const s = songs.find(x => x.number === n);
+  $('index-scroll').scrollTop = 0;
+  if (songNumber) {
+    const s = songs.find(x => x.number === songNumber);
     if (s) { history.replaceState(null, '', location.pathname + location.search); openSong(s.pos); }
   }
-  if (!prefs.setupDone) openSettings();
   // warm up the files this reader needs, so they work offline later
   const lang = prefs.lang;
   if (lang !== 'en') loadText(lyricsFile(lang));
   loadText(meaningFile(lang));
   loadAudio();
+}
+
+// ---------- start ----------
+async function start() {
+  applyLook();
+  const [b, n] = fromHash();
+  if (b) await openBook(b.id, n);
+  else showView('v-home');
+  if (!prefs.setupDone) openSettings();
 }
 
 if ('serviceWorker' in navigator) {

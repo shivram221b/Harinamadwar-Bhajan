@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Harinamadwar Guru</title>
-<meta name="description" content="Divya Nama Sankeertanam — bhajan lyrics, meanings and audio">
+<meta name="description" content="Divya Nama Sankeertanam and Śrī Gīta Govindam (Aṣṭapadi) — lyrics, meanings and audio">
 <meta name="theme-color" content="#C2410C">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -18,13 +18,43 @@
 <body>
 <div id="app">
 
+  <!-- ===== Home: choose a book ===== -->
+  <section id="v-home" class="view">
+    <header class="bar">
+      <div class="bar-row">
+        <span class="spacer"></span>
+        <button class="icon-btn" id="btn-home-settings" aria-label="Settings">
+          <svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 000-2l2.1-1.6-2-3.5-2.5 1a7.5 7.5 0 00-1.7-1L15 3h-4l-.4 2.9a7.5 7.5 0 00-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 000 2l-2.1 1.6 2 3.5 2.5-1a7.5 7.5 0 001.7 1L11 21h4l.4-2.9a7.5 7.5 0 001.7-1l2.5 1 2-3.5L19.4 13zM13 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z"/></svg>
+        </button>
+      </div>
+    </header>
+    <div class="scroll">
+      <div class="home">
+        <img class="home-logo" src="icons/icon-512.png" alt="">
+        <h1 class="home-name">Harinamadwar Guru</h1>
+        <p class="home-hint">Choose a book</p>
+        <button class="book-card" data-book="dns">
+          <span class="book-name">Divya Nama Sankeertanam</span>
+          <span class="book-sub">Bhajan songs · lyrics, meanings and audio</span>
+        </button>
+        <button class="book-card" data-book="ashta">
+          <span class="book-name">Śrī Gīta Govindam</span>
+          <span class="book-sub">Aṣṭapadi of Śrī Jayadeva · lyrics and meanings</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
   <!-- ===== Index ===== -->
-  <section id="v-index" class="view">
+  <section id="v-index" class="view hidden">
     <header class="bar">
       <div class="bar-row" id="title-row">
+        <button class="icon-btn" id="btn-books" aria-label="Books">
+          <svg viewBox="0 0 24 24"><path d="M15.4 5.4L14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>
+        </button>
         <div class="bar-titles">
-          <h1>Harinamadwar Guru</h1>
-          <p>Divya Nama Sankeertanam</p>
+          <h1 id="book-title">Divya Nama Sankeertanam</h1>
+          <p>Harinamadwar Guru</p>
         </div>
         <button class="icon-btn" id="btn-search" aria-label="Search">
           <svg viewBox="0 0 24 24"><path d="M10 3a7 7 0 015.6 11.2l4.6 4.6-1.4 1.4-4.6-4.6A7 7 0 1110 3zm0 2a5 5 0 100 10 5 5 0 000-10z"/></svg>
@@ -43,7 +73,7 @@
     <div class="scroll" id="index-scroll">
       <ul id="song-list"></ul>
       <p id="empty" class="empty hidden">No songs found</p>
-      <p id="loading" class="empty">Loading songs…</p>
+      <p id="loading" class="empty">Loading…</p>
     </div>
   </section>
 
