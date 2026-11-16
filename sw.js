@@ -1,0 +1,47 @@
+/* Offline support: the app itself is kept on the phone; song and meaning files are
+ * always fetched fresh when there is internet, and the last copy is used when there isn't.
+ * Audio is streamed and not stored. */
+const SHELL = 'hg-shell-v1';
+const DATA = 'hg-data';
+const SHELL_FILES = ['./', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest',
+  'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'];
+
+const DATA_FILES = ['songs.txt', 'songs_ta.txt', 'songs_kn.txt', 'songs_sa.txt',
+  'meanings_ta.txt', 'meanings_en.txt', 'meanings_kn.txt', 'audio.txt', 'manifest.txt'];
+
+self.addEventListener('install', e => {
+  e.waitUntil(Promise.all([
+    caches.open(SHELL).then(c => c.addAll(SHELL_FILES)),
+    // keep every song and meaning on the phone from the first visit, so it works offline
+    caches.open(DATA).then(c => Promise.all(DATA_FILES.map(f =>
+      fetch(f, { cache: 'no-cache' }).then(r => r.ok && c.put(new URL(f, self.location).href, r)).catch(() => {})))),
+  ]).then(() => self.skipWaiting()));
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(keys => Promise.all(
+    keys.filter(k => k.startsWith('hg-shell-') && k !== SHELL).map(k => caches.delete(k))
+  )).then(() => self.clients.claim()));
+});
+
+self.addEventListener('fetch', e => {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== location.origin) return;
+  if (/\.(m4a|mp3|aac|wav|ogg)$/i.test(url.pathname) || url.pathname.includes('/Audio')) return; // stream audio directly
+
+  if (url.pathname.endsWith('.txt')) {
+    // network first, so new songs and meanings show up as soon as they are pushed
+    const key = new Request(url.origin + url.pathname);
+    e.respondWith(fetch(req).then(res => {
+      if (res.ok) { const copy = res.clone(); caches.open(DATA).then(c => c.put(key, copy)); }
+      return res;
+    }).catch(() => caches.match(key).then(r => r || Response.error())));
+    return;
+  }
+  // app files: network first too (small), falling back to the stored copy offline
+  e.respondWith(fetch(req).then(res => {
+    if (res.ok) { const copy = res.clone(); caches.open(SHELL).then(c => c.put(req, copy)); }
+    return res;
+  }).catch(() => caches.match(req).then(r => r || caches.match('index.html'))));
+});

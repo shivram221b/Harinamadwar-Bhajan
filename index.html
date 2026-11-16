@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Harinamadwar Guru</title>
+<meta name="description" content="Divya Nama Sankeertanam — bhajan lyrics, meanings and audio">
+<meta name="theme-color" content="#C2410C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Harinamadwar">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== Index ===== -->
+  <section id="v-index" class="view">
+    <header class="bar">
+      <div class="bar-row" id="title-row">
+        <div class="bar-titles">
+          <h1>Harinamadwar Guru</h1>
+          <p>Divya Nama Sankeertanam</p>
+        </div>
+        <button class="icon-btn" id="btn-search" aria-label="Search">
+          <svg viewBox="0 0 24 24"><path d="M10 3a7 7 0 015.6 11.2l4.6 4.6-1.4 1.4-4.6-4.6A7 7 0 1110 3zm0 2a5 5 0 100 10 5 5 0 000-10z"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-settings" aria-label="Settings">
+          <svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 000-2l2.1-1.6-2-3.5-2.5 1a7.5 7.5 0 00-1.7-1L15 3h-4l-.4 2.9a7.5 7.5 0 00-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 000 2l-2.1 1.6 2 3.5 2.5-1a7.5 7.5 0 001.7 1L11 21h4l.4-2.9a7.5 7.5 0 001.7-1l2.5 1 2-3.5L19.4 13zM13 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z"/></svg>
+        </button>
+      </div>
+      <div class="bar-row hidden" id="search-row">
+        <input id="search-input" type="search" placeholder="Search: section no. or song title" autocomplete="off" autocorrect="off" spellcheck="false">
+        <button class="icon-btn" id="btn-close-search" aria-label="Close search">
+          <svg viewBox="0 0 24 24"><path d="M6.4 5L12 10.6 17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4L12 13.4 6.4 19 5 17.6 10.6 12 5 6.4z"/></svg>
+        </button>
+      </div>
+    </header>
+    <div class="scroll" id="index-scroll">
+      <ul id="song-list"></ul>
+      <p id="empty" class="empty hidden">No songs found</p>
+      <p id="loading" class="empty">Loading songs…</p>
+    </div>
+  </section>
+
+  <!-- ===== Song ===== -->
+  <section id="v-song" class="view hidden">
+    <header class="bar">
+      <div class="bar-row">
+        <button class="text-btn" id="btn-back">☰&nbsp; Index</button>
+        <span class="spacer"></span>
+        <button class="lang-btn" id="btn-lang">English ▾</button>
+        <button class="text-btn small" id="btn-smaller" aria-label="Smaller text">A−</button>
+        <button class="text-btn" id="btn-bigger" aria-label="Bigger text">A+</button>
+      </div>
+      <div class="song-head">
+        <h2 id="song-title"></h2>
+        <p id="song-meta"></p>
+      </div>
+      <nav class="tabs">
+        <button class="tab sel" data-tab="0">Lyrics</button>
+        <button class="tab" data-tab="1">Meaning</button>
+        <button class="tab" data-tab="2" id="tab-audio">Audio</button>
+      </nav>
+    </header>
+    <div class="scroll" id="song-scroll">
+      <div class="page" id="p-lyrics"><div class="text" id="lyrics"></div></div>
+      <div class="page hidden" id="p-meaning"><div class="text meaning" id="meaning"></div></div>
+      <div class="page hidden" id="p-audio">
+        <div class="player">
+          <p class="audio-title" id="audio-title"></p>
+          <button class="play" id="btn-play" aria-label="Play">
+            <svg class="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <svg class="i-pause hidden" viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+          </button>
+          <input type="range" id="seek" min="0" max="1000" value="0" disabled>
+          <div class="times"><span id="pos">0:00</span><span id="len">0:00</span></div>
+          <p class="audio-status" id="audio-status"></p>
+        </div>
+        <div class="text" id="audio-lyrics"></div>
+      </div>
+    </div>
+    <footer class="foot">
+      <button class="text-btn" id="btn-prev">‹&nbsp; Previous</button>
+      <span id="position"></span>
+      <button class="text-btn" id="btn-next">Next &nbsp;›</button>
+    </footer>
+    <audio id="audio" preload="none"></audio>
+  </section>
+
+  <!-- ===== Settings ===== -->
+  <section id="v-settings" class="view hidden">
+    <header class="bar">
+      <div class="bar-row">
+        <button class="text-btn" id="btn-settings-back">‹&nbsp; Back</button>
+        <h1 class="bar-mid">Settings</h1>
+        <span class="spacer"></span>
+      </div>
+    </header>
+    <div class="scroll">
+      <div class="settings">
+        <h3>Language of lyrics</h3>
+        <div class="lang-grid" id="lang-grid"></div>
+
+        <h3>Text size</h3>
+        <input type="range" id="size-range" min="80" max="240" step="5">
+        <p class="hint">Drag to make the lyrics bigger or smaller. You can also use A− / A+ on any song.</p>
+        <div class="sample" id="sample">rAma rAma rAma · ராம ராம · ರಾಮ ರಾಮ · राम राम</div>
+
+        <label class="switch"><span>Keep screen on while a song is open</span><input type="checkbox" id="sw-screen"></label>
+        <label class="switch"><span>Night mode (light text on dark page)</span><input type="checkbox" id="sw-night"></label>
+
+        <h3 id="install-h">Put this app on your iPhone home screen</h3>
+        <p class="hint" id="install-text">In <b>Safari</b>, tap the <b>Share</b> button (the square with an arrow pointing up), then tap <b>Add to Home Screen</b>, then <b>Add</b>. The app then opens full screen from its own icon and works without internet after the first visit (audio needs internet).</p>
+
+        <h3>About the English spellings</h3>
+        <p class="hint pre">The English lyrics follow the book's spelling code:
+
+• Capital vowels are long: A = ā (rAma = Rāma), I = ī, U = ū, E = ē, O = ō
+• Capital T, Th, D, Dh, N = hard sounds ṭ, ṭh, ḍ, ḍh, ṇ (as in maNi)
+• L = ḷ (ळ),  zh = ழ,  S = ṣ (ष),  sh = ś (श)
+• c = च (as in church),  ch = छ,  gn = ज्ञ
+• r between two consonants = ṛ (krSNa = Kṛṣṇa, krpA = Kṛpā)
+
+In the index, titles are shown with these marks (Shrī Rāma) so they read naturally. The lyrics are exactly as printed in the book.</p>
+
+        <p class="hint version" id="version-info"></p>
+        <button class="done" id="btn-done">Done</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- language chooser -->
+  <div id="sheet" class="sheet hidden">
+    <div class="sheet-box">
+      <h3>Language of lyrics</h3>
+      <div id="sheet-langs"></div>
+    </div>
+  </div>
+  <div id="toast" class="toast hidden"></div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

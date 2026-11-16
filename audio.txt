@@ -77,8 +77,8 @@
 10.3|Audio/10.3-PahiKalyanaram.m4a
 10.4|Audio/10.4-Marugelara.m4a
 10.5|Audio/10.5-Kamalaptakula.m4a
-10.7|Audio/10.7-BantuRiti
-10.8|Audio/10.8-Vandanamu
+10.7|Audio/10.7-BantuRiti.m4a
+10.8|Audio/10.8-Vandanamu.m4a
 11.20|Audio/11.20-Ramabhadra.m4a
 11.21|Audio/11.21-BegaBaro.m4a
 11.22|Audio/11.22-DevaBandano.m4a
@@ -111,7 +111,7 @@
 15.2|Audio/15.2-IndarikiAbhayambu.m4a
 15.3|Audio/15.3-Muddugare.m4a
 15.4|Audio/15.4-Brahmamokate.m4a
-16.1|Audio/16.1-Namadevakirtana
+16.1|Audio/16.1-Namadevakirtana.m4a
 16.2|Audio/16.2-Harimukhe.m4a
 16.4|Audio/16.4-Dasachi.m4a
 16.5|Audio/16.5-Jyachevamshi.m4a
