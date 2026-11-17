@@ -1,0 +1,5 @@
+# Upcoming satsangs. One per line, soonest first:
+# last day (YYYY-MM-DD) | when, as shown | MONTH | day(s) | name | place
+# A satsang disappears from the app automatically after its last day.
+2026-11-21 | November 21st | NOV | 21 | Ayyappan Bhajan | Mania’s house
+2026-11-29 | Nov 28 and 29 | NOV | 28–29 | Radha Kalyanam | RP3 Bangalore

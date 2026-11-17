@@ -1,0 +1,7 @@
+version=1
+file=tfd.txt
+file=events.txt
+file=learn.txt
+size=tfd.txt:3866
+size=events.txt:343
+size=learn.txt:137
