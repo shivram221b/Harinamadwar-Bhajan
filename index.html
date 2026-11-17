@@ -18,40 +18,83 @@
 <body>
 <div id="app">
 
-  <!-- ===== Home: choose a book ===== -->
+  <!-- ===== Home ===== -->
   <section id="v-home" class="view">
     <header class="bar">
-      <div class="bar-row">
-        <span class="spacer"></span>
-        <button class="icon-btn" id="btn-home-settings" aria-label="Settings">
-          <svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 000-2l2.1-1.6-2-3.5-2.5 1a7.5 7.5 0 00-1.7-1L15 3h-4l-.4 2.9a7.5 7.5 0 00-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 000 2l-2.1 1.6 2 3.5 2.5-1a7.5 7.5 0 001.7 1L11 21h4l.4-2.9a7.5 7.5 0 001.7-1l2.5 1 2-3.5L19.4 13zM13 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z"/></svg>
-        </button>
+      <div class="bar-row hb-row">
+        <img class="hb-logo" src="icons/logo.jpg" alt="">
+        <div class="hb-t" id="home-hello"></div>
+        <button class="icon-btn hb-gear" id="btn-home-settings" aria-label="Settings"><svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 000-2l2.1-1.6-2-3.5-2.5 1a7.5 7.5 0 00-1.7-1L15 3h-4l-.4 2.9a7.5 7.5 0 00-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 000 2l-2.1 1.6 2 3.5 2.5-1a7.5 7.5 0 001.7 1L11 21h4l.4-2.9a7.5 7.5 0 001.7-1l2.5 1 2-3.5L19.4 13zM13 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z"/></svg></button>
       </div>
     </header>
-    <div class="scroll">
-      <div class="home">
-        <img class="home-logo" src="icons/logo.jpg" alt="">
-        <h1 class="home-name">Harinamadwar</h1>
-        <p class="home-hint">Hari nāma saṅkīrtanam</p>
-        <p class="home-label">Choose a book</p>
-        <button class="book-card" data-book="dns">
-          <span class="bk-ic"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14z"/><path d="M8 7h8M8 11h6"/></svg></span>
-          <span class="bk-txt"><span class="book-name">Divya Nama Sankeertanam</span>
-          <span class="book-sub">Bhajans · lyrics, meanings, audio</span></span>
-          <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-        </button>
-        <button class="book-card" data-book="ashta">
-          <span class="bk-ic"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
-          <span class="bk-txt"><span class="book-name">Śrī Gīta Govindam</span>
-          <span class="book-sub">24 Aṣṭapadis of Śrī Jayadeva</span></span>
-          <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
-        </button>
-        <button class="about-card" id="btn-about"><span class="ic">🪷</span><span>About Harinamadwar<small>Our purpose, satsangs and how to contact us</small></span></button>
-        <button class="continue hidden" id="btn-continue"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span id="continue-text"></span></button>
-      </div>
-    </div>
+    <div class="scroll" id="home-scroll"><div class="home2" id="home-box"></div></div>
   </section>
 
+  <section id="v-welcome" class="view hidden">
+    <header class="bar">
+      <div class="bar-row">
+        <button class="text-btn back-btn" data-back>‹ Back</button>
+        <span class="bar-mid"><b id="welcome-title">Welcome</b></span>
+        <span class="bar-right"></span>
+      </div>
+    </header>
+    <div class="scroll" id="welcome-scroll"><div class="pbox" id="welcome-box"></div></div>
+  </section>
+
+  <section id="v-diary" class="view hidden">
+    <header class="bar">
+      <div class="bar-row">
+        <button class="text-btn back-btn" data-back>‹ Back</button>
+        <span class="bar-mid"><b id="diary-title">Satsang diary</b></span>
+        <span class="bar-right"></span>
+      </div>
+    </header>
+    <div class="scroll" id="diary-scroll"><div class="pbox" id="diary-box"></div></div>
+  </section>
+
+  <section id="v-learn" class="view hidden">
+    <header class="bar">
+      <div class="bar-row">
+        <button class="text-btn back-btn" data-back>‹ Back</button>
+        <span class="bar-mid"><b id="learn-title">Learn</b></span>
+        <span class="bar-right"></span>
+      </div>
+    </header>
+    <div class="scroll" id="learn-scroll"><div class="pbox" id="learn-box"></div></div>
+  </section>
+
+  <section id="v-favs" class="view hidden">
+    <header class="bar">
+      <div class="bar-row">
+        <button class="text-btn back-btn" data-back>‹ Back</button>
+        <span class="bar-mid"><b id="favs-title">My favourites</b></span>
+        <span class="bar-right"></span>
+      </div>
+    </header>
+    <div class="scroll" id="favs-scroll"><div class="pbox" id="favs-box"></div></div>
+  </section>
+
+  <section id="v-tfd" class="view hidden">
+    <header class="bar">
+      <div class="bar-row">
+        <button class="text-btn back-btn" data-back>‹ Back</button>
+        <span class="bar-mid"><b id="tfd-title">Thought for the Day</b></span>
+        <span class="bar-right"><button class="text-btn small" id="tfd-smaller" aria-label="Smaller text">A−</button><button class="text-btn big" id="tfd-bigger" aria-label="Bigger text">A+</button></span>
+      </div>
+    </header>
+    <div class="scroll" id="tfd-scroll"><div class="pbox" id="tfd-box"></div></div>
+  </section>
+
+  <section id="v-share" class="view hidden">
+    <header class="bar">
+      <div class="bar-row">
+        <button class="text-btn back-btn" data-back>‹ Back</button>
+        <span class="bar-mid"><b id="share-title">Share a song</b></span>
+        <span class="bar-right"></span>
+      </div>
+    </header>
+    <div class="scroll" id="share-scroll"><div class="pbox" id="share-box"></div></div>
+  </section>
 
   <!-- ===== About ===== -->
   <section id="v-about" class="view hidden">
@@ -105,6 +148,19 @@
           <p>Families, temples, communities and organisations are welcome to host an evening of nama, music and meaning.</p>
           <a class="ab-cta" href="tel:+919845204620"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"></path></svg>Call to invite</a></div>
 
+        <div class="ab-block" id="feedback"><span class="ab-kicker">FEEDBACK &amp; SUGGESTIONS</span><h3>Share your thoughts</h3>
+          <p class="ab-fbi">Your message goes only to Shri Janakiraman Ji. Please add your name so he can reply.</p>
+          <div class="fb-form">
+            <label class="fb-l" for="fb-name">Your name</label>
+            <input id="fb-name" class="fb-in" type="text" autocomplete="name" autocapitalize="words">
+            <span class="fb-l">This is a</span>
+            <div class="fb-kinds"><button class="fb-k sel" data-k="Suggestion">Suggestion</button><button class="fb-k" data-k="Feedback">Feedback</button></div>
+            <label class="fb-l" for="fb-msg">Your message</label>
+            <textarea id="fb-msg" class="fb-in" rows="5" placeholder="Write here…"></textarea>
+            <span class="fb-l">Send by</span>
+            <div class="fb-send"><button id="fb-wa" class="fb-wa">WhatsApp</button><button id="fb-em" class="fb-em">Email</button></div>
+          </div></div>
+
         <div class="ab-block"><span class="ab-kicker">STAY CONNECTED</span>
           <div class="ab-links">
           <a class="ab-link" href="https://www.youtube.com/@HariNamadwar" target="_blank" rel="noopener"><span class="ab-li" style="color:#C4302B"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="4"></rect><path d="M10 9l5 3-5 3z"></path></svg></span><span class="ab-lt"><b>YouTube</b>@HariNamadwar</span><span class="ab-chev"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg></span></a>
@@ -122,8 +178,8 @@
   <section id="v-index" class="view hidden">
     <header class="bar">
       <div class="bar-row" id="title-row">
-        <button class="icon-btn" id="btn-books" aria-label="Books">
-          <svg viewBox="0 0 24 24"><path d="M15.4 5.4L14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>
+        <button class="icon-btn" id="btn-books" aria-label="Home">
+          <svg class="st" viewBox="0 0 24 24"><path d="M3,11l9,-8l9,8 M5,9.5V20h5v-6h4v6h5V9.5"/></svg>
         </button>
         <div class="bar-titles">
           <h1 id="book-title">Divya Nama Sankeertanam</h1>
@@ -134,9 +190,6 @@
         </button>
         <button class="icon-btn" id="btn-search" aria-label="Search">
           <svg viewBox="0 0 24 24"><path d="M10 3a7 7 0 015.6 11.2l4.6 4.6-1.4 1.4-4.6-4.6A7 7 0 1110 3zm0 2a5 5 0 100 10 5 5 0 000-10z"/></svg>
-        </button>
-        <button class="icon-btn" id="btn-settings" aria-label="Settings">
-          <svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 000-2l2.1-1.6-2-3.5-2.5 1a7.5 7.5 0 00-1.7-1L15 3h-4l-.4 2.9a7.5 7.5 0 00-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 000 2l-2.1 1.6 2 3.5 2.5-1a7.5 7.5 0 001.7 1L11 21h4l.4-2.9a7.5 7.5 0 001.7-1l2.5 1 2-3.5L19.4 13zM13 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z"/></svg>
         </button>
       </div>
       <div class="bar-row hidden" id="search-row">
@@ -161,6 +214,7 @@
           <svg viewBox="0 0 24 24"><path d="M15.4 5.4L14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>
         </button>
         <span class="crumb" id="crumb"></span>
+        <button class="icon-btn fav-btn" id="btn-fav" aria-label="Add to my favourites"></button>
         <button class="text-btn small" id="btn-smaller" aria-label="Smaller text">A−</button>
         <button class="text-btn big" id="btn-bigger" aria-label="Bigger text">A+</button>
       </div>
@@ -276,6 +330,12 @@ In the index, titles are shown with these marks (Shrī Rāma) so they read natur
         <button id="voice-close">Close</button>
       </div>
     </div>
+  </div>
+  <!-- ===== Opening: walk through the doorway ===== -->
+  <div id="splash" class="splash hidden" aria-hidden="true">
+    <div class="sp-om">ॐ</div>
+    <div class="sp-door"><img src="icons/logo.jpg" alt=""></div>
+    <div class="sp-words"><b>Harinamadwar</b><span>A doorway to the Lord’s Name</span></div>
   </div>
 </div>
 <script src="app.js"></script>
