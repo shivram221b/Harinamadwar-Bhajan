@@ -1,0 +1,13 @@
+version=3
+file=songs.txt
+file=songs_ta.txt
+file=songs_kn.txt
+file=songs_sa.txt
+file=meanings_ta.txt
+file=audio.txt
+size=songs.txt:1130298
+size=songs_ta.txt:2819152
+size=songs_kn.txt:2700511
+size=songs_sa.txt:2819152
+size=meanings_ta.txt:75045
+size=audio.txt:0
