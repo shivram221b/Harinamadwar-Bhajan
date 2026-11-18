@@ -3,12 +3,15 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.1';
-// The two books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/).
+const WEB_VERSION = '4.3';
+// The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
   ashta: { id: 'ashta', base: 'ashtapathy/', hash: '#ashta/', title: 'Śrī Gīta Govindam', search: 'Search: aṣṭapadi no. or title', unit: 'aṣṭapadis' },
+  ndp: { id: 'ndp', base: 'prabandham/', hash: '#ndp/', title: 'Naalaayira Divya Prabandham', search: 'Search: pāsuram no. or words', unit: 'pāsurams' },
 };
+// the Prabandham's name follows the chosen language
+const bookTitle = id => (id === 'ndp' ? NDP_BOOK[ndpLang()][0] : BOOKS[id].title);
 let book = BOOKS.dns;
 const loaded = {}; // book id -> {songs, indexItems}
 const LANGS = [
@@ -40,6 +43,9 @@ const files = {};
 const bf = name => book.base + name; // file of the open book
 function fetchText(name) {
   if (!files[name]) {
+    // signed-in mode: satsangs/learn/thoughts come from the admin page; songs from the private store (phase 2)
+    if (accessOn() && name.startsWith('community/')) return (files[name] = communityFile(name.slice(10)).catch(e => { delete files[name]; throw e; }));
+    if (accessOn() && ACCESS.privateContent && name.endsWith('.txt')) return (files[name] = privateFile(name).catch(e => { delete files[name]; throw e; }));
     files[name] = fetch(name, { cache: 'no-cache' })
       .then(r => { if (!r.ok) throw new Error(name + ' ' + r.status); return r.text(); })
       .catch(e => { delete files[name]; throw e; });
@@ -158,7 +164,7 @@ function toast(msg) {
 }
 
 // ---------- views ----------
-const VIEWS = ['v-home', 'v-about', 'v-index', 'v-song', 'v-settings', 'v-welcome', 'v-diary', 'v-learn', 'v-favs', 'v-tfd', 'v-share'];
+const VIEWS = ['v-home', 'v-about', 'v-index', 'v-song', 'v-settings', 'v-welcome', 'v-diary', 'v-learn', 'v-favs', 'v-tfd', 'v-share', 'v-login', 'v-locked'];
 let homeScroll = 0;
 function showView(id) {
   if (!$('v-home').classList.contains('hidden') && id !== 'v-home') homeScroll = $('home-scroll').scrollTop;  // SCRUM-51
@@ -187,7 +193,7 @@ async function renderIndex(filter) {
       if (!(s.number.startsWith(q) || hay.includes(q))) continue;
       if (pendingChap) { out.push(`<li class="chap">${esc(pendingChap.heading)}</li>`); pendingChap = null; }
     }
-    const sub = [tr && tr.title ? s.displayTitle : '', s.displayRaga].filter(Boolean).join('  ·  ');
+    const sub = [tr && tr.title && tr.title !== s.displayTitle ? s.displayTitle : '', s.displayRaga].filter(Boolean).join('  ·  ');
     out.push(`<li class="row" data-pos="${s.pos}"><span class="badge">${esc(s.number)}</span>` +
       `<div class="row-text"><div class="row-title">${esc(title)}</div>${sub ? `<div class="row-sub">${esc(sub)}</div>` : ''}</div>` +
       (am.has(s.number) ? '<span class="has-audio" aria-label="Audio available">♪</span>' : '') + '</li>');
@@ -209,7 +215,8 @@ function closeSearch() {
 
 // ---------- song ----------
 let cur = 0, tab = 0;
-const PAGES = ['s-lyrics', 's-meaning', 's-audio'];
+let openTab = null;   // the Listen button opens a song on its Audio tab (SCRUM-62)
+const PAGES = ['s-lyrics', 's-meaning', 's-audio', 's-composer'];
 
 function splitSummary(text) {
   for (const m of ['\nMeaning Summary\n', '\nSummary\n']) {
@@ -334,7 +341,8 @@ async function showSong(pos, keepTab, keepScroll) {
   $('btn-play').disabled = !url;
   ['btn-back10', 'btn-fwd10', 'btn-repeat', 'btn-speed'].forEach(id => { $(id).disabled = !url; });
 
-  selectTab(keepTab ? tab : 0);
+  selectTab(openTab !== null ? openTab : (keepTab ? tab : 0));
+  openTab = null;
   if (keepScroll) {
     PAGES.forEach((id, i) => { const el = $(id); el.scrollTop = keepScroll[i] * (el.scrollHeight - el.clientHeight); });
   } else if (changed) PAGES.forEach(id => { $(id).scrollTop = 0; });
@@ -350,7 +358,7 @@ function selectTab(t) {
   PAGES.forEach((id, i) => $(id).classList.toggle('hidden', i !== t));   // each page keeps its own place
   const meaningChips = t === 1 && +($('mean-chips').dataset.n || 0) > 0;
   $('mean-chips').classList.toggle('hidden', !meaningChips);
-  $('lang-chips').classList.toggle('hidden', t === 1);
+  $('lang-chips').classList.toggle('hidden', t === 1 || t === 3);
   $('song-meta').textContent = t === 1 ? 'Meaning in ' + (LANGS.find(l => l.code === (prefs.lang === 'sa' ? 'en' : prefs.lang)).name)
     : ($('song-meta').dataset.raga || '');
 }
@@ -466,8 +474,9 @@ function openSettings() {
   $('install-h').classList.toggle('hidden', standalone);
   $('install-text').classList.toggle('hidden', standalone);
   const ver = f => fetchText(f).then(t => (t.match(/version=(\d+)/) || [])[1] || '?').catch(() => '?');
-  Promise.all([ver('manifest.txt'), ver('ashtapathy/manifest.txt')]).then(([a, b]) => {
-    $('version-info').textContent = 'Web app ' + WEB_VERSION + '  ·  Divyanama content ' + a + '  ·  Ashtapathy content ' + b;
+  Promise.all([ver('manifest.txt'), ver('ashtapathy/manifest.txt'), ver('prabandham/manifest.txt')]).then(([a, b, c]) => {
+    $('admin-link').classList.toggle('hidden', !ACCESS.url);
+    $('version-info').textContent = 'Web app ' + WEB_VERSION + '  ·  Divyanama content ' + a + '  ·  Ashtapathy content ' + b + '  ·  Prabandham content ' + c;
   });
   showView('v-settings');
 }
@@ -519,7 +528,7 @@ async function useBook(id) {
 
 async function showIndex(id, fromSong) {
   const fresh = indexBook !== id;
-  $('book-title').textContent = BOOKS[id].title;
+  $('book-title').textContent = bookTitle(id);
   $('search-input').placeholder = BOOKS[id].search;
   $('empty').textContent = 'No ' + BOOKS[id].unit + ' found';
   if (fresh) {
@@ -584,6 +593,7 @@ window.addEventListener('popstate', () => {
 
 function route() {
   const h = decodeURIComponent(location.hash || '');
+  if (accessGate(h)) return;
   if (!h || h === '#' || h === '#home') return showHome();
   if (h === '#about') return openAbout();
   if (h === '#settings') return openSettings();
@@ -705,6 +715,10 @@ function openAbout() {
   if (!$('fb-name').value) $('fb-name').value = store.get('name', '');
 }
 $('btn-about-back').onclick = () => back();
+$('lg-go').onclick = doLogin;
+$('lg-code').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+$('lk-go').onclick = retryLocked;
+document.querySelectorAll('[data-about]').forEach(b => { b.onclick = () => go('#about'); });
 
 // feedback & suggestions: goes only to Janakiraman Ji, by WhatsApp or email (nothing is stored anywhere)
 const FEEDBACK_WHATSAPP = '919845204620', FEEDBACK_EMAIL = 'utah.ram@gmail.com';
@@ -728,7 +742,9 @@ async function start() {
   applyLook();
   document.querySelectorAll('[data-back]').forEach(b => { b.onclick = () => back(); });
   if (!location.hash) splash();
+  await accessStart();
   route();
+  if (accessState !== 'open') return;   // sign in first; welcome comes after
   if (!store.get('interestsDone', false)) go('#welcome');
   else if (!prefs.setupDone) go('#settings');
 }
@@ -741,11 +757,19 @@ if ('serviceWorker' in navigator) {
     if (e.data === 'content-updated') toast('Songs and meanings updated');
   });
 }
-const ICONS = {"book": "<path d=\"M4,19.5A2.5,2.5 0,0 1,6.5 17H20V3H6.5A2.5,2.5 0,0 0,4 5.5v14zM8,7h8M8,11h6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "lotus": "<path d=\"M12,3c2,3 2,6 0,9 -2,-3 -2,-6 0,-9z M12,12c3,-2 6,-2 8,0 -2,3 -5,3 -8,0z M12,12c-3,-2 -6,-2 -8,0 2,3 5,3 8,0z M5,17h14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "music": "<path d=\"M9,18V5l12,-2v13 M3,18a3,3 0,1 0,6 0a3,3 0,1 0,-6 0 M15,16a3,3 0,1 0,6 0a3,3 0,1 0,-6 0\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "phone": "<path d=\"M22,16.9v3a2,2 0,0 1,-2.2 2 19.8,19.8 0,0 1,-8.6 -3.1 19.5,19.5 0,0 1,-6 -6A19.8,19.8 0,0 1,2.1 4.2 2,2 0,0 1,4.1 2h3a2,2 0,0 1,2 1.7c0.1,0.9 0.4,1.8 0.7,2.7a2,2 0,0 1,-0.5 2.1L8,9.8a16,16 0,0 0,6 6l1.3,-1.3a2,2 0,0 1,2.1 -0.4c0.9,0.3 1.8,0.6 2.7,0.7a2,2 0,0 1,1.7 2z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "mail": "<path d=\"M5,4h14a3,3 0,0 1,3 3v10a3,3 0,0 1,-3 3H5a3,3 0,0 1,-3 -3V7a3,3 0,0 1,3 -3z M3,6l9,7 9,-7\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "chat": "<path d=\"M21,15a2,2 0,0 1,-2 2H7l-4,4V5a2,2 0,0 1,2 -2h14a2,2 0,0 1,2 2z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "chevron": "<path d=\"M9,6l6,6 -6,6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "calendar": "<path d=\"M6,5h12a3,3 0,0 1,3 3v10a3,3 0,0 1,-3 3H6a3,3 0,0 1,-3 -3V8a3,3 0,0 1,3 -3z M3,10h18 M8,3v4 M16,3v4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "check": "<path d=\"M5,12.5l4.5,4.5L19,7.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "class": "<path d=\"M2,9l10,-5 10,5 -10,5z M6,11v5c3,3 9,3 12,0v-5 M22,9v6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "event": "<path d=\"M6,5h12a3,3 0,0 1,3 3v10a3,3 0,0 1,-3 3H6a3,3 0,0 1,-3 -3V8a3,3 0,0 1,3 -3z M3,10h18 M8,3v4 M16,3v4 M12,12.5l1.2,2.4 2.6,0.4 -1.9,1.8 0.5,2.6 -2.4,-1.3 -2.4,1.3 0.5,-2.6 -1.9,-1.8 2.6,-0.4z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "feather": "<path d=\"M20,4c-6,0 -12,4 -14,12l-2,4 M20,4c0,6 -4,12 -12,14 M20,4L8,16 M14,7l1,4 M11,10l1,3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "heart": "<path d=\"M20.8,4.6a5.5,5.5 0,0 0,-7.8 0L12,5.7l-1,-1.1a5.5,5.5 0,0 0,-7.8 7.8l1,1.1L12,21l7.8,-7.6 1,-1.1a5.5,5.5 0,0 0,0 -7.8z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "heart_on": "<path d=\"M20.8,4.6a5.5,5.5 0,0 0,-7.8 0L12,5.7l-1,-1.1a5.5,5.5 0,0 0,-7.8 7.8l1,1.1L12,21l7.8,-7.6 1,-1.1a5.5,5.5 0,0 0,0 -7.8z\" fill=\"currentColor\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "history": "<path d=\"M3,12a9,9 0,1 0,3 -6.7 M3,4v5h5 M12,8v4l3,2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "home": "<path d=\"M3,10.5L12,3l9,7.5 M5,9v11a1,1 0,0 0,1 1h4v-6h4v6h4a1,1 0,0 0,1 -1V9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "photo": "<path d=\"M5,4h14a2,2 0,0 1,2 2v12a2,2 0,0 1,-2 2H5a2,2 0,0 1,-2 -2V6a2,2 0,0 1,2 -2z M8.5,10a1.5,1.5 0,1 0,0 -3a1.5,1.5 0,1 0,0 3z M21,15l-5,-5L5,20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "pin": "<path d=\"M12,22s7,-6.5 7,-12a7,7 0,0 0,-14 0c0,5.5 7,12 7,12z M12,12.5a2.5,2.5 0,1 0,0 -5a2.5,2.5 0,1 0,0 5z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "play": "<path d=\"M8,5l11,7 -11,7z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "share": "<path d=\"M18,8a3,3 0,1 0,0 -6a3,3 0,1 0,0 6z M6,15a3,3 0,1 0,0 -6a3,3 0,1 0,0 6z M18,22a3,3 0,1 0,0 -6a3,3 0,1 0,0 6z M8.6,13.5l6.8,4 M15.4,6.5l-6.8,4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "user": "<path d=\"M20,21v-2a4,4 0,0 0,-4 -4H8a4,4 0,0 0,-4 4v2 M12,11a4,4 0,1 0,0 -8a4,4 0,1 0,0 8z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "video": "<path d=\"M4,6h11a2,2 0,0 1,2 2v8a2,2 0,0 1,-2 2H4a2,2 0,0 1,-2 -2V8a2,2 0,0 1,2 -2z M17,10.5l5,-3v9l-5,-3z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "settings": "<path d=\"M19.14,12.94c0.04,-0.3 0.06,-0.61 0.06,-0.94c0,-0.32 -0.02,-0.64 -0.07,-0.94l2.03,-1.58c0.18,-0.14 0.23,-0.41 0.12,-0.61l-1.92,-3.32c-0.12,-0.22 -0.37,-0.29 -0.59,-0.22l-2.39,0.96c-0.5,-0.38 -1.03,-0.7 -1.62,-0.94L14.4,2.81c-0.04,-0.24 -0.24,-0.41 -0.48,-0.41h-3.84c-0.24,0 -0.43,0.17 -0.47,0.41L9.25,5.35C8.66,5.59 8.12,5.92 7.63,6.29L5.24,5.33c-0.22,-0.08 -0.47,0 -0.59,0.22L2.74,8.87C2.62,9.08 2.66,9.34 2.86,9.48l2.03,1.58C4.84,11.36 4.8,11.69 4.8,12s0.02,0.64 0.07,0.94l-2.03,1.58c-0.18,0.14 -0.23,0.41 -0.12,0.61l1.92,3.32c0.12,0.22 0.37,0.29 0.59,0.22l2.39,-0.96c0.5,0.38 1.03,0.7 1.62,0.94l0.36,2.54c0.05,0.24 0.24,0.41 0.48,0.41h3.84c0.24,0 0.44,-0.17 0.47,-0.41l0.36,-2.54c0.59,-0.24 1.13,-0.56 1.62,-0.94l2.39,0.96c0.22,0.08 0.47,0 0.59,-0.22l1.92,-3.32c0.12,-0.22 0.07,-0.47 -0.12,-0.61L19.14,12.94zM12,15.6c-1.98,0 -3.6,-1.62 -3.6,-3.6s1.62,-3.6 3.6,-3.6s3.6,1.62 3.6,3.6S13.98,15.6 12,15.6z\" fill=\"currentColor\"/>", "back": "<path d=\"M15.4,5.4L14,4l-8,8 8,8 1.4,-1.4L8.8,12z\" fill=\"currentColor\"/>", "close": "<path d=\"M19,6.41L17.59,5 12,10.59 6.41,5 5,6.41 10.59,12 5,17.59 6.41,19 12,13.41 17.59,19 19,17.59 13.41,12z\" fill=\"currentColor\"/>"};
+const ICONS = {"scroll": "<path d=\"M7,4h11a2,2 0,0 1,2 2v1h-3 M7,4a2,2 0,0 0,-2 2v12a2,2 0,0 0,2 2h10a2,2 0,0 0,2 -2V7 M7,4a2,2 0,0 1,2 2v12a2,2 0,0 1,-2 2 M11,9h5 M11,12h5 M11,15h3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "book": "<path d=\"M4,19.5A2.5,2.5 0,0 1,6.5 17H20V3H6.5A2.5,2.5 0,0 0,4 5.5v14zM8,7h8M8,11h6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "lotus": "<path d=\"M12,3c2,3 2,6 0,9 -2,-3 -2,-6 0,-9z M12,12c3,-2 6,-2 8,0 -2,3 -5,3 -8,0z M12,12c-3,-2 -6,-2 -8,0 2,3 5,3 8,0z M5,17h14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "music": "<path d=\"M9,18V5l12,-2v13 M3,18a3,3 0,1 0,6 0a3,3 0,1 0,-6 0 M15,16a3,3 0,1 0,6 0a3,3 0,1 0,-6 0\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "phone": "<path d=\"M22,16.9v3a2,2 0,0 1,-2.2 2 19.8,19.8 0,0 1,-8.6 -3.1 19.5,19.5 0,0 1,-6 -6A19.8,19.8 0,0 1,2.1 4.2 2,2 0,0 1,4.1 2h3a2,2 0,0 1,2 1.7c0.1,0.9 0.4,1.8 0.7,2.7a2,2 0,0 1,-0.5 2.1L8,9.8a16,16 0,0 0,6 6l1.3,-1.3a2,2 0,0 1,2.1 -0.4c0.9,0.3 1.8,0.6 2.7,0.7a2,2 0,0 1,1.7 2z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "mail": "<path d=\"M5,4h14a3,3 0,0 1,3 3v10a3,3 0,0 1,-3 3H5a3,3 0,0 1,-3 -3V7a3,3 0,0 1,3 -3z M3,6l9,7 9,-7\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "chat": "<path d=\"M21,15a2,2 0,0 1,-2 2H7l-4,4V5a2,2 0,0 1,2 -2h14a2,2 0,0 1,2 2z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "chevron": "<path d=\"M9,6l6,6 -6,6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "calendar": "<path d=\"M6,5h12a3,3 0,0 1,3 3v10a3,3 0,0 1,-3 3H6a3,3 0,0 1,-3 -3V8a3,3 0,0 1,3 -3z M3,10h18 M8,3v4 M16,3v4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "check": "<path d=\"M5,12.5l4.5,4.5L19,7.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "class": "<path d=\"M2,9l10,-5 10,5 -10,5z M6,11v5c3,3 9,3 12,0v-5 M22,9v6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "event": "<path d=\"M6,5h12a3,3 0,0 1,3 3v10a3,3 0,0 1,-3 3H6a3,3 0,0 1,-3 -3V8a3,3 0,0 1,3 -3z M3,10h18 M8,3v4 M16,3v4 M12,12.5l1.2,2.4 2.6,0.4 -1.9,1.8 0.5,2.6 -2.4,-1.3 -2.4,1.3 0.5,-2.6 -1.9,-1.8 2.6,-0.4z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "feather": "<path d=\"M20,4c-6,0 -12,4 -14,12l-2,4 M20,4c0,6 -4,12 -12,14 M20,4L8,16 M14,7l1,4 M11,10l1,3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "heart": "<path d=\"M20.8,4.6a5.5,5.5 0,0 0,-7.8 0L12,5.7l-1,-1.1a5.5,5.5 0,0 0,-7.8 7.8l1,1.1L12,21l7.8,-7.6 1,-1.1a5.5,5.5 0,0 0,0 -7.8z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "heart_on": "<path d=\"M20.8,4.6a5.5,5.5 0,0 0,-7.8 0L12,5.7l-1,-1.1a5.5,5.5 0,0 0,-7.8 7.8l1,1.1L12,21l7.8,-7.6 1,-1.1a5.5,5.5 0,0 0,0 -7.8z\" fill=\"currentColor\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "history": "<path d=\"M3,12a9,9 0,1 0,3 -6.7 M3,4v5h5 M12,8v4l3,2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "home": "<path d=\"M3,10.5L12,3l9,7.5 M5,9v11a1,1 0,0 0,1 1h4v-6h4v6h4a1,1 0,0 0,1 -1V9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "photo": "<path d=\"M5,4h14a2,2 0,0 1,2 2v12a2,2 0,0 1,-2 2H5a2,2 0,0 1,-2 -2V6a2,2 0,0 1,2 -2z M8.5,10a1.5,1.5 0,1 0,0 -3a1.5,1.5 0,1 0,0 3z M21,15l-5,-5L5,20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "pin": "<path d=\"M12,22s7,-6.5 7,-12a7,7 0,0 0,-14 0c0,5.5 7,12 7,12z M12,12.5a2.5,2.5 0,1 0,0 -5a2.5,2.5 0,1 0,0 5z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "play": "<path d=\"M8,5l11,7 -11,7z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "share": "<path d=\"M18,8a3,3 0,1 0,0 -6a3,3 0,1 0,0 6z M6,15a3,3 0,1 0,0 -6a3,3 0,1 0,0 6z M18,22a3,3 0,1 0,0 -6a3,3 0,1 0,0 6z M8.6,13.5l6.8,4 M15.4,6.5l-6.8,4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "user": "<path d=\"M20,21v-2a4,4 0,0 0,-4 -4H8a4,4 0,0 0,-4 4v2 M12,11a4,4 0,1 0,0 -8a4,4 0,1 0,0 8z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "video": "<path d=\"M4,6h11a2,2 0,0 1,2 2v8a2,2 0,0 1,-2 2H4a2,2 0,0 1,-2 -2V8a2,2 0,0 1,2 -2z M17,10.5l5,-3v9l-5,-3z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "settings": "<path d=\"M19.14,12.94c0.04,-0.3 0.06,-0.61 0.06,-0.94c0,-0.32 -0.02,-0.64 -0.07,-0.94l2.03,-1.58c0.18,-0.14 0.23,-0.41 0.12,-0.61l-1.92,-3.32c-0.12,-0.22 -0.37,-0.29 -0.59,-0.22l-2.39,0.96c-0.5,-0.38 -1.03,-0.7 -1.62,-0.94L14.4,2.81c-0.04,-0.24 -0.24,-0.41 -0.48,-0.41h-3.84c-0.24,0 -0.43,0.17 -0.47,0.41L9.25,5.35C8.66,5.59 8.12,5.92 7.63,6.29L5.24,5.33c-0.22,-0.08 -0.47,0 -0.59,0.22L2.74,8.87C2.62,9.08 2.66,9.34 2.86,9.48l2.03,1.58C4.84,11.36 4.8,11.69 4.8,12s0.02,0.64 0.07,0.94l-2.03,1.58c-0.18,0.14 -0.23,0.41 -0.12,0.61l1.92,3.32c0.12,0.22 0.37,0.29 0.59,0.22l2.39,-0.96c0.5,0.38 1.03,0.7 1.62,0.94l0.36,2.54c0.05,0.24 0.24,0.41 0.48,0.41h3.84c0.24,0 0.44,-0.17 0.47,-0.41l0.36,-2.54c0.59,-0.24 1.13,-0.56 1.62,-0.94l2.39,0.96c0.22,0.08 0.47,0 0.59,-0.22l1.92,-3.32c0.12,-0.22 0.07,-0.47 -0.12,-0.61L19.14,12.94zM12,15.6c-1.98,0 -3.6,-1.62 -3.6,-3.6s1.62,-3.6 3.6,-3.6s3.6,1.62 3.6,3.6S13.98,15.6 12,15.6z\" fill=\"currentColor\"/>", "back": "<path d=\"M15.4,5.4L14,4l-8,8 8,8 1.4,-1.4L8.8,12z\" fill=\"currentColor\"/>", "close": "<path d=\"M19,6.41L17.59,5 12,10.59 6.41,5 5,6.41 10.59,12 5,17.59 6.41,19 12,13.41 17.59,19 19,17.59 13.41,12z\" fill=\"currentColor\"/>"};
 // =====================================================================
 // v4.0 – same home and screens as the Android app v13.1
 // =====================================================================
 const svgI = (name, cls) => `<svg class="ic ${cls || ''}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ''}</svg>`;
+// The third book: its name and line follow the chosen language
+const NDP_BOOK = {
+  en: ['Naalaayira Divya Prabandham', '4000 pāsurams of the Āzhvārs'],
+  ta: ['நாலாயிர திவ்ய பிரபந்தம்', 'ஆழ்வார்களின் 4000 பாசுரங்கள்'],
+  kn: ['ನಾಲಾಯಿರ ದಿವ್ಯ ಪ್ರಬಂಧಂ', 'ಆಳ್ವಾರರ 4000 ಪಾಶುರಗಳು'],
+  sa: ['नालायिर दिव्य प्रबन्धम्', 'आळ्वाराणां ४००० पाशुराः'],
+};
+const ndpLang = () => NDP_BOOK[prefs.lang] ? prefs.lang : 'en';
 const badge = (name, cls) => `<span class="ibadge ${cls || ''}">${svgI(name)}</span>`;
 const CHANNEL = 'https://www.youtube.com/@HariNamadwar';
 
@@ -838,7 +862,7 @@ async function songOfTheDay() {
 
 function eventRows(list, big) {
   return list.map(e => `<div class="ev-row${big ? ' big' : ''}"><div class="ev-date"><span>${esc(e.month)}</span><b class="${e.days.length > 2 ? 'long' : ''}">${esc(e.days)}</b></div>` +
-    `<div class="ev-t"><span class="ev-when">${big ? 'Coming up on ' : ''}${esc(e.when)}</span><b>${esc(e.name)}</b><span class="ev-where">${svgI('pin')}at ${esc(e.place)}</span></div></div>`).join('');
+    `<div class="ev-t"><b>${esc(e.name)}</b><span class="ev-where">${svgI('pin')}at ${esc(e.place)}</span></div></div>`).join('');
 }
 
 // ---------- home ----------
@@ -854,11 +878,12 @@ async function showHome() {
   // home order: books · continue · upcoming satsangs/learn/favourites · thought for the day · song of the day · about (Coming Up removed; it lives in Upcoming Satsangs)
   out.push(`<span class="lbl sect">CHOOSE A BOOK</span><div class="books">` +
     `<button class="arch-card" data-go="#book/dns">${badge('book', 'big')}<b>Divya Nama Sankeertanam</b><span>Bhajans · lyrics,<br>meanings, audio</span></button>` +
-    `<button class="arch-card" data-go="#book/ashta">${badge('feather', 'big')}<b>Śrī Gīta Govindam</b><span>24 Aṣṭapadis of<br>Śrī Jayadeva</span></button></div>`);
+    `<button class="arch-card" data-go="#book/ashta">${badge('feather', 'big')}<b>Śrī Gīta Govindam</b><span>24 Aṣṭapadis of<br>Śrī Jayadeva</span></button>` +
+    `<button class="arch-card wide" data-go="#book/ndp">${badge('scroll', 'big')}<span class="hc-soon"><b>${NDP_BOOK[ndpLang()][0]}</b><span>${NDP_BOOK[ndpLang()][1]}</span></span></button></div>`);
   const l = store.get('last', null);   // after the books, above the tiles
   if (l && BOOKS[l.book]) {
     out.push(`<button class="h-cont" data-go="${BOOKS[l.book].hash}${esc(l.number)}">${badge('history', 'plain')}<span class="hc-t"><span class="mut">Continue where you left off</span>` +
-      `<b>${esc((l.book === 'ashta' ? 'Aṣṭapadi ' : '') + l.number)}&nbsp; ${esc(l.title)}</b></span>${svgI('chevron', 'chev2')}</button>`);
+      `<b>${esc((l.book === 'ashta' ? 'Aṣṭapadi ' : l.book === 'ndp' ? 'Pāsuram ' : '') + l.number)}&nbsp; ${esc(l.title)}</b></span>${svgI('chevron', 'chev2')}</button>`);
   }
   const tiles = [`<button class="tile" data-go="#diary">${badge('calendar')}<b>Upcoming<br>Satsangs</b></button>`];
   if (interest('learn') && (prac.length || meet)) tiles.push(`<button class="tile" data-go="#learn">${badge('class')}<b>Learn<br>&nbsp;</b></button>`);
@@ -872,7 +897,7 @@ async function showHome() {
   if (sod) {
     out.push(`<div class="card h-sod"><div class="sod-tile">${svgI('music')}</div><div class="sod-t"><span class="lbl">SONG OF THE DAY</span>` +
       `<b>${esc(sod.displayTitle)}</b><span class="mut">${esc(sod.displayRaga || sod.chapter)}</span>` +
-      `<div class="sod-btns"><button class="btn-acc" data-go="#song/${esc(sod.number)}">▶&nbsp; Listen</button><button class="btn-line" data-go="#share/${esc(sod.number)}">${svgI('share')}Share</button></div></div></div>`);
+      `<div class="sod-btns"><button class="btn-acc" data-go="#song/${esc(sod.number)}" data-open-tab="2">▶&nbsp; Listen</button><button class="btn-line" data-go="#share/${esc(sod.number)}">${svgI('share')}Share</button></div></div></div>`);
   }
   out.push(`<button class="h-about" data-go="#about">${badge('lotus', 'white')}<span class="hc-t"><b>About Harinamadwar</b><span class="mut">Our satsangs, our guide, and how to invite us</span></span>${svgI('chevron', 'chev2')}</button>`);
   out.push(`<button class="h-change" data-go="#welcome">Change what I see on this page ›</button>`);
@@ -881,7 +906,7 @@ async function showHome() {
 }
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-go]');
-  if (b) go(b.dataset.go);
+  if (b) { openTab = b.dataset.openTab ? +b.dataset.openTab : null; go(b.dataset.go); }
 });
 
 // ---------- welcome: name and what to show ----------
@@ -999,6 +1024,34 @@ async function showTfdList() {
   $('tfd-scroll').scrollTop = 0;
 }
 let tfdNow = null;
+// ---------- reactions on a Thought for the Day (SCRUM-50): one per phone; tap again to take it back ----------
+const REACTIONS = ['🙏', '❤️', '🌸', '😊', '👍'];
+let reactNow = { tfd: 0, counts: {}, mine: null };
+function paintReactions() {
+  const box = $('t-react'); if (!box) return;
+  box.innerHTML = `<span class="mut">How did this thought touch you?</span><div class="t-rx">` + REACTIONS.map(e => {
+    const n = reactNow.counts[e] || 0;
+    return `<button class="rx${reactNow.mine === e ? ' on' : ''}" data-rx="${e}" aria-pressed="${reactNow.mine === e}"><span>${e}</span>${n ? `<b>${n}</b>` : ''}</button>`;
+  }).join('') + '</div>';
+  box.querySelectorAll('[data-rx]').forEach(b => { b.onclick = () => react(b.dataset.rx); });
+}
+async function loadReactions(tfd) {
+  reactNow = { tfd, counts: {}, mine: null }; paintReactions();
+  try { const r = await rpc('app_reactions', { p_tfd: tfd, p_device_key: deviceKey() }); if (reactNow.tfd === tfd) { reactNow.counts = r.counts || {}; reactNow.mine = r.mine || null; paintReactions(); } }
+  catch (e) { /* offline: the buttons still show, and work when back online */ }
+}
+async function react(e) {
+  const tfd = reactNow.tfd, before = JSON.stringify(reactNow);
+  // show it straight away, then confirm with the server
+  if (reactNow.mine) reactNow.counts[reactNow.mine] = Math.max(0, (reactNow.counts[reactNow.mine] || 1) - 1);
+  if (reactNow.mine === e) reactNow.mine = null; else { reactNow.mine = e; reactNow.counts[e] = (reactNow.counts[e] || 0) + 1; }
+  paintReactions();
+  try {
+    const r = await rpc('app_react', { p_tfd: tfd, p_device_key: deviceKey(), p_emoji: e });
+    if (r && r.ok && reactNow.tfd === tfd) { reactNow.counts = r.counts || {}; reactNow.mine = r.mine || null; paintReactions(); }
+  } catch (err) { reactNow = JSON.parse(before); paintReactions(); toast('Could not send. Please check the internet.'); }
+}
+
 async function showTfd(number) {
   showView('v-tfd');
   const all = await tfds(), t = all.find(x => x.number === number);
@@ -1024,6 +1077,7 @@ async function showTfd(number) {
     else { close(); out.push(`<p class="t-p${i === 0 ? ' first' : ''}">${esc(p)}</p>`); }
   });
   close();
+  if (ACCESS.url) out.push('<div class="t-react" id="t-react" aria-label="Reactions"></div>');   // SCRUM-50
   out.push('<div class="t-sep"></div>');
   if (t.songNumber && t.songBook === 'dns') {
     const s = await dnsSong(t.songNumber);
@@ -1034,6 +1088,7 @@ async function showTfd(number) {
   out.push(`<div class="t-acts"><button class="btn-acc" id="t-share">${svgI('share')}Share</button><button class="btn-line" data-go="#tfd">Past thoughts</button></div>`);
   $('tfd-box').innerHTML = `<div class="tfd-read">${out.join('')}</div>`;
   if (fresh) $('tfd-scroll').scrollTop = 0;
+  if (ACCESS.url) loadReactions(+t.number);
   $('t-share').onclick = () => {
     const text = 'Thought for the Day (TFD ' + t.number + '): ' + t.title + '\n\n' + t.paras.join('\n\n') + '\n\nRead the full thought and listen to the bhajans in the Harinamadwar app 🙏\n' + location.origin + location.pathname;
     if (navigator.share) navigator.share({ title: t.title, text }).catch(() => {});
@@ -1106,8 +1161,9 @@ function splash() {
   const s = $('splash');
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   s.classList.remove('hidden');
-  setTimeout(() => s.classList.add('go'), 700);
-  setTimeout(() => s.classList.add('hidden'), 2000);
+  // hold the doorway for about 3 seconds before walking through (SCRUM-65); a tap skips ahead
+  let t1 = setTimeout(() => s.classList.add('go'), 2700), t2 = setTimeout(() => s.classList.add('hidden'), 4000);
+  s.onclick = () => { clearTimeout(t1); clearTimeout(t2); s.classList.add('go'); setTimeout(() => s.classList.add('hidden'), 1300); };
 }
 
 start();

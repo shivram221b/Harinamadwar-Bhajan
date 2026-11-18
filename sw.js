@@ -1,9 +1,9 @@
 /* Offline support: the app itself is kept on the phone; song and meaning files are
  * always fetched fresh when there is internet, and the last copy is used when there isn't.
  * Audio is streamed and not stored. */
-const SHELL = 'hg-shell-v9';
+const SHELL = 'hg-shell-v12s';
 const DATA = 'hg-data';
-const SHELL_FILES = ['./', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest',
+const SHELL_FILES = ['./', 'index.html', 'style.css', 'app.js', 'access.js', 'manifest.webmanifest',
   'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png',
   'icons/logo.jpg', 'icons/about-group.jpg', 'icons/about-jk.jpg', 'icons/icon.svg',
   'fonts/baloo-tamma-2-kannada-400-normal.woff2', 'fonts/baloo-tamma-2-kannada-700-normal.woff2', 'fonts/mukta-devanagari-400-normal.woff2', 'fonts/mukta-devanagari-700-normal.woff2', 'fonts/mukta-latin-400-normal.woff2', 'fonts/mukta-latin-600-normal.woff2', 'fonts/mukta-latin-700-normal.woff2', 'fonts/mukta-latin-ext-400-normal.woff2', 'fonts/mukta-latin-ext-700-normal.woff2', 'fonts/mukta-malar-tamil-400-normal.woff2', 'fonts/mukta-malar-tamil-700-normal.woff2'];
@@ -33,7 +33,8 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  if (url.origin !== location.origin) return;
+  if (url.origin !== location.origin) return;   // sign-in server and YouTube go straight to the network
+  if (url.pathname.includes('/admin/')) return;   // the admin screens always come fresh from the network
   if (/\.(m4a|mp3|aac|wav|ogg)$/i.test(url.pathname) || url.pathname.includes('/Audio')) return; // stream audio directly
 
   if (url.pathname.endsWith('.txt')) {
