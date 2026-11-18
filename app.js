@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.0';
+const WEB_VERSION = '4.1';
 // The two books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -851,30 +851,28 @@ async function showHome() {
   const [ev, sod, tf, prac, meet] = await Promise.all([events(), interest('listen') ? songOfTheDay() : null, tfds(), practice(), learnValue('meet')]);
   if (my !== homeBusy) return;
   const out = [];
-  if (interest('satsang') && ev.length) {
-    out.push(`<button class="h-ev" data-go="#diary"><div class="h-ev-top">${svgI('event')}<span class="lbl">COMING UP</span><b>Diary ›</b></div>${eventRows(ev.slice(0, 2), false)}</button>`);
+  // home order: books · continue · upcoming satsangs/learn/favourites · thought for the day · song of the day · about (Coming Up removed; it lives in Upcoming Satsangs)
+  out.push(`<span class="lbl sect">CHOOSE A BOOK</span><div class="books">` +
+    `<button class="arch-card" data-go="#book/dns">${badge('book', 'big')}<b>Divya Nama Sankeertanam</b><span>Bhajans · lyrics,<br>meanings, audio</span></button>` +
+    `<button class="arch-card" data-go="#book/ashta">${badge('feather', 'big')}<b>Śrī Gīta Govindam</b><span>24 Aṣṭapadis of<br>Śrī Jayadeva</span></button></div>`);
+  const l = store.get('last', null);   // after the books, above the tiles
+  if (l && BOOKS[l.book]) {
+    out.push(`<button class="h-cont" data-go="${BOOKS[l.book].hash}${esc(l.number)}">${badge('history', 'plain')}<span class="hc-t"><span class="mut">Continue where you left off</span>` +
+      `<b>${esc((l.book === 'ashta' ? 'Aṣṭapadi ' : '') + l.number)}&nbsp; ${esc(l.title)}</b></span>${svgI('chevron', 'chev2')}</button>`);
   }
-  if (sod) {
-    out.push(`<div class="card h-sod"><div class="sod-tile">${svgI('music')}</div><div class="sod-t"><span class="lbl">SONG OF THE DAY</span>` +
-      `<b>${esc(sod.displayTitle)}</b><span class="mut">${esc(sod.displayRaga || sod.chapter)}</span>` +
-      `<div class="sod-btns"><button class="btn-acc" data-go="#song/${esc(sod.number)}">▶&nbsp; Listen</button><button class="btn-line" data-go="#share/${esc(sod.number)}">${svgI('share')}Share</button></div></div></div>`);
-  }
+  const tiles = [`<button class="tile" data-go="#diary">${badge('calendar')}<b>Upcoming<br>Satsangs</b></button>`];
+  if (interest('learn') && (prac.length || meet)) tiles.push(`<button class="tile" data-go="#learn">${badge('class')}<b>Learn<br>&nbsp;</b></button>`);
+  tiles.push(`<button class="tile" data-go="#favs">${badge('heart')}<b>My<br>favourites</b></button>`);
+  out.push(`<div class="tiles">${tiles.join('')}</div>`);
   if (tf.length) {
     const t = tf[0];
     out.push(`<button class="h-tfd" data-go="#tfd/${esc(t.number)}"><span class="h-tfd-top">${svgI('lotus')}<span class="lbl">THOUGHT FOR THE DAY · TFD ${esc(t.number)}</span></span>` +
       `<b>${esc(t.title)}</b><span class="teaser">${esc(t.paras[0] || '')}</span><span class="more">Read ›</span></button>`);
   }
-  const tiles = [`<button class="tile" data-go="#diary">${badge('calendar')}<b>Satsang<br>diary</b></button>`];
-  if (interest('learn') && (prac.length || meet)) tiles.push(`<button class="tile" data-go="#learn">${badge('class')}<b>Learn<br>&nbsp;</b></button>`);
-  tiles.push(`<button class="tile" data-go="#favs">${badge('heart')}<b>My<br>favourites</b></button>`);
-  out.push(`<div class="tiles">${tiles.join('')}</div>`);
-  out.push(`<span class="lbl sect">CHOOSE A BOOK</span><div class="books">` +
-    `<button class="arch-card" data-go="#book/dns">${badge('book', 'big')}<b>Divya Nama Sankeertanam</b><span>Bhajans · lyrics,<br>meanings, audio</span></button>` +
-    `<button class="arch-card" data-go="#book/ashta">${badge('feather', 'big')}<b>Śrī Gīta Govindam</b><span>24 Aṣṭapadis of<br>Śrī Jayadeva</span></button></div>`);
-  const l = store.get('last', null);   // SCRUM-55: after the books, above About
-  if (l && BOOKS[l.book]) {
-    out.push(`<button class="h-cont" data-go="${BOOKS[l.book].hash}${esc(l.number)}">${badge('history', 'plain')}<span class="hc-t"><span class="mut">Continue where you left off</span>` +
-      `<b>${esc((l.book === 'ashta' ? 'Aṣṭapadi ' : '') + l.number)}&nbsp; ${esc(l.title)}</b></span>${svgI('chevron', 'chev2')}</button>`);
+  if (sod) {
+    out.push(`<div class="card h-sod"><div class="sod-tile">${svgI('music')}</div><div class="sod-t"><span class="lbl">SONG OF THE DAY</span>` +
+      `<b>${esc(sod.displayTitle)}</b><span class="mut">${esc(sod.displayRaga || sod.chapter)}</span>` +
+      `<div class="sod-btns"><button class="btn-acc" data-go="#song/${esc(sod.number)}">▶&nbsp; Listen</button><button class="btn-line" data-go="#share/${esc(sod.number)}">${svgI('share')}Share</button></div></div></div>`);
   }
   out.push(`<button class="h-about" data-go="#about">${badge('lotus', 'white')}<span class="hc-t"><b>About Harinamadwar</b><span class="mut">Our satsangs, our guide, and how to invite us</span></span>${svgI('chevron', 'chev2')}</button>`);
   out.push(`<button class="h-change" data-go="#welcome">Change what I see on this page ›</button>`);
