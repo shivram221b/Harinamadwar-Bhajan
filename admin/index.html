@@ -241,7 +241,16 @@ function page(title, body, opts) {
   window.scrollTo(0, 0);
 }
 const on = (sel, ev, fn) => document.querySelectorAll(sel).forEach(el => el.addEventListener(ev, fn));
-async function guard(fn) { try { return await fn(); } catch (e) { console.error(e); toast(/admins can/.test(e.message) ? 'You are not on the admin list.' : 'Something went wrong. Please check the internet and try again.'); } }
+async function guard(fn) {
+  try { return await fn(); } catch (e) {
+    console.error(e);
+    const m = (e && (e.message || e.details || e.hint)) || String(e), code = e && e.code ? ' (' + e.code + ')' : '';
+    toast(/admins can/.test(m) ? 'You are not on the admin list.'
+      : /permission denied/i.test(m) ? 'The database is not set up yet: please run backend/fix_grants.sql in Supabase.' + code
+      : 'Something went wrong: ' + m.slice(0, 120) + code);
+    const el = document.querySelector('main .empty'); if (el && /Loading/.test(el.textContent)) el.textContent = 'Could not load. ' + m.slice(0, 160) + code;
+  }
+}
 function go() { ({ dash: showDashboard, students: showStudents, content: showContent, settings: showSettings })[tab](); }
 
 // ---------------------------------------------------------------- A · sign in
@@ -308,7 +317,8 @@ async function showStudents() {
   const live = ticket();
   page('Students', '<div class="empty">Loading…</div>');
   const list = await guard(() => api.students()); if (!list || !live()) return;
-  const lim = (await api.settings()).device_limit || 3; if (!live()) return;
+  const st = await guard(() => api.settings()); if (!st || !live()) return;
+  const lim = st.device_limit || 3;
   const status = s => s.status === 'paused' ? ['paused', 'Paused'] : s.devices > 0 ? ['active', 'Active'] : s.code_expires ? ['sent', 'Code sent'] : ['none', 'No code'];
   const draw = () => {
     const f = filter.toLowerCase().replace(/\s/g, ''), shown = list.filter(s => !f || (s.name + s.phone).toLowerCase().replace(/\s/g, '').includes(f));
