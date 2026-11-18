@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Harinamadwar Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1D4E9E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root { --page:#FAF6F0; --text:#1B2638; --muted:#4D5D76; --line:#D3DFF0; --soft:#E6EEF9; --bar:#1D4E9E; --deep:#163E7E;
+  --acc:#CA7E0B; --label:#B06A00; --ok:#2E7D4F; --bad:#B3261E; --card:#fff; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--page); color: var(--text); font: 17px/1.45 Mukta, -apple-system, "Segoe UI", sans-serif; }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; padding: 0; }
+.hidden { display: none !important; }
+.top { position: sticky; top: 0; z-index: 5; background: var(--bar); color: #fff; border-bottom: 3px solid var(--acc); padding: calc(10px + env(safe-area-inset-top)) 14px 10px; }
+.top-row { max-width: 640px; margin: 0 auto; display: flex; align-items: center; gap: 10px; min-height: 40px; }
+.top-row h1 { flex: 1; margin: 0; font-size: 20px; }
+.back { font-size: 17px; font-weight: 700; padding: 6px 8px; margin-left: -8px; border-radius: 18px; }
+.chip-admin { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; padding: 4px 10px; border-radius: 12px; background: rgba(255,255,255,.16); }
+main { max-width: 640px; margin: 0 auto; padding: 18px 18px calc(110px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 14px; }
+.lbl { font-size: 12px; font-weight: 700; letter-spacing: 1.6px; color: var(--label); margin-top: 6px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
+.stats div { padding: 10px 12px; border-radius: 16px; background: #fff; border: 1px solid var(--line); }
+.stats b { display: block; font-size: 24px; font-weight: 800; color: var(--deep); line-height: 1.2; }
+.stats span { font-size: 13px; color: var(--muted); }
+.search { width: 100%; padding: 11px 16px; border-radius: 22px; border: 1px solid var(--line); background: #fff; outline: none; }
+.list { overflow: hidden; }
+.row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--soft); width: 100%; text-align: left; }
+.row:last-child { border-bottom: 0; }
+button.row:active { background: var(--soft); }
+.av { width: 40px; height: 40px; border-radius: 50%; background: var(--soft); color: var(--deep); font-weight: 800; display: grid; place-items: center; flex-shrink: 0; }
+.av.big { width: 56px; height: 56px; font-size: 24px; }
+.rt { flex: 1; min-width: 0; }
+.rt b { display: block; font-size: 17px; color: var(--deep); line-height: 1.25; }
+.rt span { display: block; font-size: 13px; color: var(--muted); }
+.st { font-size: 13px; font-weight: 700; white-space: nowrap; }
+.st.active { color: var(--ok); } .st.sent { color: var(--label); } .st.paused { color: var(--muted); } .st.none { color: var(--bad); }
+.btn { min-height: 50px; border-radius: 25px; padding: 0 18px; font-weight: 700; font-size: 17px; width: 100%; }
+.btn.acc { background: var(--acc); color: #1B1206; }
+.btn.deep { background: var(--deep); color: #fff; }
+.btn.line { background: #fff; border: 1.5px solid var(--line); color: var(--deep); }
+.btn.bad { background: #fff; border: 1.5px solid #E8B8B3; color: var(--bad); }
+.btn.wa { background: #1E7A46; color: #fff; }
+.btn.small { min-height: 40px; width: auto; font-size: 14px; padding: 0 14px; border-radius: 20px; }
+.btn:disabled { opacity: .45; }
+.pair { display: flex; gap: 10px; } .pair > * { flex: 1; }
+label.f { display: flex; flex-direction: column; gap: 6px; font-size: 15px; font-weight: 700; color: var(--deep); }
+.f input, .f textarea, .f select { font-weight: 400; font-size: 17px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: #fff; outline: none; width: 100%; }
+.f input:focus, .f textarea:focus { border-color: var(--bar); }
+.f textarea { min-height: 180px; resize: vertical; line-height: 1.5; }
+.hint { font-size: 14px; color: var(--muted); }
+.err { color: var(--bad); font-size: 15px; font-weight: 600; }
+.code-card { padding: 18px; border-radius: 18px; background: #FFF8EA; border: 1.5px solid #E8D3A6; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.code { font-size: 40px; font-weight: 800; letter-spacing: 4px; color: var(--deep); line-height: 1.1; user-select: all; }
+.head { display: flex; align-items: center; gap: 14px; }
+.head .rt b { font-size: 24px; }
+.dev svg { width: 24px; height: 24px; flex-shrink: 0; color: var(--deep); }
+details.pend summary { list-style: none; display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; }
+details.pend summary::-webkit-details-marker { display: none; }
+details.pend .rt { flex: 1; }
+.pn { min-width: 36px; padding: 2px 10px; border-radius: 14px; background: #FBE3DC; color: var(--bad); font-weight: 800; text-align: center; }
+.pn.done { background: #E3F2E8; color: var(--ok); }
+.pch { padding: 6px 14px 10px; border-top: 1px solid var(--soft); display: flex; flex-direction: column; gap: 4px; }
+.pit { color: var(--text); text-decoration: none; font-size: 15px; }
+.pit b { color: var(--deep); }
+.foot-note { padding: 12px 14px; font-size: 14px; color: var(--muted); }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tab { padding: 7px 14px; border-radius: 16px; font-size: 15px; font-weight: 700; background: var(--soft); color: var(--deep); }
+.tab.on { background: var(--bar); color: #fff; }
+.item { padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; width: 100%; text-align: left; }
+.item .t { display: flex; justify-content: space-between; gap: 10px; }
+.item .t b { color: var(--deep); font-size: 17px; }
+.item .t span { color: var(--bar); font-weight: 700; flex-shrink: 0; }
+.item .s { font-size: 14px; color: var(--muted); }
+.nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; background: #fff; border-top: 1px solid var(--line); padding: 6px 10px calc(6px + env(safe-area-inset-bottom)); }
+.nav div { max-width: 640px; margin: 0 auto; display: flex; gap: 6px; }
+.nav button { flex: 1; min-height: 52px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: var(--muted); }
+.nav button svg { width: 24px; height: 24px; }
+.nav button.on { background: var(--soft); color: var(--deep); font-weight: 700; }
+.signin { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; padding: 30px 22px; }
+.door { width: 110px; height: 140px; border-radius: 55px 55px 8px 8px; border: 3px solid #D4A853; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 18px; }
+.signin h2 { margin: 0; font-size: 28px; color: var(--deep); }
+.signin .btn { max-width: 320px; }
+.toast { position: fixed; left: 50%; bottom: calc(86px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 20; background: rgba(27,38,56,.94); color: #fff;
+  padding: 11px 20px; border-radius: 22px; font-size: 16px; max-width: 90%; text-align: center; }
+.demo { background: #FFF8EA; border: 1px dashed #E8D3A6; color: var(--label); border-radius: 12px; padding: 8px 12px; font-size: 14px; text-align: center; }
+.set-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--soft); }
+.set-row:last-child { border-bottom: 0; }
+.set-row input { width: 80px; text-align: center; padding: 8px; border-radius: 10px; border: 1px solid var(--line); font-size: 17px; }
+.empty { padding: 26px 16px; text-align: center; color: var(--muted); }
+.ask { position: fixed; inset: 0; z-index: 30; background: rgba(14,30,62,.5); display: flex; align-items: flex-end; justify-content: center; }
+.ask-box { width: 100%; max-width: 520px; background: var(--page); border-radius: 22px 22px 0 0; border-top: 4px solid var(--acc); padding: 22px 18px calc(18px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 12px; }
+.ask-box p { margin: 0 0 4px; font-size: 18px; line-height: 1.45; color: var(--text); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast hidden"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+'use strict';
+// ====== Settings: fill these two in once the Supabase project exists ======
+const SUPABASE_URL = 'https://rjjpgxiyncgjrwmvnbhg.supabase.co';        // e.g. https://abcd1234.supabase.co
+const SUPABASE_ANON_KEY = 'sb_publishable_v_qO0MNpMCGvuaEo3oWGEQ_NyiOylEM';   // the public key: "anon" (eyJ…) or "publishable" (sb_publishable_…)
+const IPHONE_APP = 'https://shivram221b.github.io/Harinamadwar-Bhajan/';
+const ANDROID_APP = '';         // link where the APK is shared, if any
+// =========================================================================
+
+const $app = document.getElementById('app');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const DEMO = !SUPABASE_URL || /[?&]demo/.test(location.search);
+const ICON = {
+  people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.3-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.7c2 .7 3.2 2.5 3.5 5.3"/></svg>',
+  content: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5h12a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3z M3 10h18 M8 3v4 M16 3v4"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  dash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h8V3H3z M13 21h8V11h-8z M13 3v6h8V3z M3 21h8v-6H3z"/></svg>',
+  phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>',
+  tablet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M11 18h2"/></svg>',
+  lock: '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#163E7E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  google: '<svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.5l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.6 5.4 2.6 13.3l7.8 6C12.3 13.4 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.4-4.1 7-10.1 7-17.6z"/><path fill="#FBBC05" d="M10.4 28.7A14.6 14.6 0 0 1 9.5 24c0-1.6.3-3.2.9-4.7l-7.8-6A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.7l7.8-6z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.7-4.2-13.6-10l-7.8 6C6.6 42.6 14.6 48 24 48z"/></svg>'
+};
+
+/** In-page "Are you sure?" (large buttons; the browser's own pop-up is blocked in some viewers). */
+function ask(msg, yes, danger) {
+  return new Promise(res => {
+    const d = document.createElement('div'); d.className = 'ask';
+    d.innerHTML = `<div class="ask-box" role="dialog"><p>${esc(msg)}</p><button class="btn ${danger ? 'bad' : 'deep'}" data-a="1">${esc(yes)}</button><button class="btn line" data-a="0">Cancel</button></div>`;
+    d.onclick = e => { const b = e.target.closest('[data-a]'); if (b || e.target === d) { d.remove(); res(!!(b && b.dataset.a === '1')); } };
+    document.body.appendChild(d);
+  });
+}
+function toast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.remove('hidden'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.add('hidden'), 2600); }
+const fmtPhone = p => { const d = String(p || '').replace(/\D/g, '').slice(-10); return d.length === 10 ? '+91 ' + d.slice(0, 5) + ' ' + d.slice(5) : p; };
+function ago(t) {
+  if (!t) return 'never';
+  const d = Math.floor((Date.now() - new Date(t)) / 864e5);
+  return d <= 0 ? 'today' : d === 1 ? 'yesterday' : d < 60 ? d + ' days ago' : new Date(t).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+const daysLeft = t => Math.max(0, Math.ceil((new Date(t) - Date.now()) / 864e5));
+const ERR = { exists: 'This phone number is already in the list.', phone: 'Please enter a 10-digit phone number.',
+  full: 'All device places are used. Remove an old device first.', self: 'You cannot remove yourself.', last: 'There must be at least one admin.' };
+
+// ---------------------------------------------------------------- data
+let sb = null, me = '';
+const api = DEMO ? demoApi() : {
+  async rpc(fn, args) { const { data, error } = await sb.rpc(fn, args || {}); if (error) throw error; return data; },
+  students() { return this.rpc('admin_students'); },
+  devices(id) { return this.rpc('admin_devices', { p_student: id }); },
+  addStudent(n, p, note) { return this.rpc('admin_add_student', { p_name: n, p_phone: p, p_note: note }); },
+  updateStudent(id, n, p, note) { return this.rpc('admin_update_student', { p_student: id, p_name: n, p_phone: p, p_note: note }); },
+  newCode(id) { return this.rpc('admin_new_code', { p_student: id }); },
+  setStatus(id, s) { return this.rpc('admin_set_status', { p_student: id, p_status: s }); },
+  removeDevice(id) { return this.rpc('admin_remove_device', { p_device: id }); },
+  removeStudent(id) { return this.rpc('admin_remove_student', { p_student: id }); },
+  async table(t, order) { const { data, error } = await sb.from(t).select('*').order(order.col, { ascending: order.asc }); if (error) throw error; return data; },
+  events() { return this.table('events', { col: 'last_day', asc: true }); },
+  saveEvent(e) { return this.rpc('admin_save_event', { p_id: e.id || null, p_first_day: e.first_day, p_last_day: e.last_day, p_when: e.when_text, p_month: e.month, p_days: e.days, p_name: e.name, p_place: e.place }); },
+  deleteEvent(id) { return this.rpc('admin_delete_event', { p_id: id }); },
+  thoughts() { return this.table('thoughts', { col: 'number', asc: false }); },
+  saveThought(t) { return this.rpc('admin_save_thought', { p_number: t.number, p_series: t.series, p_title: t.title, p_song: t.song_ref, p_body: t.body, p_published: t.published }); },
+  deleteThought(n) { return this.rpc('admin_delete_thought', { p_number: n }); },
+  async settings() { const r = await this.table('settings', { col: 'key', asc: true }); return Object.fromEntries(r.map(x => [x.key, x.value])); },
+  setSetting(k, v) { return this.rpc('admin_set_setting', { p_key: k, p_value: v }); },
+  admins() { return this.table('admins', { col: 'added_at', asc: true }); },
+  addAdmin(e, n) { return this.rpc('admin_add_admin', { p_email: e, p_name: n }); },
+  removeAdmin(e) { return this.rpc('admin_remove_admin', { p_email: e }); },
+  dashboard() { return this.rpc('admin_dashboard'); },
+  reactions() { return this.rpc('admin_reactions'); },
+};
+
+// Demo: same screens with sample people, nothing is saved anywhere.
+function demoApi() {
+  const day = 864e5, now = Date.now(), uid = () => Math.random().toString(36).slice(2);
+  const S = [
+    { id: 'k', name: 'Kamala', phone: '9845000101', note: '', status: 'active', dev: [{ id: uid(), label: 'Android phone', platform: 'android', last_seen: now }, { id: uid(), label: 'iPad', platform: 'ios', last_seen: now - 2 * day }] },
+    { id: 'm', name: 'Mania', phone: '9845000102', note: 'Hosts Ayyappan bhajan', status: 'active', dev: [{ id: uid(), label: 'Android phone', platform: 'android', last_seen: now - day }] },
+    { id: 'l', name: 'Lakshmi', phone: '9845000103', note: '', status: 'active', dev: [{ id: uid(), label: 'Android phone', platform: 'android', last_seen: now }, { id: uid(), label: 'Android tablet', platform: 'android', last_seen: now - 5 * day }, { id: uid(), label: 'iPhone', platform: 'ios', last_seen: now - 9 * day }] },
+    { id: 'r', name: 'Raghavan', phone: '9845000104', note: 'Joins the morning session', status: 'active', dev: [], code: now + 6 * day },
+    { id: 's', name: 'Saroja', phone: '9845000105', note: '', status: 'paused', dev: [{ id: uid(), label: 'iPhone', platform: 'ios', last_seen: now - 20 * day }] },
+  ];
+  let E = [{ id: uid(), last_day: '2026-11-21', when_text: 'November 21st', month: 'NOV', days: '21', name: 'Ayyappan Bhajan', place: 'Mania’s house' },
+    { id: uid(), last_day: '2026-11-29', when_text: 'Nov 28 and 29', month: 'NOV', days: '28–29', name: 'Radha Kalyanam', place: 'RP3 Bangalore' }];
+  let T = [{ number: 253, series: 'Epic Series 123', title: 'Why Do We Suffer Twice?', song_ref: 'dns:8.4', body: 'Have you noticed how often we worry about things that haven’t even happened?\n\n…', published: true }];
+  const set = { offline_days: 30, device_limit: 3, code_days: 7, meet_url: 'https://meet.google.com/kcv-uviq-vqe', practice_songs: '22.7,5.2,24.1' };
+  let A = [{ email: 'you@gmail.com', name: 'You' }];
+  const code = () => 'HN-' + Array.from({ length: 4 }, () => '23456789ABCDEFGHJKMNPQRSTUVWXYZ'[Math.floor(Math.random() * 31)]).join('');
+  const find = id => S.find(s => s.id === id);
+  const wait = v => new Promise(r => setTimeout(() => r(v), 120));
+  return {
+    students: () => wait(S.map(s => ({ id: s.id, name: s.name, phone: s.phone, note: s.note, status: s.status, devices: s.dev.length,
+      last_seen: s.dev.length ? Math.max(...s.dev.map(d => d.last_seen)) : null, code_expires: s.code || null }))
+      .sort((a, b) => a.name.localeCompare(b.name))),
+    devices: id => wait(find(id).dev.map(d => ({ ...d }))),
+    addStudent(n, p, note) {
+      const d = p.replace(/\D/g, '').slice(-10);
+      if (d.length < 10) return wait({ ok: false, error: 'phone' });
+      if (S.some(s => s.phone === d)) return wait({ ok: false, error: 'exists' });
+      const s = { id: uid(), name: n, phone: d, note, status: 'active', dev: [] }; S.push(s);
+      return this.newCode(s.id).then(r => ({ ...r, id: s.id }));
+    },
+    updateStudent(id, n, p, note) { Object.assign(find(id), { name: n, phone: p.replace(/\D/g, '').slice(-10), note }); return wait({ ok: true }); },
+    newCode(id) { const s = find(id); if (s.dev.length >= set.device_limit) return wait({ ok: false, error: 'full' }); s.code = now + set.code_days * day; return wait({ ok: true, code: code(), expires_at: s.code, device_no: s.dev.length + 1, days: set.code_days }); },
+    setStatus(id, st) { find(id).status = st; return wait(); },
+    removeDevice(id) { S.forEach(s => { s.dev = s.dev.filter(d => d.id !== id); }); return wait(); },
+    removeStudent(id) { S.splice(S.indexOf(find(id)), 1); return wait(); },
+    events: () => wait(E.slice().sort((a, b) => a.last_day.localeCompare(b.last_day))),
+    saveEvent(e) { if (e.id) Object.assign(E.find(x => x.id === e.id), e); else E.push({ ...e, id: uid() }); return wait(); },
+    deleteEvent(id) { E = E.filter(x => x.id !== id); return wait(); },
+    thoughts: () => wait(T.slice().sort((a, b) => b.number - a.number)),
+    saveThought(t) { T = T.filter(x => x.number !== t.number); T.push(t); return wait(); },
+    deleteThought(n) { T = T.filter(x => x.number !== n); return wait(); },
+    settings: () => wait({ ...set }),
+    setSetting(k, v) { set[k] = v; return wait(); },
+    admins: () => wait(A.slice()),
+    addAdmin(e, n) { A.push({ email: e.toLowerCase(), name: n }); return wait(); },
+    removeAdmin(e) { if (e === 'you@gmail.com') return wait({ ok: false, error: 'self' }); A = A.filter(x => x.email !== e); return wait({ ok: true }); },
+    dashboard: () => wait({ students: S.length, active: S.filter(s => s.status === 'active').length, paused: S.filter(s => s.status === 'paused').length,
+      no_device: S.filter(s => !s.dev.length).length, codes_waiting: S.filter(s => s.code && !s.dev.length).length, devices: S.reduce((n, s) => n + s.dev.length, 0),
+      seen_7_days: S.filter(s => s.dev.some(d => d.last_seen > now - 7 * day)).length, upcoming_events: E.length, thoughts: T.length, last_thought: 253, reactions_7_days: 9 }),
+    reactions: () => wait([{ tfd: 253, emoji: '🙏', n: 6 }, { tfd: 253, emoji: '❤️', n: 3 }]),
+  };
+}
+
+// ---------------------------------------------------------------- frame
+let tab = 'dash', navId = 0;
+/** Each screen keeps a ticket; if the admin has moved on while it was loading, it does not draw. */
+const ticket = () => { const id = ++navId; return () => id === navId; };
+function page(title, body, opts) {
+  opts = opts || {};
+  $app.innerHTML = `<header class="top"><div class="top-row">${opts.back ? '<button class="back" id="b-back">‹ Back</button>' : ''}<h1>${esc(title)}</h1><span class="chip-admin">ADMIN</span></div></header>` +
+    `<main>${DEMO ? '<div class="demo">Demo with sample names · nothing is saved</div>' : ''}${body}</main>` +
+    (opts.back ? '' : `<nav class="nav"><div>${[['dash', 'Dashboard', ICON.dash], ['students', 'Students', ICON.people], ['content', 'App content', ICON.content], ['settings', 'Settings', ICON.gear]]
+      .map(([k, t, i]) => `<button data-tab="${k}" class="${tab === k ? 'on' : ''}">${i}${t}</button>`).join('')}</div></nav>`);
+  if (opts.back) document.getElementById('b-back').onclick = opts.back;
+  $app.querySelectorAll('[data-tab]').forEach(b => { b.onclick = () => { tab = b.dataset.tab; go(); }; });
+  window.scrollTo(0, 0);
+}
+const on = (sel, ev, fn) => document.querySelectorAll(sel).forEach(el => el.addEventListener(ev, fn));
+async function guard(fn) { try { return await fn(); } catch (e) { console.error(e); toast(/admins can/.test(e.message) ? 'You are not on the admin list.' : 'Something went wrong. Please check the internet and try again.'); } }
+function go() { ({ dash: showDashboard, students: showStudents, content: showContent, settings: showSettings })[tab](); }
+
+// ---------------------------------------------------------------- A · sign in
+function showSignIn(note) {
+  $app.innerHTML = `<div class="signin"><div class="door">${ICON.lock}</div><h2>Harinamadwar Admin</h2>
+    <div class="hint" style="max-width:320px">For the satsang admins only. Students use the app, not this page.</div>
+    <button class="btn line" id="g">${ICON.google}&nbsp; Sign in with Google</button>
+    <div class="hint">or get a sign-in link by e-mail</div>
+    <div style="display:flex;gap:8px;width:100%;max-width:320px"><input id="em" type="email" class="search" placeholder="Your e-mail" autocomplete="email"><button class="btn deep small" id="ml">Send</button></div>
+    ${note ? `<div class="err">${esc(note)}</div>` : ''}</div>`;
+  document.getElementById('g').onclick = () => sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href.split('#')[0] } });
+  document.getElementById('ml').onclick = async () => {
+    const e = document.getElementById('em').value.trim();
+    if (!/^\S+@\S+\.\S+$/.test(e)) return toast('Please type your e-mail address.');
+    const { error } = await sb.auth.signInWithOtp({ email: e, options: { shouldCreateUser: true, emailRedirectTo: location.href.split('#')[0] } });
+    toast(error ? 'Could not send. Please try again.' : 'Sign-in link sent. Open it on this device.');
+  };
+}
+
+// ---------------------------------------------------------------- dashboard (SCRUM-70)
+// The app's own files (same place as the app): what is still missing, so anyone can pick up the next piece of work.
+const APP_BASE = /\/admin\/?(index\.html)?$/.test(location.pathname) ? new URL('../', location.href).href : IPHONE_APP;
+async function appFile(path) { try { const r = await fetch(APP_BASE + path, { cache: 'no-store' }); return r.ok ? await r.text() : ''; } catch (e) { return ''; } }
+const heads = t => [...t.replace(/\r/g, '').matchAll(/^@@\s*([^|\n]+?)\s*\|\s*([^|\n]*)/gm)].map(m => ({ n: m[1], title: m[2].trim() }));
+const nonEmpty = t => { const m = new Set(); t.replace(/\r/g, '').split(/\n(?=@@)/).forEach(b => { const h = b.match(/^@@\s*([^|\n]+?)\s*\|/); if (h && b.split('\n').slice(1).join('').trim()) m.add(h[1]); }); return m; };
+const audioSet = t => new Set(t.replace(/\r/g, '').split('\n').filter(l => /^[^#\s][^|]*\|\s*\S/.test(l)).map(l => l.split('|')[0].trim()));
+async function pending() {
+  const [songs, ta, en, kn, au, aSongs, aAu] = await Promise.all(['songs.txt', 'meanings_ta.txt', 'meanings_en.txt', 'meanings_kn.txt', 'audio.txt', 'ashtapathy/songs.txt', 'ashtapathy/audio.txt'].map(appFile));
+  if (!songs) return null;
+  const list = heads(songs).filter(s => /\d/.test(s.n)), mt = nonEmpty(ta), me = nonEmpty(en), mk = nonEmpty(kn), a = audioSet(au);
+  const al = heads(aSongs).filter(s => /\d/.test(s.n)), aa = audioSet(aAu);
+  return { total: list.length, aTotal: al.length,
+    meaning: list.filter(s => !mt.has(s.n)), meaningEn: list.filter(s => mt.has(s.n) && !me.has(s.n)), meaningKn: list.filter(s => mt.has(s.n) && !mk.has(s.n)),
+    audio: list.filter(s => !a.has(s.n)), aAudio: al.filter(s => !aa.has(s.n)) };
+}
+function missingBlock(title, sub, items, hash) {
+  if (!items) return '';
+  const byChap = {}; items.forEach(s => { const c = s.n.split('.')[0]; (byChap[c] = byChap[c] || []).push(s); });
+  return `<details class="card pend"><summary><span class="rt"><b>${esc(title)}</b><span>${esc(sub)}</span></span><span class="pn ${items.length ? '' : 'done'}">${items.length || '✓'}</span></summary>` +
+    (items.length ? Object.entries(byChap).map(([c, l]) => `<div class="pch"><span class="lbl">${hash === '#ashta/' ? 'AṢṬAPADI' : 'CHAPTER'} ${esc(c)}</span>` +
+      l.map(s => `<a class="pit" target="_blank" rel="noopener" href="${esc(IPHONE_APP + hash + s.n)}"><b>${esc(s.n)}</b> ${esc(s.title)}</a>`).join('') + '</div>').join('') : '<div class="foot-note">Nothing missing.</div>') + '</details>';
+}
+async function showDashboard() {
+  const live = ticket();
+  page('Dashboard', '<div class="empty">Loading…</div>');
+  const [d, p] = await Promise.all([guard(() => api.dashboard()), pending()]); if (!d || !live()) return;
+  const tile = (n, t) => `<div><b>${n == null ? '–' : n}</b><span>${t}</span></div>`;
+  page('Dashboard', `<div class="lbl">STUDENTS</div><div class="stats">${tile(d.students, 'Students')}${tile(d.seen_7_days, 'Opened the app this week')}${tile(d.devices, 'Devices signed in')}</div>
+    <div class="stats">${tile(d.codes_waiting, 'Codes not yet used')}${tile(d.no_device, 'Not signed in yet')}${tile(d.paused, 'Paused')}</div>
+    <div class="lbl">APP CONTENT</div><div class="stats">${tile(d.upcoming_events, 'Upcoming satsangs')}${tile(d.last_thought ? 'TFD ' + d.last_thought : null, 'Latest thought')}${tile(d.reactions_7_days, 'Reactions this week')}</div>
+    <div class="lbl">STILL TO DO IN THE BOOKS</div>` +
+    (p ? missingBlock('Divya Nama · meanings', 'Songs with no meaning yet (of ' + p.total + ')', p.meaning, '#song/') +
+      missingBlock('Divya Nama · English meanings', 'Tamil meaning written, English not yet', p.meaningEn, '#song/') +
+      missingBlock('Divya Nama · Kannada meanings', 'Tamil meaning written, Kannada not yet', p.meaningKn, '#song/') +
+      missingBlock('Divya Nama · recordings', 'Songs with no audio yet (of ' + p.total + ')', p.audio, '#song/') +
+      missingBlock('Gita Govindam · recordings', 'Items with no audio yet (of ' + p.aTotal + ')', p.aAudio, '#ashta/')
+      : '<div class="empty">Could not read the book files. Please check the internet.</div>') +
+    '<div class="hint">Tap a section to see the list. Each song opens in the app.</div>');
+}
+
+// ---------------------------------------------------------------- B · students
+let filter = '';
+async function showStudents() {
+  const live = ticket();
+  page('Students', '<div class="empty">Loading…</div>');
+  const list = await guard(() => api.students()); if (!list || !live()) return;
+  const lim = (await api.settings()).device_limit || 3; if (!live()) return;
+  const status = s => s.status === 'paused' ? ['paused', 'Paused'] : s.devices > 0 ? ['active', 'Active'] : s.code_expires ? ['sent', 'Code sent'] : ['none', 'No code'];
+  const draw = () => {
+    const f = filter.toLowerCase().replace(/\s/g, ''), shown = list.filter(s => !f || (s.name + s.phone).toLowerCase().replace(/\s/g, '').includes(f));
+    document.getElementById('rows').innerHTML = shown.length ? shown.map(s => {
+      const [c, t] = status(s);
+      return `<button class="row" data-id="${esc(s.id)}"><span class="av">${esc(s.name.trim()[0] || '?').toUpperCase()}</span><span class="rt"><b>${esc(s.name)}</b>` +
+        `<span>${esc(fmtPhone(s.phone))} · devices ${s.devices} of ${lim}${s.devices >= lim ? ' · <b style="color:var(--bad);display:inline">Full</b>' : ''}${!s.devices && s.status !== 'paused' ? (s.code_expires ? ' · Not joined' : '') : ''}</span></span><span class="st ${c}">${t}</span></button>`;
+    }).join('') : `<div class="empty">${list.length ? 'No one matches “' + esc(filter) + '”' : 'No students yet. Tap “Add student” to begin.'}</div>`;
+    on('#rows .row', 'click', e => showStudent(e.currentTarget.dataset.id));
+  };
+  page('Students', `<div class="stats"><div><b>${list.filter(s => s.status === 'active' && s.devices).length}</b><span>active</span></div>` +
+    `<div><b style="color:var(--label)">${list.filter(s => !s.devices).length}</b><span>not joined</span></div><div><b>${list.length}</b><span>students</span></div></div>` +
+    `<input class="search" id="q" type="search" placeholder="Search name or phone" value="${esc(filter)}"><div class="card list" id="rows"></div>` +
+    `<button class="btn acc" id="add">+ Add student</button>`);
+  draw();
+  document.getElementById('q').oninput = e => { filter = e.target.value; draw(); };
+  document.getElementById('add').onclick = () => showAdd();
+}
+
+// ---------------------------------------------------------------- C · add / edit student, invite code
+function showAdd(edit) {
+  ticket();
+  page(edit ? 'Edit student' : 'Add student', `
+    <label class="f">Full name<input id="n" autocomplete="off" autocapitalize="words" value="${esc(edit ? edit.name : '')}"></label>
+    <label class="f">Phone number<input id="p" type="tel" inputmode="tel" placeholder="+91 98xxx xxxxx" value="${esc(edit ? fmtPhone(edit.phone) : '')}"></label>
+    <label class="f">Note (optional)<input id="o" autocomplete="off" value="${esc(edit ? edit.note : '')}"></label>
+    <div class="err" id="e"></div>
+    <button class="btn deep" id="go">${edit ? 'Save' : 'Create invite code'}</button>
+    ${edit ? '' : '<div class="hint">The code works once, on one phone or iPad, for 7 days. Each extra device needs its own code.</div>'}`,
+  { back: () => edit ? showStudent(edit.id) : go() });
+  document.getElementById('go').onclick = async () => {
+    const n = document.getElementById('n').value.trim(), p = document.getElementById('p').value.trim(), o = document.getElementById('o').value.trim();
+    if (!n) return (document.getElementById('e').textContent = 'Please write the name.');
+    const r = await guard(() => edit ? api.updateStudent(edit.id, n, p, o) : api.addStudent(n, p, o));
+    if (!r) return;
+    if (!r.ok) return (document.getElementById('e').textContent = ERR[r.error] || 'Could not save.');
+    if (edit) { toast('Saved'); return showStudent(edit.id); }
+    showCode({ id: r.id, name: n, phone: p }, r);
+  };
+}
+
+function showCode(s, r) {
+  ticket();
+  const msg = `Hari Om ${s.name} 🙏\n\nYour Harinamadwar code: *${r.code}*\n\nIt works once, on one phone or iPad, until ${new Date(r.expires_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long' })}.\n\n` +
+    `1. Open the Harinamadwar app${ANDROID_APP ? ' (Android: ' + ANDROID_APP + ')' : ''} (iPhone/iPad: ${IPHONE_APP})\n2. Enter your phone number and this code\n\nAfter that the app opens straight away, even without internet.`;
+  const wa = 'https://wa.me/' + (String(s.phone).replace(/\D/g, '').slice(-10).length === 10 ? '91' + String(s.phone).replace(/\D/g, '').slice(-10) : '') + '?text=' + encodeURIComponent(msg);
+  page('Invite code', `<div class="code-card"><div class="lbl" style="margin:0">INVITE CODE · ${esc(s.name.toUpperCase())} · DEVICE ${r.device_no}</div>
+    <div class="code">${esc(r.code)}</div><div class="hint">Unique to ${esc(s.name)} · works on one device only · valid ${r.days} days</div>
+    <div class="pair" style="width:100%"><a class="btn wa" style="display:grid;place-items:center;text-decoration:none" href="${esc(wa)}" target="_blank" rel="noopener">Share on WhatsApp</a><button class="btn line" id="cp">Copy</button></div></div>
+    <div class="hint">Please share it now. For safety the code is not shown again. If it is lost, create a new one; the old one then stops working.</div>
+    <button class="btn line" id="done">Done</button>`, { back: () => showStudent(s.id) });
+  document.getElementById('cp').onclick = () => navigator.clipboard.writeText(msg).then(() => toast('Copied. Paste it in WhatsApp or SMS.'), () => toast(r.code));
+  document.getElementById('done').onclick = () => showStudent(s.id);
+}
+
+// ---------------------------------------------------------------- D · one student
+async function showStudent(id) {
+  const live = ticket();
+  page('Student', '<div class="empty">Loading…</div>', { back: go });
+  const list = await guard(() => api.students()); if (!list || !live()) return;
+  const s = list.find(x => x.id === id); if (!s) return go();
+  const [dev, set] = await Promise.all([api.devices(id), api.settings()]); if (!live()) return;
+  const lim = set.device_limit || 3, free = lim - dev.length, paused = s.status === 'paused';
+  page('Student', `<div class="head"><span class="av big">${esc(s.name.trim()[0] || '?').toUpperCase()}</span><span class="rt"><b>${esc(s.name)}</b>
+      <span>${esc(fmtPhone(s.phone))} · <b style="display:inline;font-size:14px;color:${paused ? 'var(--muted)' : 'var(--ok)'}">${paused ? 'Paused' : 'Active'}</b></span>${s.note ? `<span>${esc(s.note)}</span>` : ''}</span></div>
+    <div class="lbl">DEVICES · ${dev.length} OF ${lim} USED</div>
+    <div class="card list">${dev.map(d => `<div class="row dev">${/ipad|tablet/i.test(d.label) ? ICON.tablet : ICON.phone}<span class="rt"><b style="font-size:16px;color:var(--text)">${esc(d.label || 'Device')}</b><span>Last opened ${ago(d.last_seen)}</span></span>
+      <button class="btn bad small" data-dev="${esc(d.id)}" data-label="${esc(d.label || 'this device')}">Remove</button></div>`).join('')}
+      <div class="foot-note">${s.code_expires ? `A code is waiting to be used · ${daysLeft(s.code_expires)} days left · ` : ''}${free > 0 ? free + (free === 1 ? ' place' : ' places') + ' free · a new device needs its own code' : 'All places used · remove an old device to add a new one'}</div></div>
+    <div class="lbl">ACTIONS</div>
+    <button class="btn deep" id="nc" ${free > 0 ? '' : 'disabled'}>Create code for ${dev.length ? 'another' : 'the first'} device</button>
+    <button class="btn line" id="ps">${paused ? 'Resume access' : 'Pause access'}</button>
+    <button class="btn line" id="ed">Edit name or phone</button>
+    <button class="btn bad" id="rm">Remove student</button>
+    <div class="hint">Pausing keeps the student’s devices but locks the songs until resumed. Removing deletes the student and all devices.</div>`, { back: go });
+  document.getElementById('nc').onclick = async () => {
+    const r = await guard(() => api.newCode(id)); if (!r) return;
+    if (!r.ok) return toast(ERR[r.error] || 'Could not create a code.');
+    showCode(s, r);
+  };
+  document.getElementById('ps').onclick = async () => {
+    if (!paused && !(await ask(`Pause ${s.name}? Songs will be locked on all their devices until you resume.`, 'Pause access'))) return;
+    await guard(() => api.setStatus(id, paused ? 'active' : 'paused')); toast(paused ? 'Access resumed' : 'Access paused'); showStudent(id);
+  };
+  document.getElementById('ed').onclick = () => showAdd(s);
+  document.getElementById('rm').onclick = async () => {
+    if (!(await ask(`Remove ${s.name} and all their devices? This cannot be undone.`, 'Remove student', true))) return;
+    await guard(() => api.removeStudent(id)); toast('Student removed'); go();
+  };
+  on('[data-dev]', 'click', async e => {
+    const b = e.currentTarget;
+    if (!(await ask(`Remove ${b.dataset.label}? The app on it will lock the next time it goes online.`, 'Remove device', true))) return;
+    await guard(() => api.removeDevice(b.dataset.dev)); toast('Device removed'); showStudent(id);
+  });
+}
+
+// ---------------------------------------------------------------- E · app content
+let ctab = 'satsangs';
+async function showContent() {
+  const live = ticket();
+  const tabs = `<div class="tabs">${[['satsangs', 'Satsangs'], ['learn', 'Learn'], ['thoughts', 'Thoughts']].map(([k, t]) => `<button class="tab ${ctab === k ? 'on' : ''}" data-ct="${k}">${t}</button>`).join('')}</div>`;
+  const wire = () => on('[data-ct]', 'click', e => { ctab = e.currentTarget.dataset.ct; showContent(); });
+  page('App content', tabs + '<div class="empty">Loading…</div>'); wire();
+  const note = '<div class="hint">Changes reach every phone the next time the app opens online.</div>';
+  if (ctab === 'satsangs') {
+    const ev = await guard(() => api.events()); if (!ev || !live()) return;
+    const today = new Date().toISOString().slice(0, 10);
+    page('App content', tabs + `<div class="lbl">UPCOMING SATSANGS</div>` +
+      (ev.filter(e => e.last_day >= today).map(e => `<button class="card item" data-ev="${esc(e.id)}"><span class="t"><b>${esc(e.name)}</b><span>Edit</span></span><span class="s">${esc(e.when_text)} · at ${esc(e.place)}</span></button>`).join('') || '<div class="empty">No upcoming satsangs.</div>') +
+      `<button class="btn line" id="ae">+ Add satsang</button>` +
+      (ev.some(e => e.last_day < today) ? `<div class="lbl">PAST (HIDDEN IN THE APP)</div>` + ev.filter(e => e.last_day < today).reverse().slice(0, 5).map(e => `<button class="card item" data-ev="${esc(e.id)}"><span class="t"><b style="color:var(--muted)">${esc(e.name)}</b><span>Edit</span></span><span class="s">${esc(e.when_text)}</span></button>`).join('') : '') + note);
+    wire();
+    on('[data-ev]', 'click', e => showEvent(ev.find(x => x.id === e.currentTarget.dataset.ev)));
+    document.getElementById('ae').onclick = () => showEvent(null);
+  } else if (ctab === 'learn') {
+    const s = await guard(() => api.settings()); if (!s || !live()) return;
+    page('App content', tabs + `<label class="f">Google Meet link for the daily session<input id="mu" value="${esc(s.meet_url || '')}"></label>
+      <label class="f">This week’s songs<input id="ps" value="${esc(s.practice_songs || '')}" placeholder="22.7, 5.2, 24.1"></label>
+      <div class="hint">Song numbers from Divya Nama Sankeertanam, separated by commas.</div>
+      <button class="btn deep" id="sv">Save</button>` + note);
+    wire();
+    document.getElementById('sv').onclick = async () => {
+      const songs = document.getElementById('ps').value.split(/[,\s]+/).filter(Boolean).join(',');
+      await guard(async () => { await api.setSetting('meet_url', document.getElementById('mu').value.trim()); await api.setSetting('practice_songs', songs); });
+      toast('Saved');
+    };
+  } else {
+    const [th, rx] = await Promise.all([guard(() => api.thoughts()), api.reactions().catch(() => [])]); if (!th || !live()) return;
+    const rxOf = n => (rx || []).filter(r => r.tfd === n).map(r => r.emoji + ' ' + r.n).join('  ');
+    page('App content', tabs + `<button class="btn acc" id="at">+ New Thought for the Day</button>` +
+      th.map(t => `<button class="card item" data-th="${t.number}"><span class="t"><b>TFD ${t.number} · ${esc(t.title)}</b><span>Edit</span></span><span class="s">${esc(t.series)}${t.published ? '' : ' · not published'}${rxOf(t.number) ? ' · ' + esc(rxOf(t.number)) : ''}</span></button>`).join('') + note);
+    wire();
+    on('[data-th]', 'click', e => showThought(th.find(x => x.number === +e.currentTarget.dataset.th)));
+    document.getElementById('at').onclick = () => showThought(null, th.length ? th[0].number + 1 : 1);
+  }
+}
+
+function showEvent(e) {
+  ticket();
+  const MON = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  page(e ? 'Edit satsang' : 'Add satsang', `
+    <label class="f">Name of the satsang<input id="nm" value="${esc(e ? e.name : '')}" placeholder="Radha Kalyanam"></label>
+    <label class="f">Place<input id="pl" value="${esc(e ? e.place : '')}" placeholder="RP3 Bangalore"></label>
+    <div class="pair"><label class="f">First day<input id="d1" type="date" value="${esc(e ? (e.first_day || e.last_day) : '')}"></label><label class="f">Last day<input id="d2" type="date" value="${esc(e ? e.last_day : '')}"></label></div>
+    <label class="f">How the date reads in the app<input id="wt" value="${esc(e ? e.when_text : '')}" placeholder="Nov 28 and 29"></label>
+    <div class="hint">The satsang disappears from the app after its last day.</div>
+    <div class="err" id="er"></div>
+    <button class="btn deep" id="sv">Save</button>${e ? '<button class="btn bad" id="dl">Delete</button>' : ''}`, { back: showContent });
+  const d1 = document.getElementById('d1'), d2 = document.getElementById('d2'), wt = document.getElementById('wt');
+  const auto = () => {
+    if (!d1.value) return; if (!d2.value || d2.value < d1.value) d2.value = d1.value;
+    const a = new Date(d1.value + 'T12:00'), b = new Date(d2.value + 'T12:00'), M = a.toLocaleString('en-IN', { month: 'short' });
+    if (!wt.dataset.typed) wt.value = +a === +b ? a.toLocaleString('en-IN', { month: 'long' }) + ' ' + a.getDate() : a.getMonth() === b.getMonth() ? `${M} ${a.getDate()} and ${b.getDate()}` : `${M} ${a.getDate()} – ${b.toLocaleString('en-IN', { month: 'short' })} ${b.getDate()}`;
+  };
+  d1.onchange = auto; d2.onchange = auto; wt.oninput = () => { wt.dataset.typed = 1; };
+  document.getElementById('sv').onclick = async () => {
+    const nm = document.getElementById('nm').value.trim(), pl = document.getElementById('pl').value.trim();
+    if (!nm || !pl || !d1.value) return (document.getElementById('er').textContent = 'Please fill in the name, place and first day.');
+    auto();
+    const a = new Date(d1.value + 'T12:00'), b = new Date(d2.value + 'T12:00');
+    await guard(() => api.saveEvent({ id: e && e.id, first_day: d1.value, last_day: d2.value, when_text: wt.value.trim(), month: MON[a.getMonth()],
+      days: +a === +b ? String(a.getDate()) : a.getDate() + '–' + b.getDate(), name: nm, place: pl }));
+    toast('Saved'); showContent();
+  };
+  if (e) document.getElementById('dl').onclick = async () => { if (await ask('Delete this satsang?', 'Delete', true)) { await guard(() => api.deleteEvent(e.id)); toast('Deleted'); showContent(); } };
+}
+
+function showThought(t, next) {
+  ticket();
+  page(t ? 'Edit thought' : 'New thought', `
+    <div class="pair"><label class="f">TFD number<input id="no" type="number" inputmode="numeric" value="${t ? t.number : next}" ${t ? 'disabled' : ''}></label><label class="f">Series (optional)<input id="se" value="${esc(t ? t.series : '')}"></label></div>
+    <label class="f">Title<input id="ti" value="${esc(t ? t.title : '')}"></label>
+    <label class="f">The thought<textarea id="bo" placeholder="Paste the whole message here. Leave an empty line between paragraphs.">${esc(t ? t.body : '')}</textarea></label>
+    <label class="f">Related bhajan (optional)<input id="sg" value="${esc(t ? t.song_ref.replace(/^dns:/, '') : '')}" placeholder="Song number, e.g. 8.4"></label>
+    <label style="display:flex;gap:10px;align-items:center;font-size:16px"><input id="pb" type="checkbox" style="width:22px;height:22px" ${!t || t.published ? 'checked' : ''}> Show in the app</label>
+    <div class="err" id="er"></div>
+    <button class="btn deep" id="sv">Publish</button>${t ? '<button class="btn bad" id="dl">Delete</button>' : ''}`, { back: showContent });
+  document.getElementById('sv').onclick = async () => {
+    const no = +document.getElementById('no').value, ti = document.getElementById('ti').value.trim(), bo = document.getElementById('bo').value.replace(/\r/g, '').trim();
+    if (!no || !ti || !bo) return (document.getElementById('er').textContent = 'Please fill in the number, title and the thought.');
+    const sg = document.getElementById('sg').value.trim();
+    await guard(() => api.saveThought({ number: no, series: document.getElementById('se').value.trim(), title: ti, body: bo,
+      song_ref: sg ? (sg.includes(':') ? sg : 'dns:' + sg) : '', published: document.getElementById('pb').checked }));
+    toast('Published'); showContent();
+  };
+  if (t) document.getElementById('dl').onclick = async () => { if (await ask('Delete TFD ' + t.number + '?', 'Delete', true)) { await guard(() => api.deleteThought(t.number)); toast('Deleted'); showContent(); } };
+}
+
+// ---------------------------------------------------------------- settings
+async function showSettings() {
+  const live = ticket();
+  page('Settings', '<div class="empty">Loading…</div>');
+  const [s, ad] = await Promise.all([guard(() => api.settings()), guard(() => api.admins())]); if (!s || !ad || !live()) return;
+  page('Settings', `<div class="lbl">ACCESS RULES</div><div class="card">
+    <div class="set-row"><span class="rt"><b>Days the app works offline</b><span>Then it needs internet once to check access</span></span><input id="od" type="number" min="1" max="365" value="${s.offline_days}"></div>
+    <div class="set-row"><span class="rt"><b>Devices per student</b><span>Phones and iPads</span></span><input id="dl" type="number" min="1" max="10" value="${s.device_limit}"></div>
+    <div class="set-row"><span class="rt"><b>Days an invite code is valid</b><span>Unused codes stop working after this</span></span><input id="cd" type="number" min="1" max="60" value="${s.code_days}"></div></div>
+    <button class="btn deep" id="sv">Save rules</button>
+    <div class="lbl">ADMINS · ALL HAVE THE SAME RIGHTS</div>
+    <div class="card list">${ad.map(a => `<div class="row"><span class="av">${esc((a.name || a.email)[0]).toUpperCase()}</span><span class="rt"><b>${esc(a.name || a.email)}</b><span>${esc(a.email)}</span></span>
+      <button class="btn bad small" data-ad="${esc(a.email)}">Remove</button></div>`).join('')}</div>
+    <div class="pair"><input class="search" id="ae" type="email" placeholder="Google e-mail"><input class="search" id="an" placeholder="Name"></div>
+    <button class="btn line" id="aa">+ Add admin</button>
+    <a class="btn line" href="${esc(APP_BASE)}" style="text-align:center;text-decoration:none">‹ Back to the Harinamadwar app</a>
+    ${DEMO ? '' : '<button class="btn line" id="so">Sign out</button>'}`);
+  document.getElementById('sv').onclick = async () => {
+    const v = id => Math.max(1, parseInt(document.getElementById(id).value, 10) || 1);
+    await guard(async () => { await api.setSetting('offline_days', v('od')); await api.setSetting('device_limit', v('dl')); await api.setSetting('code_days', v('cd')); });
+    toast('Saved');
+  };
+  document.getElementById('aa').onclick = async () => {
+    const e = document.getElementById('ae').value.trim(); if (!/^\S+@\S+\.\S+$/.test(e)) return toast('Please type their e-mail address.');
+    await guard(() => api.addAdmin(e, document.getElementById('an').value.trim())); toast('Admin added'); showSettings();
+  };
+  on('[data-ad]', 'click', async ev => {
+    const e = ev.currentTarget.dataset.ad; if (!(await ask('Remove ' + e + ' as admin?', 'Remove admin', true))) return;
+    const r = await guard(() => api.removeAdmin(e)); if (r && !r.ok) return toast(ERR[r.error]); toast('Removed'); showSettings();
+  });
+  if (!DEMO) document.getElementById('so').onclick = async () => { await sb.auth.signOut(); showSignIn(); };
+}
+
+// ---------------------------------------------------------------- start
+(async function start() {
+  if (DEMO) return go();
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const check = async session => {
+    if (!session) return showSignIn();
+    me = session.user.email;
+    const { data, error } = await sb.rpc('is_admin');
+    if (error || !data) { await sb.auth.signOut(); return showSignIn(me + ' is not on the admin list. Please ask another admin to add you.'); }
+    go();
+  };
+  sb.auth.onAuthStateChange((ev, session) => { if (ev === 'SIGNED_IN' || ev === 'SIGNED_OUT') check(session); });
+  const { data } = await sb.auth.getSession();
+  check(data.session);
+})();
+</script>
+</body>
+</html>
