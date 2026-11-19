@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.5';
+const WEB_VERSION = '4.6';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -45,6 +45,8 @@ function fetchText(name) {
   if (!files[name]) {
     // signed-in mode: satsangs/learn/thoughts come from the admin page; songs from the private store (phase 2)
     if (accessOn() && name.startsWith('community/')) return (files[name] = communityFile(name.slice(10)).catch(e => { delete files[name]; throw e; }));
+    // without sign-in: satsangs, Learn and thoughts also come from the admin page (the online file is the fallback, e.g. offline)
+    if (!accessOn() && name.startsWith('community/')) return (files[name] = openCommunity(name.slice(10)).catch(e => { delete files[name]; throw e; }));
     if (accessOn() && ACCESS.privateContent && name.endsWith('.txt')) return (files[name] = privateFile(name).catch(e => { delete files[name]; throw e; }));
     files[name] = fetch(name, { cache: 'no-cache' })
       .then(r => { if (!r.ok) throw new Error(name + ' ' + r.status); return r.text(); })
@@ -53,6 +55,13 @@ function fetchText(name) {
   return files[name];
 }
 
+let openCommunityP = null;
+function openCommunity(file) {
+  if (!openCommunityP) openCommunityP = fetch(REC_URL + '/rest/v1/rpc/app_community', { method: 'POST', headers: { apikey: REC_KEY, 'Content-Type': 'application/json' }, body: '{}' })
+    .then(r => r.ok ? r.json() : null).catch(() => null);
+  const github = () => fetch('community/' + file, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(file + ' ' + r.status); return r.text(); });
+  return openCommunityP.then(r => r && typeof r[file] === 'string' ? r[file] : github());
+}
 let songs = [];      // {number,title,raga,page,lyrics,chapter,displayTitle,displayRaga,pos}
 let indexItems = []; // {type:'chap', heading} | {type:'song', song}
 const texts = {};    // lang -> Map(number -> {title,raga,body})
@@ -178,9 +187,13 @@ function toast(msg) {
 }
 
 // ---------- views ----------
-const VIEWS = ['v-home', 'v-about', 'v-index', 'v-song', 'v-settings', 'v-welcome', 'v-diary', 'v-learn', 'v-favs', 'v-tfd', 'v-share', 'v-login', 'v-locked'];
+const VIEWS = ['v-home', 'v-about', 'v-index', 'v-song', 'v-settings', 'v-welcome', 'v-diary', 'v-learn', 'v-playlist', 'v-favs', 'v-tfd', 'v-share', 'v-login', 'v-locked'];
 let homeScroll = 0;
+const scrollMem = {}; let prevView = '';
 function showView(id) {
+  const curV = VIEWS.find(v => !$(v).classList.contains('hidden'));
+  if (curV && curV !== id) { const sc = $(curV).querySelector('.scroll'); if (sc) scrollMem[curV] = sc.scrollTop; }
+  prevView = curV || '';
   if (!$('v-home').classList.contains('hidden') && id !== 'v-home') homeScroll = $('home-scroll').scrollTop;  // SCRUM-51
   if (!$('v-index').classList.contains('hidden') && id !== 'v-index') indexScroll = $('index-scroll').scrollTop;
   if (!$('v-song').classList.contains('hidden') && id !== 'v-song') { stopAudio(); keepAwake(false); }
@@ -411,7 +424,7 @@ function renderMeaningChips() {
   if (heads.length < 2) { box.innerHTML = ''; box.dataset.n = 0; selectTab(tab); return; }
   heads.forEach((h, i) => { h.id = 'mh' + i; });
   const pick = book.id === 'ashta' ? heads.filter(h => h.classList.contains('mh')) : heads;
-  const list = (pick.length >= 2 ? pick : heads).slice(0, 5);
+  const list = (pick.length >= 2 ? pick : heads).slice(0, 12);
   box.innerHTML = list.map((h, i) => `<button class="chip${i === 0 ? ' sel' : ''}" data-to="${h.id}">${esc(short(h.textContent.trim().replace(/[:：]$/, ''), 22))}</button>`).join('');
   box.dataset.n = list.length;
   selectTab(tab);
@@ -422,6 +435,7 @@ $('mean-chips').onclick = e => {
   const el = $(b.dataset.to), sc = $('s-meaning');
   sc.scrollTo({ top: el.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 12, behavior: 'smooth' });
   $('mean-chips').querySelectorAll('.chip').forEach(c => c.classList.toggle('sel', c === b));
+  $('mean-chips').scrollTo({ left: b.offsetLeft - ($('mean-chips').clientWidth - b.offsetWidth) / 2, behavior: 'smooth' });
 };
 $('s-meaning').addEventListener('scroll', () => {
   const chips = [...$('mean-chips').querySelectorAll('.chip')];
@@ -429,13 +443,19 @@ $('s-meaning').addEventListener('scroll', () => {
   const top = $('s-meaning').getBoundingClientRect().top + 40;
   let on = chips[0];
   for (const c of chips) { const el = $(c.dataset.to); if (el && el.getBoundingClientRect().top <= top) on = c; }
-  chips.forEach(c => c.classList.toggle('sel', c === on));
+  const sc = $('s-meaning'); if (sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 4) on = chips[chips.length - 1];   // at the end: the last section
+  if (!on.classList.contains('sel')) {
+    chips.forEach(c => c.classList.toggle('sel', c === on));
+    const box = $('mean-chips');   // keep the section being read in view in the row of headings
+    box.scrollTo({ left: on.offsetLeft - (box.clientWidth - on.offsetWidth) / 2, behavior: 'smooth' });
+  }
 }, { passive: true });
 
 async function showSong(pos, keepTab, keepScroll) {
   const changed = pos !== cur || !keepTab;
   cur = Math.max(0, Math.min(songs.length - 1, pos));
   const s = songs[cur];
+  paintPlBar();
   const lang = prefs.lang;
   const t = lang === 'en' ? null : (await loadText(lyricsFile(lang))).get(s.number);
   const title = t ? t.title : s.displayTitle;
@@ -460,6 +480,7 @@ async function showSong(pos, keepTab, keepScroll) {
   $('btn-next').textContent = next ? next.number + ' ' + short(next.displayTitle, 14) + ' ›' : '';
   $('btn-prev').classList.toggle('hidden', !prev);
   $('btn-next').classList.toggle('hidden', !next);
+  plNav();
 
   // meaning: reader's language, falling back to the Tamil original
   let m = (await loadText(meaningFile(lang))).get(s.number);
@@ -507,6 +528,22 @@ function selectTab(t) {
 }
 
 function openSong(pos) { go(book.hash + songs[pos].number); }
+// opened from a satsang's list: ‹ › at the bottom move through that list, not the book
+const plIndex = () => plNow ? plNow.hashes.indexOf(location.hash) : -1;
+const plStep = d => { const i = plIndex(); return i < 0 ? null : plNow.hashes[i + d] || null; };
+function plNav() {
+  const i = plIndex(); if (i < 0) return;
+  const p = plNow.hashes[i - 1], n = plNow.hashes[i + 1];
+  $('btn-prev').textContent = p ? '‹ ' + (i) + '. ' + short(plNow.titles[i - 1], 14) : '';
+  $('btn-next').textContent = n ? (i + 2) + '. ' + short(plNow.titles[i + 1], 14) + ' ›' : '';
+  $('btn-prev').classList.toggle('hidden', !p); $('btn-next').classList.toggle('hidden', !n);
+}
+function paintPlBar() {
+  const bar = $('pl-bar'), h = location.hash, i = plNow ? plNow.hashes.indexOf(h) : -1;
+  if (i < 0) { bar.classList.add('hidden'); return; }
+  bar.classList.remove('hidden');
+  bar.innerHTML = `${svgI('music')}<span class="pl-mid"><span>${esc(plNow.name)} · song ${i + 1} of ${plNow.hashes.length}</span></span><button class="pl-all" data-go="#satsang/${esc(plNow.last)}">All songs</button>`;
+}
 function closeSong() { back(navStack.length > 1 ? undefined : '#book/' + book.id); }   // back to where we came from (Learn, Favourites…)
 
 function setScale(v) {
@@ -644,8 +681,8 @@ $('song-list').addEventListener('click', e => {
   if (r) openSong(+r.dataset.pos);
 });
 $('btn-back').onclick = closeSong;
-$('btn-prev').onclick = () => showSong(cur - 1, true);
-$('btn-next').onclick = () => showSong(cur + 1, true);
+$('btn-prev').onclick = () => { const p = plStep(-1); if (p) return go(p); showSong(cur - 1, true); };
+$('btn-next').onclick = () => { const p = plStep(1); if (p) return go(p); showSong(cur + 1, true); };
 $('btn-smaller').onclick = () => setScale(prefs.scale / STEP);
 $('btn-bigger').onclick = () => setScale(prefs.scale * STEP);
 $('btn-play').onclick = togglePlay;
@@ -742,6 +779,7 @@ function route() {
   if (h === '#settings') return openSettings();
   if (h === '#welcome') return showWelcome();
   if (h === '#diary') return showDiary();
+  if (h.startsWith('#satsang/')) return showPlaylist(decodeURIComponent(h.slice(9)));
   if (h === '#learn') return showLearn();
   if (h === '#favs') return showFavs();
   if (h === '#tfd') return showTfdList();
@@ -1130,7 +1168,7 @@ async function events() {
   for (const l of await communityLines('events.txt')) {
     const f = l.split('|').map(x => x.trim());
     if (f.length < 6 || f[0] < today) continue;
-    out.push({ when: f[1], month: f[2], days: f[3], name: f[4], place: f[5] });
+    out.push({ when: f[1], month: f[2], days: f[3], name: f[4], place: f[5], songs: (f[6] || '').split(',').map(x => x.trim()).filter(Boolean), live: /^https:\/\/(www\.|m\.)?(youtube\.com|youtu\.be)\//.test(f[7] || '') ? f[7] : '', last: f[0] });
   }
   return out;
 }
@@ -1217,7 +1255,9 @@ async function songOfTheDay() {
 
 function eventRows(list, big) {
   return list.map(e => `<div class="ev-row${big ? ' big' : ''}"><div class="ev-date"><span>${esc(e.month)}</span><b class="${e.days.length > 2 ? 'long' : ''}">${esc(e.days)}</b></div>` +
-    `<div class="ev-t"><b>${esc(e.name)}</b><span class="ev-where">${svgI('pin')}at ${esc(e.place)}</span></div></div>`).join('');
+    `<div class="ev-t"><b>${esc(e.name)}</b><span class="ev-where">${svgI('pin')}at ${esc(e.place)}</span>` +
+    (big && e.songs && e.songs.length ? `<button class="ev-pl" data-go="#satsang/${esc(e.last)}">${svgI('music')}<span><b>${e.songs.length} songs</b> to be sung · see the list</span>${svgI('chevron', 'chev2')}</button>` : '') +
+    (big && e.live ? `<div class="ev-live"><a class="ev-yt" href="${esc(e.live)}" target="_blank" rel="noopener">${svgI('video')}Watch on YouTube</a><button class="ev-share" data-live="${esc(e.live)}" data-name="${esc(e.name)}" aria-label="Share the live link">${svgI('share')}</button></div>` : '') + `</div></div>`).join('');
 }
 
 // ---------- home ----------
@@ -1264,7 +1304,13 @@ async function showHome() {
 }
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-go]');
-  if (b) { openTab = b.dataset.openTab ? +b.dataset.openTab : null; go(b.dataset.go); }
+  if (b) { openTab = b.dataset.openTab ? +b.dataset.openTab : null; go(b.dataset.go); return; }
+  const sh = e.target.closest('[data-live]');   // share a satsang's YouTube live link
+  if (sh) {
+    const text = sh.dataset.name + ' · live on YouTube 🙏';
+    if (navigator.share) navigator.share({ title: sh.dataset.name, text, url: sh.dataset.live }).catch(() => {});
+    else if (navigator.clipboard) navigator.clipboard.writeText(text + '\n' + sh.dataset.live).then(() => toast('Link copied. You can paste it in WhatsApp.'));
+  }
 });
 
 // ---------- welcome: name and what to show ----------
@@ -1310,6 +1356,27 @@ async function showDiary() {
     `<a class="card d-yt" href="${CHANNEL}/shorts" target="_blank" rel="noopener">${badge('video')}<span class="hc-t"><b>Watch clips from past satsangs</b><span class="mut">Short videos on our YouTube channel, @HariNamadwar</span></span>${svgI('chevron', 'chev2')}</a>` +
     `<span class="lbl sect">PHOTOS</span><img class="d-photo" src="icons/about-group.jpg" alt="Devotees singing at a Harinamadwar satsang">` +
     `<a class="btn-acc wide" href="tel:+919845204620">${svgI('phone')}Invite us to your home</a>`;
+  restoreScroll('v-diary');
+}
+
+// ---------- songs to be sung at a satsang (the admin sets the list and its order) ----------
+let plNow = null;   // { name, last, refs: [...], hashes: [...] } while songs are opened from a satsang's list
+async function showPlaylist(last) {
+  showView('v-playlist');
+  const e = (await events()).find(x => x.last === last);
+  if (!e) { replaceHash('#diary'); return showDiary(); }
+  const list = (await Promise.all(e.songs.map(pracSong))).filter(Boolean);
+  plNow = { name: e.name, last, hashes: list.map(s => s.hash), titles: list.map(s => s.title) };
+  const out = [`<span class="lbl sect">UPCOMING SATSANG</span>` + eventRows([Object.assign({}, e, { songs: [] })], true)];
+  out.push(`<div class="pl-sum"><span><b>${list.length} songs</b>, in the order they will be sung</span>` +
+    (list.length ? `<button class="btn-acc" data-go="${esc(list[0].hash)}" data-open-tab="0">${svgI('book')}Start from song 1</button>` : '') + `</div>`);
+  out.push(`<div class="card list pl-list">` + list.map((s, i) =>
+    `<div class="l-row pl-row"><span class="pl-n">${i + 1}</span>` +
+    `<button class="hc-t l-open" data-go="${esc(s.hash)}" data-open-tab="0"><b>${esc(s.title)}</b><span class="mut">${esc(s.sub)}</span></button>` +
+    `<button class="ibadge" data-go="${esc(s.hash)}" data-open-tab="2" aria-label="Listen to ${esc(s.title)}">${svgI('play')}</button></div>`).join('') + `</div>`);
+  out.push(`<p class="mut center small">Tap a song for its words and meaning, or ▶ for its recording. The list may change until the day of the satsang.</p>`);
+  $('playlist-box').innerHTML = out.join('');
+  restoreScroll('v-playlist');
 }
 
 // ---------- learn ----------
@@ -1337,9 +1404,12 @@ async function showLearn() {
   // Record with sruti: on hold for now (feature kept in sruti.html)
   out.push(`<div class="l-msg"><img src="icons/about-jk.jpg" alt=""><span class="hc-t"><span class="l-msg-l">Message from Janakiraman Ji</span><b>About this week’s songs</b><span class="soon">Audio message · coming soon</span></span></div>`);
   $('learn-box').innerHTML = out.join('');
+  restoreScroll('v-learn');
   $('l-toggle').onclick = () => { store.set('showProgress', !showP); keepScroll('learn', showLearn); };
   $('learn-box').querySelectorAll('.tickbox').forEach(b => { b.onclick = () => { setLearnt(b.dataset.n, !learnt(b.dataset.n)); keepScroll('learn', showLearn); }; });
 }
+// back from a song: the list stays where it was (Learn, Favourites, Satsangs, a satsang's songs)
+function restoreScroll(id) { if (prevView === 'v-song' && scrollMem[id] != null) { const sc = $(id).querySelector('.scroll'); if (sc) sc.scrollTop = scrollMem[id]; } }
 async function keepScroll(id, fn) { const y = $(id + '-scroll').scrollTop; await fn(); $(id + '-scroll').scrollTop = y; }
 
 // ---------- my favourites ----------
@@ -1349,10 +1419,12 @@ function showFavs() {
   $('favs-box').innerHTML = !l.length
     ? `<div class="f-empty">${badge('heart', 'big')}<b>No favourites yet</b><p class="mut">Open any song and tap the ♡ at the top. It will appear here, so you can come back to listen and learn.</p></div>`
     : `<span class="lbl">${l.length === 1 ? '1 SONG' : l.length + ' SONGS'}</span><div class="card list">` + l.map(f =>
-      `<div class="l-row" data-go="${BOOKS[f.book] ? BOOKS[f.book].hash : '#song/'}${esc(f.number)}"><span class="badge">${esc(f.number)}</span>` +
-      `<span class="hc-t"><b>${esc(f.title)}</b><span class="mut">${esc((f.book === 'ashta' ? 'Aṣṭapadi ' + f.number + (f.raga ? ' · ' : '') : '') + (f.raga || ''))}</span></span>` +
+      `<div class="l-row"><span class="badge">${esc(f.number)}</span>` +
+      `<button class="hc-t l-open" data-go="${BOOKS[f.book] ? BOOKS[f.book].hash : '#song/'}${esc(f.number)}" data-open-tab="0"><b>${esc(f.title)}</b><span class="mut">${esc((f.book === 'ashta' ? 'Aṣṭapadi ' + f.number + (f.raga ? ' · ' : '') : '') + (f.raga || ''))}</span></button>` +
+      `<button class="ibadge" data-go="${BOOKS[f.book] ? BOOKS[f.book].hash : '#song/'}${esc(f.number)}" data-open-tab="2" aria-label="Listen to ${esc(f.title)}">${svgI('play')}</button>` +
       `<button class="f-heart" data-b="${esc(f.book)}" data-n="${esc(f.number)}" aria-label="Remove from my favourites">${svgI('heart_on')}</button></div>`).join('') +
-      `</div><p class="mut f-hint">Tap a song to open it. Tap the heart to remove it.</p>`;
+      `</div><p class="mut f-hint">Tap a song for its words, ▶ for its recording. Tap the heart to remove it.</p>`;
+  restoreScroll('v-favs');
   $('favs-box').querySelectorAll('.f-heart').forEach(b => { b.onclick = e => {
     e.stopPropagation();
     store.set('favs', favList().filter(f => favKey(f.book, f.number) !== favKey(b.dataset.b, b.dataset.n)));

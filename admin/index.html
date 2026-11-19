@@ -143,6 +143,7 @@ details.rec-g .pn { font-size: 13px; min-width: 30px; }
 .q-row.lift { transition: none; z-index: 3; box-shadow: 0 8px 24px rgba(22,62,126,.22); border-radius: 12px; }
 .q-grip { width: 40px; height: 44px; display: grid; place-items: center; color: var(--muted); cursor: grab; touch-action: none; flex-shrink: 0; }
 .q-grip svg { width: 22px; height: 22px; }
+.q-pos { width: 30px; height: 30px; border-radius: 50%; background: var(--chip, #E6EEF9); color: var(--deep); font-weight: 700; display: grid; place-items: center; flex-shrink: 0; font-size: 14px; }
 .q-no { flex-shrink: 0; min-width: 46px; padding: 4px 6px; border-radius: 9px; text-align: center; background: var(--soft); color: var(--deep); font-weight: 800; font-size: 14px; }
 .q-row .rt b { font-size: 16px; } .q-row .rt span { font-size: 12.5px; }
 .q-btn { width: 30px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: var(--deep); flex-shrink: 0; }
@@ -228,7 +229,7 @@ const api = DEMO ? demoApi() : {
   removeStudent(id) { return this.rpc('admin_remove_student', { p_student: id }); },
   async table(t, order) { const { data, error } = await sb.from(t).select('*').order(order.col, { ascending: order.asc }); if (error) throw error; return data; },
   events() { return this.table('events', { col: 'last_day', asc: true }); },
-  saveEvent(e) { return this.rpc('admin_save_event', { p_id: e.id || null, p_first_day: e.first_day, p_last_day: e.last_day, p_when: e.when_text, p_month: e.month, p_days: e.days, p_name: e.name, p_place: e.place }); },
+  saveEvent(e) { return this.rpc('admin_save_event', { p_id: e.id || null, p_first_day: e.first_day, p_last_day: e.last_day, p_when: e.when_text, p_month: e.month, p_days: e.days, p_name: e.name, p_place: e.place, p_songs: e.songs, p_live: e.live_url }); },
   deleteEvent(id) { return this.rpc('admin_delete_event', { p_id: id }); },
   thoughts() { return this.table('thoughts', { col: 'number', asc: false }); },
   saveThought(t) { return this.rpc('admin_save_thought', { p_number: t.number, p_series: t.series, p_title: t.title, p_song: t.song_ref, p_body: t.body, p_published: t.published }); },
@@ -260,7 +261,7 @@ function demoApi() {
     { id: 's', name: 'Saroja', phone: '9845000105', note: '', status: 'paused', dev: [{ id: uid(), label: 'iPhone', platform: 'ios', last_seen: now - 20 * day }] },
   ];
   let E = [{ id: uid(), last_day: '2026-11-21', when_text: 'November 21st', month: 'NOV', days: '21', name: 'Ayyappan Bhajan', place: 'Mania’s house' },
-    { id: uid(), last_day: '2026-11-29', when_text: 'Nov 28 and 29', month: 'NOV', days: '28–29', name: 'Radha Kalyanam', place: 'RP3 Bangalore' }];
+    { id: uid(), last_day: '2026-11-29', when_text: 'Nov 28 and 29', month: 'NOV', days: '28–29', name: 'Radha Kalyanam', place: 'RP3 Bangalore', songs: '1.1,2.1,12.1,12.2,12.3,12.4,12.5,12.6,12.7,12.8,12.9,ashta:1.2,26.1' }];
   let T = [{ number: 253, series: 'Epic Series 123', title: 'Why Do We Suffer Twice?', song_ref: 'dns:8.4', body: 'Have you noticed how often we worry about things that haven’t even happened?\n\n…', published: true }];
   let R = [{ book: 'dns', number: '1.3', status: 'uploaded', url: APP_BASE_DEMO + 'Audio/2.1-BhajareManasa.m4a', by: 'shiv@gmail.com', at: new Date(now - 2 * day).toISOString() }];
   const set = { offline_days: 30, device_limit: 3, code_days: 7, meet_url: 'https://meet.google.com/kcv-uviq-vqe', practice_songs: '22.7,5.2,24.1' };
@@ -752,7 +753,7 @@ async function showContent() {
     const ev = await guard(() => api.events()); if (!ev || !live()) return;
     const today = new Date().toISOString().slice(0, 10);
     page('App content', tabs + `<div class="lbl">UPCOMING SATSANGS</div>` +
-      (ev.filter(e => e.last_day >= today).map(e => `<button class="card item" data-ev="${esc(e.id)}"><span class="t"><b>${esc(e.name)}</b><span>Edit</span></span><span class="s">${esc(e.when_text)} · at ${esc(e.place)}</span></button>`).join('') || '<div class="empty">No upcoming satsangs.</div>') +
+      (ev.filter(e => e.last_day >= today).map(e => `<button class="card item" data-ev="${esc(e.id)}"><span class="t"><b>${esc(e.name)}</b><span>Edit</span></span><span class="s">${esc(e.when_text)} · at ${esc(e.place)}${e.songs ? ' · ' + e.songs.split(',').filter(Boolean).length + ' songs' : ''}${e.live_url ? ' · live link' : ''}</span></button>`).join('') || '<div class="empty">No upcoming satsangs.</div>') +
       `<button class="btn line" id="ae">+ Add satsang</button>` +
       (ev.some(e => e.last_day < today) ? `<div class="lbl">PAST (HIDDEN IN THE APP)</div>` + ev.filter(e => e.last_day < today).reverse().slice(0, 5).map(e => `<button class="card item" data-ev="${esc(e.id)}"><span class="t"><b style="color:var(--muted)">${esc(e.name)}</b><span>Edit</span></span><span class="s">${esc(e.when_text)}</span></button>`).join('') : '') + note);
     wire();
@@ -774,34 +775,76 @@ async function showContent() {
   }
 }
 
-function showEvent(e) {
+async function showEvent(e) {
   ticket();
   const MON = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
-  page(e ? 'Edit satsang' : 'Add satsang', `
-    <label class="f">Name of the satsang<input id="nm" value="${esc(e ? e.name : '')}" placeholder="Radha Kalyanam"></label>
-    <label class="f">Place<input id="pl" value="${esc(e ? e.place : '')}" placeholder="RP3 Bangalore"></label>
-    <div class="pair"><label class="f">First day<input id="d1" type="date" value="${esc(e ? (e.first_day || e.last_day) : '')}"></label><label class="f">Last day<input id="d2" type="date" value="${esc(e ? e.last_day : '')}"></label></div>
-    <label class="f">How the date reads in the app<input id="wt" value="${esc(e ? e.when_text : '')}" placeholder="Nov 28 and 29"></label>
+  const trees = {}; for (const id of Object.keys(BOOKS)) trees[id] = await loadTree(id, admLang);
+  const find = r => { const { id, n } = parseRef(r); for (const c of trees[id]) { const x = c.songs.find(s => s.n === n); if (x) return { ...x, id, chap: (id === 'dns' ? c.n + '. ' : '') + c.t, book: BOOKS[id].short }; } return null; };
+  let f = { nm: e ? e.name : '', pl: e ? e.place : '', d1: e ? (e.first_day || e.last_day) : '', d2: e ? e.last_day : '', wt: e ? e.when_text : '', yt: e ? (e.live_url || '') : '' };
+  let picked = String((e && e.songs) || '').split(/[,\s]+/).filter(r => r && find(r)), bk = 'dns', chap = '', dec = '', first = true;
+  const keep = () => { for (const k of ['nm', 'pl', 'd1', 'd2', 'wt', 'yt']) { const el = document.getElementById(k); if (el) f[k] = el.value; } };
+  const draw = () => {
+    const y = first ? 0 : scrollY; first = false;
+    const tree = trees[bk], c = tree.find(x => x.n === chap) || tree[0]; chap = c ? c.n : '';
+    const d = c && c.subs.length ? (c.subs.find(x => x.n === dec) || c.subs[0]) : null; dec = d ? d.n : '';
+    const pool = d ? d.songs : c ? c.songs : [];
+    page(e ? 'Edit satsang' : 'Add satsang', `
+    <label class="f">Name of the satsang<input id="nm" value="${esc(f.nm)}" placeholder="Radha Kalyanam"></label>
+    <label class="f">Place<input id="pl" value="${esc(f.pl)}" placeholder="RP3 Bangalore"></label>
+    <div class="pair"><label class="f">First day<input id="d1" type="date" value="${esc(f.d1)}"></label><label class="f">Last day<input id="d2" type="date" value="${esc(f.d2)}"></label></div>
+    <label class="f">How the date reads in the app<input id="wt" value="${esc(f.wt)}" placeholder="Nov 28 and 29"></label>
     <div class="hint">The satsang disappears from the app after its last day.</div>
+    <label class="f">YouTube live link (optional)<input id="yt" type="url" inputmode="url" value="${esc(f.yt)}" placeholder="https://youtube.com/live/…"></label>
+    <div class="hint">Paste the link of the live stream. Devotees get a “Watch live on YouTube” button, which opens the YouTube app, and a Share button.</div>
+    ${langPicker(['en', 'ta'])}
+    <div class="lbl">SONGS TO BE SUNG · ${picked.length}</div>
+    <div class="card q-list" id="ql">${picked.length ? picked.map((r, i) => { const x = find(r); return `<div class="q-row" data-i="${i}">
+        <span class="q-grip" title="Drag to move" aria-label="Drag to move">${ICON.grip}</span>
+        <span class="q-pos">${i + 1}</span><span class="rt"><b>${esc(x.title)}</b><span>${esc(x.n + ' · ' + x.book + ' · ' + x.chap)}</span></span>
+        <button class="q-btn" data-up="${i}" aria-label="Move up" ${i ? '' : 'disabled'}>${ICON.up}</button><button class="q-btn" data-dn="${i}" aria-label="Move down" ${i < picked.length - 1 ? '' : 'disabled'}>${ICON.down}</button>
+        <button class="q-btn x" data-rm="${i}" aria-label="Remove">${ICON.x}</button></div>`; }).join('')
+      : '<div class="empty">No songs yet. Add them below in the order they will be sung.</div>'}</div>
+    <div class="card add-box"><div class="lbl" style="margin:0">ADD A SONG</div>
+      <label class="f">Choose book<select id="bk">${Object.entries(BOOKS).map(([id, b]) => `<option value="${id}" ${id === bk ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}</select></label>
+      <label class="f">${bk === 'ndp' ? 'Work' : bk === 'ashta' ? 'Aṣṭapadi' : 'Chapter'}<select id="ch">${tree.map(x => `<option value="${esc(x.n)}" ${x.n === chap ? 'selected' : ''}>${esc(x.n)}. ${esc(x.t)}</option>`).join('')}</select></label>
+      ${c && c.subs.length ? `<label class="f">Decade<select id="dc">${c.subs.map(x => `<option value="${esc(x.n)}" ${x.n === dec ? 'selected' : ''}>${esc(x.n)} · ${esc(x.t)}</option>`).join('')}</select></label>` : ''}
+      <label class="f">Song<select id="sg">${pool.map(x => { const has = picked.includes(refOf(bk, x.n)); return `<option value="${esc(x.n)}" ${has ? 'disabled' : ''}>${esc(x.n)} · ${esc(x.title)}${has ? '  (added)' : ''}</option>`; }).join('')}</select></label>
+      <button class="btn line" id="ad">+ Add to the list</button></div>
+    <div class="hint">Devotees see this list under Upcoming Satsangs, in this order, with the words and recordings of each song.</div>
     <div class="err" id="er"></div>
     <button class="btn deep" id="sv">Save</button>${e ? '<button class="btn bad" id="dl">Delete</button>' : ''}`, { back: showContent });
-  const d1 = document.getElementById('d1'), d2 = document.getElementById('d2'), wt = document.getElementById('wt');
-  const auto = () => {
-    if (!d1.value) return; if (!d2.value || d2.value < d1.value) d2.value = d1.value;
-    const a = new Date(d1.value + 'T12:00'), b = new Date(d2.value + 'T12:00'), M = a.toLocaleString('en-IN', { month: 'short' });
-    if (!wt.dataset.typed) wt.value = +a === +b ? a.toLocaleString('en-IN', { month: 'long' }) + ' ' + a.getDate() : a.getMonth() === b.getMonth() ? `${M} ${a.getDate()} and ${b.getDate()}` : `${M} ${a.getDate()} – ${b.toLocaleString('en-IN', { month: 'short' })} ${b.getDate()}`;
+    if (y) scrollTo(0, y);
+    wireLang(() => { keep(); showEvent(Object.assign({}, e, { songs: picked.join(',') })); });
+    const d1 = document.getElementById('d1'), d2 = document.getElementById('d2'), wt = document.getElementById('wt');
+    const auto = () => {
+      if (!d1.value) return; if (!d2.value || d2.value < d1.value) d2.value = d1.value;
+      const a = new Date(d1.value + 'T12:00'), b = new Date(d2.value + 'T12:00'), M = a.toLocaleString('en-IN', { month: 'short' });
+      if (!wt.dataset.typed) wt.value = +a === +b ? a.toLocaleString('en-IN', { month: 'long' }) + ' ' + a.getDate() : a.getMonth() === b.getMonth() ? `${M} ${a.getDate()} and ${b.getDate()}` : `${M} ${a.getDate()} – ${b.toLocaleString('en-IN', { month: 'short' })} ${b.getDate()}`;
+    };
+    d1.onchange = auto; d2.onchange = auto; wt.oninput = () => { wt.dataset.typed = 1; };
+    const sg = document.getElementById('sg'); const free = [...sg.options].find(o => !o.disabled); if (free) sg.value = free.value;
+    document.getElementById('bk').onchange = ev => { keep(); bk = ev.target.value; chap = ''; dec = ''; draw(); };
+    document.getElementById('ch').onchange = ev => { keep(); chap = ev.target.value; dec = ''; draw(); };
+    const dc = document.getElementById('dc'); if (dc) dc.onchange = ev => { keep(); dec = ev.target.value; draw(); };
+    document.getElementById('ad').onclick = () => { const r = sg.value && refOf(bk, sg.value); if (!r || picked.includes(r)) return toast('Already in the list.'); keep(); picked.push(r); draw(); toast(sg.value + ' added'); };
+    on('[data-up]', 'click', ev => { keep(); const i = +ev.currentTarget.dataset.up; [picked[i - 1], picked[i]] = [picked[i], picked[i - 1]]; draw(); });
+    on('[data-dn]', 'click', ev => { keep(); const i = +ev.currentTarget.dataset.dn; [picked[i + 1], picked[i]] = [picked[i], picked[i + 1]]; draw(); });
+    on('[data-rm]', 'click', ev => { keep(); picked.splice(+ev.currentTarget.dataset.rm, 1); draw(); });
+    dragToReorder(document.getElementById('ql'), (from, to) => { keep(); const [m] = picked.splice(from, 1); picked.splice(to, 0, m); draw(); });
+    document.getElementById('sv').onclick = async () => {
+      const nm = document.getElementById('nm').value.trim(), pl = document.getElementById('pl').value.trim();
+      if (!nm || !pl || !d1.value) return (document.getElementById('er').textContent = 'Please fill in the name, place and first day.');
+      const yt = document.getElementById('yt').value.trim();
+      if (yt && !/^https:\/\/(www\.|m\.)?(youtube\.com|youtu\.be)\/\S+$/.test(yt)) return (document.getElementById('er').textContent = 'Please paste a YouTube link (https://youtube.com/… or https://youtu.be/…).');
+      auto();
+      const a = new Date(d1.value + 'T12:00'), b = new Date(d2.value + 'T12:00');
+      const ok = await guard(async () => { await api.saveEvent({ id: e && e.id, first_day: d1.value, last_day: d2.value, when_text: wt.value.trim(), month: MON[a.getMonth()],
+        days: +a === +b ? String(a.getDate()) : a.getDate() + '–' + b.getDate(), name: nm, place: pl, songs: picked.join(','), live_url: yt }); return true; });
+      if (ok) { toast('Saved'); showContent(); }
+    };
+    if (e && e.id) document.getElementById('dl').onclick = async () => { if (await ask('Delete this satsang?', 'Delete', true)) { await guard(() => api.deleteEvent(e.id)); toast('Deleted'); showContent(); } };
   };
-  d1.onchange = auto; d2.onchange = auto; wt.oninput = () => { wt.dataset.typed = 1; };
-  document.getElementById('sv').onclick = async () => {
-    const nm = document.getElementById('nm').value.trim(), pl = document.getElementById('pl').value.trim();
-    if (!nm || !pl || !d1.value) return (document.getElementById('er').textContent = 'Please fill in the name, place and first day.');
-    auto();
-    const a = new Date(d1.value + 'T12:00'), b = new Date(d2.value + 'T12:00');
-    await guard(() => api.saveEvent({ id: e && e.id, first_day: d1.value, last_day: d2.value, when_text: wt.value.trim(), month: MON[a.getMonth()],
-      days: +a === +b ? String(a.getDate()) : a.getDate() + '–' + b.getDate(), name: nm, place: pl }));
-    toast('Saved'); showContent();
-  };
-  if (e) document.getElementById('dl').onclick = async () => { if (await ask('Delete this satsang?', 'Delete', true)) { await guard(() => api.deleteEvent(e.id)); toast('Deleted'); showContent(); } };
+  draw();
 }
 
 function showThought(t, next) {

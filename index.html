@@ -52,6 +52,17 @@
     <div class="scroll" id="diary-scroll"><div class="pbox" id="diary-box"></div></div>
   </section>
 
+  <section id="v-playlist" class="view hidden">
+    <header class="bar">
+      <div class="bar-row">
+        <button class="text-btn back-btn" data-back>‹ Back</button>
+        <span class="bar-mid"><b>Satsang songs</b></span>
+        <span class="bar-right"></span>
+      </div>
+    </header>
+    <div class="scroll" id="playlist-scroll"><div class="pbox" id="playlist-box"></div></div>
+  </section>
+
   <section id="v-learn" class="view hidden">
     <header class="bar">
       <div class="bar-row">
@@ -218,6 +229,7 @@
         <button class="text-btn small" id="btn-smaller" aria-label="Smaller text">A−</button>
         <button class="text-btn big" id="btn-bigger" aria-label="Bigger text">A+</button>
       </div>
+      <div class="pl-bar hidden" id="pl-bar"></div>
       <div class="song-head">
         <h2 id="song-title"></h2>
         <p id="song-meta"></p>

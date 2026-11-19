@@ -591,3 +591,25 @@ body:not([data-lang="en"]) .lbl, body:not([data-lang="en"]) .nx-ay { letter-spac
 .sruti-btn .ibadge svg { width: 22px; height: 22px; fill: none; stroke: currentColor; }
 .sruti-btn b { display: block; color: var(--chap-text); }
 .sruti-btn:active { background: var(--chap-bg); }
+
+/* songs to be sung at a satsang */
+.ev-pl { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 9px 12px; border-radius: 12px; background: var(--tfd-bg); border: 1px solid var(--tfd-line); color: var(--chap-text); font-size: 15px; text-align: left; width: 100%; }
+.ev-pl .ic { width: 20px; height: 20px; flex-shrink: 0; color: var(--label); }
+.ev-pl span { flex: 1; } .ev-pl .chev2 { width: 18px; height: 18px; color: var(--muted); }
+.pl-sum { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 16px 0 12px; color: var(--muted); font-size: 15px; }
+.pl-sum b { color: var(--text); } .pl-sum .btn-acc { flex-shrink: 0; min-height: 44px; padding: 0 16px; font-size: 15px; }
+.pl-n { width: 34px; height: 34px; border-radius: 50%; background: var(--badge-bg); color: var(--badge-text); font-weight: 700; display: grid; place-items: center; flex-shrink: 0; font-size: 15px; }
+.pl-bar { display: flex; align-items: center; gap: 8px; margin: 4px 16px 2px; padding: 4px 4px 4px 12px; border-radius: 14px; background: rgba(255,255,255,.14); color: #F2D597; }
+.pl-bar .ic { width: 18px; height: 18px; flex-shrink: 0; }
+.pl-mid { flex: 1; color: var(--on-bar); font-size: 15px; font-weight: 600; }
+.pl-all { min-height: 36px; padding: 0 12px; border-radius: 10px; border: 1.5px solid var(--on-bar-soft); color: var(--on-bar); font-size: 14px; font-weight: 600; }
+.pl-step { width: 44px; height: 40px; border-radius: 12px; color: var(--on-bar); font-size: 26px; line-height: 1; }
+.pl-step:disabled { opacity: .3; }
+
+/* a satsang's YouTube live link */
+.ev-live { display: flex; gap: 8px; margin-top: 10px; }
+.ev-yt { flex: 1; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 14px; border-radius: 12px; background: #C4302B; color: #fff; font-weight: 700; font-size: 15px; text-decoration: none; }
+.ev-yt .ic { width: 20px; height: 20px; }
+.ev-share { width: 48px; min-height: 44px; border-radius: 12px; border: 1.5px solid var(--divider); background: var(--card); color: var(--chap-text); display: grid; place-items: center; }
+.ev-share .ic { width: 20px; height: 20px; }
+.l-row .f-heart { margin-left: 4px; }
