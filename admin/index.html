@@ -96,6 +96,51 @@ details.pend .rt { flex: 1; }
 .ask { position: fixed; inset: 0; z-index: 30; background: rgba(14,30,62,.5); display: flex; align-items: flex-end; justify-content: center; }
 .ask-box { width: 100%; max-width: 520px; background: var(--page); border-radius: 22px 22px 0 0; border-top: 4px solid var(--acc); padding: 22px 18px calc(18px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 12px; }
 .ask-box p { margin: 0 0 4px; font-size: 18px; line-height: 1.45; color: var(--text); }
+
+/* recordings */
+.sw { display: flex; align-items: center; gap: 10px; font-size: 15px; color: var(--deep); font-weight: 600; }
+.sw input { width: 20px; height: 20px; accent-color: var(--bar); }
+details.rec-g { border-top: 1px solid var(--soft); }
+details.rec-g summary { list-style: none; display: flex; align-items: center; gap: 10px; padding: 10px 14px 10px 18px; cursor: pointer; background: #FBFCFE; }
+details.rec-g summary::-webkit-details-marker { display: none; }
+details.rec-g summary .rt b { font-size: 15.5px; }
+details.rec-g details.rec-g summary { padding-left: 28px; background: #fff; }
+details.rec-g .pn { font-size: 13px; min-width: 30px; }
+.rec-row { padding: 10px 14px 12px 22px; border-top: 1px solid var(--soft); display: flex; flex-direction: column; gap: 8px; }
+.rec-row.done .rec-t { color: var(--muted); }
+.rec-t { font-size: 15.5px; } .rec-t b { color: var(--deep); margin-right: 4px; }
+.rtag { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 10px; margin-left: 4px; vertical-align: 1px; }
+.rtag.up { background: #FFF1D6; color: var(--label); } .rtag.ok { background: #E3F2E8; color: var(--ok); }
+.rec-row audio { width: 100%; height: 36px; }
+.rec-act { display: flex; gap: 8px; }
+.ra { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; border-radius: 20px; border: 1.5px solid var(--line); background: #fff; color: var(--deep); font-size: 14px; font-weight: 700; }
+.ra svg { width: 18px; height: 18px; }
+.ra.rec { color: var(--bad); border-color: #F0C9C4; } .ra.ok { background: var(--ok); border-color: var(--ok); color: #fff; }
+.ra:disabled { opacity: .4; }
+.rec-sheet { align-items: center; text-align: center; }
+.rec-time { font-size: 44px; font-weight: 800; color: var(--deep); font-variant-numeric: tabular-nums; }
+.rec-big { width: 84px; height: 84px; border-radius: 50%; border: 4px solid #F0C9C4; display: grid; place-items: center; background: #fff; }
+.rec-big span { width: 54px; height: 54px; border-radius: 50%; background: var(--bad); transition: all .2s; }
+.rec-big.on span { width: 30px; height: 30px; border-radius: 6px; }
+/* learn: chosen songs */
+.q-list { overflow: hidden; }
+.q-row { display: flex; align-items: center; gap: 8px; padding: 10px 8px 10px 4px; border-bottom: 1px solid var(--soft); background: #fff; transition: transform .15s; position: relative; }
+.q-row:last-child { border-bottom: 0; }
+.q-row.lift { transition: none; z-index: 3; box-shadow: 0 8px 24px rgba(22,62,126,.22); border-radius: 12px; }
+.q-grip { width: 40px; height: 44px; display: grid; place-items: center; color: var(--muted); cursor: grab; touch-action: none; flex-shrink: 0; }
+.q-grip svg { width: 22px; height: 22px; }
+.q-no { flex-shrink: 0; min-width: 46px; padding: 4px 6px; border-radius: 9px; text-align: center; background: var(--soft); color: var(--deep); font-weight: 800; font-size: 14px; }
+.q-row .rt b { font-size: 16px; } .q-row .rt span { font-size: 12.5px; }
+.q-btn { width: 30px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: var(--deep); flex-shrink: 0; }
+.q-btn svg { width: 20px; height: 20px; } .q-btn:disabled { opacity: .25; } .q-btn.x { color: var(--bad); }
+.add-box { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+.lang-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.lang-row .hint { margin-right: 4px; }
+.lchip { padding: 5px 12px; border-radius: 14px; font-size: 14px; font-weight: 700; background: #fff; border: 1.5px solid var(--line); color: var(--deep); }
+.lchip.on { background: var(--deep); border-color: var(--deep); color: #fff; }
+.ra.lis { color: var(--ok); border-color: #BFE0CB; } .ra.lis.on { background: #E3F2E8; }
+.rec-act { flex-wrap: wrap; } .ra { min-width: 92px; }
 </style>
 </head>
 <body>
@@ -108,6 +153,7 @@ details.pend .rt { flex: 1; }
 const SUPABASE_URL = 'https://rjjpgxiyncgjrwmvnbhg.supabase.co';        // e.g. https://abcd1234.supabase.co
 const SUPABASE_ANON_KEY = 'sb_publishable_v_qO0MNpMCGvuaEo3oWGEQ_NyiOylEM';   // the public key: "anon" (eyJ…) or "publishable" (sb_publishable_…)
 const IPHONE_APP = 'https://shivram221b.github.io/Harinamadwar-Bhajan/';
+const APP_BASE_DEMO = /\/admin\/?(index\.html)?$/.test(location.pathname) ? new URL('../', location.href).href : IPHONE_APP;
 const ANDROID_APP = '';         // link where the APK is shared, if any
 // =========================================================================
 
@@ -115,6 +161,15 @@ const $app = document.getElementById('app');
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const DEMO = !SUPABASE_URL || /[?&]demo/.test(location.search);
 const ICON = {
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+  stop: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
+  grip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 8h14M5 12h14M5 16h14"/></svg>',
+  up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>',
+  down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+  upload: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
   people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.3-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.7c2 .7 3.2 2.5 3.5 5.3"/></svg>',
   content: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5h12a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3z M3 10h18 M8 3v4 M16 3v4"/></svg>',
   gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
@@ -171,6 +226,13 @@ const api = DEMO ? demoApi() : {
   removeAdmin(e) { return this.rpc('admin_remove_admin', { p_email: e }); },
   dashboard() { return this.rpc('admin_dashboard'); },
   reactions() { return this.rpc('admin_reactions'); },
+  recordings() { return this.table('recordings', { col: 'number', asc: true }); },
+  async saveRecording(book, number, blob) {
+    const ty = blob.type || '', path = book + '/' + number + '.' + (/mp4|m4a|aac/.test(ty) ? 'm4a' : /ogg/.test(ty) ? 'ogg' : /mpeg|mp3/.test(ty) ? 'mp3' : /wav/.test(ty) ? 'wav' : 'webm');
+    const up = await sb.storage.from('recordings').upload(path, blob, { upsert: true, contentType: (blob.type || 'audio/webm').split(';')[0] }); if (up.error) throw up.error;
+    return this.rpc('admin_save_recording', { p_book: book, p_number: number, p_path: path });
+  },
+  completeRecording(book, number) { return this.rpc('admin_complete_recording', { p_book: book, p_number: number }); },
 };
 
 // Demo: same screens with sample people, nothing is saved anywhere.
@@ -186,6 +248,7 @@ function demoApi() {
   let E = [{ id: uid(), last_day: '2026-11-21', when_text: 'November 21st', month: 'NOV', days: '21', name: 'Ayyappan Bhajan', place: 'Mania’s house' },
     { id: uid(), last_day: '2026-11-29', when_text: 'Nov 28 and 29', month: 'NOV', days: '28–29', name: 'Radha Kalyanam', place: 'RP3 Bangalore' }];
   let T = [{ number: 253, series: 'Epic Series 123', title: 'Why Do We Suffer Twice?', song_ref: 'dns:8.4', body: 'Have you noticed how often we worry about things that haven’t even happened?\n\n…', published: true }];
+  let R = [{ book: 'dns', number: '1.3', status: 'uploaded', url: APP_BASE_DEMO + 'Audio/2.1-BhajareManasa.m4a', by: 'shiv@gmail.com', at: new Date(now - 2 * day).toISOString() }];
   const set = { offline_days: 30, device_limit: 3, code_days: 7, meet_url: 'https://meet.google.com/kcv-uviq-vqe', practice_songs: '22.7,5.2,24.1' };
   let A = [{ email: 'you@gmail.com', name: 'You' }];
   const code = () => 'HN-' + Array.from({ length: 4 }, () => '23456789ABCDEFGHJKMNPQRSTUVWXYZ'[Math.floor(Math.random() * 31)]).join('');
@@ -223,6 +286,9 @@ function demoApi() {
       no_device: S.filter(s => !s.dev.length).length, codes_waiting: S.filter(s => s.code && !s.dev.length).length, devices: S.reduce((n, s) => n + s.dev.length, 0),
       seen_7_days: S.filter(s => s.dev.some(d => d.last_seen > now - 7 * day)).length, upcoming_events: E.length, thoughts: T.length, last_thought: 253, reactions_7_days: 9 }),
     reactions: () => wait([{ tfd: 253, emoji: '🙏', n: 6 }, { tfd: 253, emoji: '❤️', n: 3 }]),
+    recordings: () => wait(R.slice()),
+    saveRecording(book, number, blob) { R = R.filter(r => !(r.book === book && r.number === number)); R.push({ book, number, status: 'uploaded', url: URL.createObjectURL(blob), by: 'you@gmail.com', at: new Date().toISOString() }); return wait(); },
+    completeRecording(book, number) { const r = R.find(x => x.book === book && x.number === number); if (r) { r.status = 'complete'; r.at = new Date().toISOString(); } return wait(); },
   };
 }
 
@@ -415,11 +481,220 @@ async function showStudent(id) {
   });
 }
 
+
+// ---------------------------------------------------------------- the books: chapters, works, decades and song names, from the app's own files
+const BOOKS = {
+  dns: { name: 'Divya Nama Sankeertanam', short: 'Divya Nama', base: '', unit: 'Chapter', hash: '#song/' },
+  ashta: { name: 'Śrī Gīta Govindam', short: 'Gita Govindam', base: 'ashtapathy/', unit: 'Aṣṭapadi', hash: '#ashta/' },
+  ndp: { name: 'Naalaayira Divya Prabandham', short: 'Prabandham', base: 'prabandham/', unit: 'Work', hash: '#ndp/' },
+};
+// song names in the same language as the app (SCRUM-74): English, Tamil, Kannada or Sanskrit
+const ADM_LANGS = [['en', 'English'], ['ta', 'தமிழ்'], ['kn', 'ಕನ್ನಡ'], ['sa', 'संस्कृतम्']];
+let admLang = (() => { try { return localStorage.getItem('adm.lang') || 'en'; } catch (e) { return 'en'; } })();
+const langPicker = () => `<div class="lang-row"><span class="hint">Song names in</span>${ADM_LANGS.map(([c, n]) => `<button class="lchip ${c === admLang ? 'on' : ''}" data-al="${c}">${n}</button>`).join('')}</div>`;
+function wireLang(redraw) { on('[data-al]', 'click', e => { admLang = e.currentTarget.dataset.al; try { localStorage.setItem('adm.lang', admLang); } catch (x) {} redraw(); }); }
+function bookTree(text, withDecades) {
+  const out = []; let top = null, sub = null;
+  for (const line of String(text || '').replace(/\r/g, '').split('\n')) {
+    if (line.startsWith('## ')) { const [n, t] = line.slice(3).split('|').map(x => x.trim()); if (n === '0') { top = null; sub = null; continue; } top = { n, t, subs: [], songs: [] }; out.push(top); sub = null; }
+    else if (line.startsWith('### ') && withDecades) { const [n, t] = line.slice(4).split('|').map(x => x.trim()); sub = { n, t, songs: [] }; if (top) top.subs.push(sub); }
+    else if (line.startsWith('@@')) { const h = line.slice(2).split('|').map(x => x.trim()); if (!/\d/.test(h[0])) continue; const song = { n: h[0], title: h[4] || h[1] }; if (!top) { top = { n: '', t: '', subs: [], songs: [] }; out.push(top); } top.songs.push(song); if (sub) sub.songs.push(song); }
+  }
+  return out;
+}
+const treeCache = {};
+/** the book's tree with names in the chosen language (falls back to English where a name is missing) */
+async function loadTree(id, lang) {
+  const key = id + '/' + lang;
+  if (!treeCache[key]) treeCache[key] = (async () => {
+    const b = BOOKS[id], tree = bookTree(await appFile(b.base + 'songs.txt'), id === 'ndp');
+    if (lang === 'en') return tree;
+    const lt = (await appFile(b.base + 'songs_' + lang + '.txt')).replace(/\r/g, '');
+    const titles = new Map(), heads = new Map(), works = new Map();
+    for (const line of lt.split('\n')) {
+      if (line.startsWith('@@')) { const h = line.slice(2).split('|').map(x => x.trim()); if (h[1]) titles.set(h[0], h[1]); if (h[2]) works.set(h[0], h[2].replace(/\s+[\d-]+$/, '')); }
+      else if (line.startsWith('## ')) { const [n, t] = line.slice(3).split('|').map(x => x.trim()); if (!heads.has(n)) heads.set(n, t); }
+    }
+    return tree.map(c => ({ ...c, t: (id === 'ndp' ? works.get(c.songs[0] && c.songs[0].n) : heads.get(c.n)) || c.t,
+      subs: c.subs.map(d => ({ ...d, t: titles.get(d.songs[0] && d.songs[0].n) ? titles.get(d.songs[0].n).split(/\s+/).slice(0, 3).join(' ') : d.t, songs: d.songs.map(x => ({ ...x, title: titles.get(x.n) || x.title })) })),
+      songs: c.songs.map(x => ({ ...x, title: titles.get(x.n) || x.title })) }));
+  })();
+  return treeCache[key];
+}
+// "22.7" = Divya Nama (as before); other books carry their name: "ashta:3", "ndp:86"
+const refOf = (id, n) => id === 'dns' ? n : id + ':' + n;
+const parseRef = r => { const i = r.indexOf(':'); return i > 0 && BOOKS[r.slice(0, i)] ? { id: r.slice(0, i), n: r.slice(i + 1) } : { id: 'dns', n: r }; };
+
+// ---------------------------------------------------------------- Learn: this week's songs from any book, chosen from drop-downs and put in order
+let learnDraft = null;
+async function showLearnEditor(st, tabs, wire, note, live) {
+  const trees = {}; for (const id of Object.keys(BOOKS)) trees[id] = await loadTree(id, admLang);
+  if (!live()) return;
+  const find = r => { const { id, n } = parseRef(r); for (const c of trees[id]) { const x = c.songs.find(s => s.n === n); if (x) return { ...x, id, chap: (id === 'dns' ? c.n + '. ' : '') + c.t, book: BOOKS[id].short }; } return null; };
+  // unsaved changes survive a switch of language
+  let picked = learnDraft ? learnDraft.picked : String(st.practice_songs || '').split(/[,\s]+/).filter(r => r && find(r));
+  let { bk, chap, dec, dirty } = learnDraft || { bk: 'dns', chap: '', dec: '', dirty: false };
+  picked = picked.filter(r => find(r));
+  const draw = () => {
+    learnDraft = dirty ? { picked, bk, chap, dec, dirty } : null;
+    const tree = trees[bk], c = tree.find(x => x.n === chap) || tree[0]; chap = c ? c.n : '';
+    const d = c && c.subs.length ? (c.subs.find(x => x.n === dec) || c.subs[0]) : null; dec = d ? d.n : '';
+    const pool = d ? d.songs : c ? c.songs : [];
+    page('App content', tabs + langPicker() + `<label class="f">Google Meet link for the daily session<input id="mu" value="${esc(st.meet_url || '')}"></label>
+      <div class="lbl">THIS WEEK’S SONGS · ${picked.length}</div>
+      <div class="card q-list" id="ql">${picked.length ? picked.map((r, i) => { const x = find(r); return `<div class="q-row" data-i="${i}">
+          <span class="q-grip" title="Drag to move" aria-label="Drag to move">${ICON.grip}</span>
+          <span class="q-no">${esc(x.n)}</span><span class="rt"><b>${esc(x.title)}</b><span>${esc(x.book + ' · ' + x.chap)}</span></span>
+          <button class="q-btn" data-up="${i}" aria-label="Move up" ${i ? '' : 'disabled'}>${ICON.up}</button><button class="q-btn" data-dn="${i}" aria-label="Move down" ${i < picked.length - 1 ? '' : 'disabled'}>${ICON.down}</button>
+          <button class="q-btn x" data-rm="${i}" aria-label="Remove">${ICON.x}</button></div>`; }).join('')
+        : '<div class="empty">No songs chosen yet. Add them below.</div>'}</div>
+      <div class="card add-box"><div class="lbl" style="margin:0">ADD A SONG</div>
+        <label class="f">Choose book<select id="bk">${Object.entries(BOOKS).map(([id, b]) => `<option value="${id}" ${id === bk ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}</select></label>
+        <label class="f">${bk === 'ndp' ? 'Work' : bk === 'ashta' ? 'Aṣṭapadi' : 'Chapter'}<select id="ch">${tree.map(x => `<option value="${esc(x.n)}" ${x.n === chap ? 'selected' : ''}>${esc(x.n)}. ${esc(x.t)}</option>`).join('')}</select></label>
+        ${c && c.subs.length ? `<label class="f">Decade<select id="dc">${c.subs.map(x => `<option value="${esc(x.n)}" ${x.n === dec ? 'selected' : ''}>${esc(x.n)} · ${esc(x.t)}</option>`).join('')}</select></label>` : ''}
+        <label class="f">Song<select id="sg">${pool.map(x => { const has = picked.includes(refOf(bk, x.n)); return `<option value="${esc(x.n)}" ${has ? 'disabled' : ''}>${esc(x.n)} · ${esc(x.title)}${has ? '  (added)' : ''}</option>`; }).join('')}</select></label>
+        <button class="btn line" id="ad">+ Add to this week’s songs</button></div>
+      <button class="btn deep" id="sv">${dirty ? 'Save changes' : 'Save'}</button>` + note);
+    wire(); wireLang(() => showContent());
+    const sg = document.getElementById('sg'); const firstFree = [...sg.options].find(o => !o.disabled); if (firstFree) sg.value = firstFree.value;
+    document.getElementById('bk').onchange = e => { bk = e.target.value; chap = ''; dec = ''; draw(); };
+    document.getElementById('ch').onchange = e => { chap = e.target.value; dec = ''; draw(); };
+    const dc = document.getElementById('dc'); if (dc) dc.onchange = e => { dec = e.target.value; draw(); };
+    document.getElementById('ad').onclick = () => { const r = sg.value && refOf(bk, sg.value); if (!r || picked.includes(r)) return toast('Already in the list.'); picked.push(r); dirty = true; draw(); toast(sg.value + ' added'); };
+    on('[data-up]', 'click', e => { const i = +e.currentTarget.dataset.up; [picked[i - 1], picked[i]] = [picked[i], picked[i - 1]]; dirty = true; draw(); });
+    on('[data-dn]', 'click', e => { const i = +e.currentTarget.dataset.dn; [picked[i + 1], picked[i]] = [picked[i], picked[i + 1]]; dirty = true; draw(); });
+    on('[data-rm]', 'click', e => { picked.splice(+e.currentTarget.dataset.rm, 1); dirty = true; draw(); });
+    dragToReorder(document.getElementById('ql'), (from, to) => { const [m] = picked.splice(from, 1); picked.splice(to, 0, m); dirty = true; draw(); });
+    document.getElementById('sv').onclick = async () => {
+      const ok = await guard(async () => { await api.setSetting('meet_url', document.getElementById('mu').value.trim()); await api.setSetting('practice_songs', picked.join(',')); return true; });
+      if (ok) { dirty = false; toast('Saved · the app shows them in this order'); draw(); }
+    };
+  };
+  draw();
+}
+// press and hold the ≡ handle, then slide up or down (like a music app's queue)
+function dragToReorder(list, done) {
+  if (!list) return;
+  list.querySelectorAll('.q-grip').forEach(g => g.addEventListener('pointerdown', e => {
+    const row = g.closest('.q-row'), rows = [...list.querySelectorAll('.q-row')], from = rows.indexOf(row), h = row.offsetHeight, y0 = e.clientY;
+    let to = from; row.classList.add('lift'); g.setPointerCapture(e.pointerId); e.preventDefault();
+    const move = ev => {
+      const dy = ev.clientY - y0; row.style.transform = `translateY(${dy}px)`;
+      to = Math.max(0, Math.min(rows.length - 1, from + Math.round(dy / h)));
+      rows.forEach((r, i) => { if (r === row) return; r.style.transform = (i > from && i <= to) ? `translateY(${-h}px)` : (i < from && i >= to) ? `translateY(${h}px)` : ''; });
+    };
+    const up = () => { g.removeEventListener('pointermove', move); rows.forEach(r => { r.style.transform = ''; r.classList.remove('lift'); }); if (to !== from) done(from, to); };
+    g.addEventListener('pointermove', move); g.addEventListener('pointerup', up, { once: true }); g.addEventListener('pointercancel', up, { once: true });
+  }));
+}
+
+// ---------------------------------------------------------------- Recordings: what still needs audio, record or upload it, listen, mark it complete
+const recUrl = r => r.url || (SUPABASE_URL + '/storage/v1/object/public/recordings/' + r.path.split('/').map(encodeURIComponent).join('/') + '?v=' + Date.parse(r.at || 0));
+let recOpen = {}, recShowDone = false;
+const player = new Audio(); let playingKey = '';
+player.onended = player.onpause = () => { if (player.ended || player.paused) { playingKey = ''; document.querySelectorAll('[data-lis].on').forEach(b => { b.classList.remove('on'); b.innerHTML = ICON.play + 'Listen'; }); } };
+async function showRecordings(tabs, wire, live) {
+  const ids = Object.keys(BOOKS);
+  const [trees, audios, recs] = await Promise.all([Promise.all(ids.map(id => loadTree(id, admLang))), Promise.all(ids.map(id => appFile(BOOKS[id].base + 'audio.txt'))), guard(() => api.recordings())]);
+  if (!recs || !live()) return;
+  const recOf = (b, n) => recs.find(r => r.book === b && r.number === n);
+  const appAudio = {}; ids.forEach((id, i) => { const m = new Map(); audios[i].replace(/\r/g, '').split('\n').forEach(l => { const k = l.indexOf('|'); if (k > 0 && !l.startsWith('#')) m.set(l.slice(0, k).trim(), l.slice(k + 1).trim()); }); appAudio[id] = m; });
+  const books = ids.map((id, i) => {
+    const tree = trees[i], has = appAudio[id];
+    const need = x => !has.has(x.n) && !((recOf(id, x.n) || {}).status === 'complete');
+    const total = tree.reduce((k, c) => k + c.songs.length, 0), left = tree.reduce((k, c) => k + c.songs.filter(need).length, 0);
+    return { id, ...BOOKS[id], tree, has, need, total, left };
+  });
+  const listenUrl = (b, n) => { const r = recOf(b.id, n); if (r) return recUrl(r); const p = b.has.get(n); return p ? (/^https?:/.test(p) ? p : APP_BASE + b.base + p.split('/').map(encodeURIComponent).join('/')) : ''; };
+  const songRow = (b, x) => {
+    const r = recOf(b.id, x.n), done = b.has.has(x.n) || (r && r.status === 'complete'), url = listenUrl(b, x.n), key = b.id + '|' + x.n;
+    const tag = r && r.status === 'complete' ? '<span class="rtag ok">Complete</span>' : r ? '<span class="rtag up">Uploaded · not checked</span>' : done ? '<span class="rtag ok">In the app</span>' : '';
+    return `<div class="rec-row ${done ? 'done' : ''}" id="r-${b.id}-${esc(x.n)}"><div class="rec-t"><b>${esc(x.n)}</b> ${esc(x.title)} ${tag}</div>
+      <div class="rec-act">` +
+      (url ? `<button class="ra lis ${playingKey === key ? 'on' : ''}" data-lis="${esc(key)}" data-url="${esc(url)}">${playingKey === key ? ICON.stop + 'Stop' : ICON.play + 'Listen'}</button>` : '') +
+      `<button class="ra rec" data-rec="${esc(key)}">${ICON.mic}Record</button><button class="ra" data-upl="${esc(key)}">${ICON.upload}Upload</button>` +
+      (done ? '' : `<button class="ra ok" data-done="${esc(key)}" ${r ? '' : 'disabled title="Record or upload first"'}>${ICON.check}Complete</button>`) + '</div></div>';
+  };
+  const group = (b, key, label, sub, items, inner) => {
+    const left = items.filter(b.need).length; if (!left && !recShowDone) return '';
+    return `<details class="rec-g" data-k="${esc(key)}" ${recOpen[key] ? 'open' : ''}><summary><span class="rt"><b>${esc(label)}</b><span>${esc(sub)}</span></span><span class="pn ${left ? '' : 'done'}">${left || '✓'}</span></summary>${recOpen[key] ? inner() : ''}</details>`;
+  };
+  const body = b => b.tree.map(c => {
+    const show = l => (recShowDone ? l : l.filter(b.need));
+    if (c.subs.length) return group(b, b.id + c.n, c.n + '. ' + c.t, c.songs.length + ' pāsurams · ' + c.subs.length + ' decades', c.songs, () => c.subs.map(d => group(b, b.id + c.n + '/' + d.n, d.n + '  ' + d.t, d.songs[0].n + '–' + d.songs[d.songs.length - 1].n, d.songs, () => show(d.songs).map(x => songRow(b, x)).join(''))).join(''));
+    const label = b.id === 'ashta' ? 'Aṣṭapadi ' + c.n : (b.id === 'dns' ? 'Chapter ' : '') + c.n + '. ' + c.t;
+    return group(b, b.id + c.n, label, c.songs.length + (b.id === 'ndp' ? ' pāsurams' : ' songs'), c.songs, () => show(c.songs).map(x => songRow(b, x)).join(''));
+  }).join('');
+  const draw = () => {
+    page('App content', tabs + langPicker() + `<div class="stats">${books.map(b => `<div><b>${b.left}</b><span>${esc(b.short)}<br>to record, of ${b.total}</span></div>`).join('')}</div>
+      <label class="sw"><input type="checkbox" id="sd" ${recShowDone ? 'checked' : ''}> Show completed songs too</label>` +
+      books.map(b => `<details class="card pend rec-book" data-k="${b.id}" ${recOpen[b.id] ? 'open' : ''}><summary><span class="rt"><b>${esc(b.short)} · recordings</b><span>Songs with no audio yet (of ${b.total})</span></span><span class="pn ${b.left ? '' : 'done'}">${b.left || '✓'}</span></summary>${recOpen[b.id] ? body(b) : ''}</details>`).join('') +
+      '<div class="hint">Record on this phone, or upload a file you already have. Tap Listen to check it, then tap Complete: the song leaves this list and plays in the app.</div><input type="file" id="fp" accept="audio/*" class="hidden">');
+    wire(); wireLang(() => showContent());
+    document.getElementById('sd').onchange = e => { recShowDone = e.target.checked; redraw(); };
+    document.querySelectorAll('details[data-k]').forEach(d => d.addEventListener('toggle', () => { if (!!recOpen[d.dataset.k] === d.open) return; recOpen[d.dataset.k] = d.open; redraw(); }));
+    on('[data-lis]', 'click', e => {
+      const btn = e.currentTarget, k = btn.dataset.lis;
+      if (playingKey === k) { player.pause(); return; }
+      player.pause(); playingKey = k; player.src = btn.dataset.url;
+      player.play().then(() => { document.querySelectorAll('[data-lis].on').forEach(b => { b.classList.remove('on'); b.innerHTML = ICON.play + 'Listen'; }); playingKey = k; btn.classList.add('on'); btn.innerHTML = ICON.stop + 'Stop'; })
+        .catch(() => { playingKey = ''; toast('Could not play this recording.'); });
+    });
+    on('[data-rec]', 'click', e => { const [b, n] = e.currentTarget.dataset.rec.split('|'); replaceOk(b, n).then(ok => ok && recordSheet(b, n, save)); });
+    on('[data-upl]', 'click', e => { const [b, n] = e.currentTarget.dataset.upl.split('|'); replaceOk(b, n).then(ok => { if (!ok) return; const fp = document.getElementById('fp'); fp.onchange = () => fp.files[0] && save(b, n, fp.files[0]); fp.value = ''; fp.click(); }); });
+    on('[data-done]', 'click', async e => {
+      const [b, n] = e.currentTarget.dataset.done.split('|');
+      if (!(await ask(`Mark ${n} as complete? It leaves the “still to record” list and plays in the app.`, 'Mark complete'))) return;
+      const ok = await guard(async () => { await api.completeRecording(b, n); return true; }); if (!ok) return;
+      const r = recOf(b, n); if (r) r.status = 'complete';
+      const bk = books.find(x => x.id === b); bk.left = bk.tree.reduce((k, c) => k + c.songs.filter(bk.need).length, 0);
+      toast(n + ' marked complete'); redraw();
+    });
+  };
+  const redraw = () => { const y = scrollY; draw(); scrollTo(0, y); };
+  // re-recording over a song that already has audio: warn first
+  async function replaceOk(b, n) {
+    const r = recOf(b, n), bk = books.find(x => x.id === b);
+    if (!r && !bk.has.has(n)) return true;
+    const what = (r && r.status === 'complete') || (!r && bk.has.has(n)) ? 'a completed recording that is already playing in the app' : 'a recording uploaded' + (r.by_email || r.by ? ' by ' + (r.by_email || r.by).split('@')[0] : '') + ' ' + ago(Date.parse(r.at) || r.at);
+    return ask(`⚠️ ${n} already has ${what}. The new recording will replace it. Do you want to continue?`, 'Yes, replace it', true);
+  }
+  async function save(b, n, blob) {
+    toast('Uploading…'); const ok = await guard(async () => { await api.saveRecording(b, n, blob); return true; }); if (!ok) return;
+    const fresh = await guard(() => api.recordings()); if (fresh) { recs.length = 0; recs.push(...fresh); }
+    toast('Saved. Tap Listen to check it, then Complete.'); redraw();
+  }
+  draw();
+}
+function recordSheet(book, number, save) {
+  const d = document.createElement('div'); d.className = 'ask';
+  d.innerHTML = `<div class="ask-box rec-sheet"><p><b>Recording ${esc(number)}</b></p><div class="rec-time" id="rt">0:00</div>
+    <button class="rec-big" id="rb" aria-label="Start recording"><span></span></button><div class="hint" id="rh">Tap the red button to start</div>
+    <audio id="ra" controls class="hidden"></audio><button class="btn deep hidden" id="rs">Save recording</button><button class="btn line" id="rc">Cancel</button></div>`;
+  document.body.appendChild(d);
+  let mr = null, chunks = [], t0 = 0, tick = null, blob = null;
+  const $ = id => d.querySelector('#' + id);
+  $('rc').onclick = () => { if (mr && mr.state === 'recording') mr.stop(); clearInterval(tick); d.remove(); };
+  $('rb').onclick = async () => {
+    if (mr && mr.state === 'recording') { mr.stop(); return; }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+      const mt = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm'].find(m => MediaRecorder.isTypeSupported(m)) || '';
+      mr = new MediaRecorder(stream, mt ? { mimeType: mt } : undefined); chunks = [];
+      mr.ondataavailable = e => chunks.push(e.data);
+      mr.onstop = () => { stream.getTracks().forEach(t => t.stop()); clearInterval(tick); blob = new Blob(chunks, { type: (mr.mimeType || 'audio/webm').split(';')[0] }); $('ra').src = URL.createObjectURL(blob); $('ra').classList.remove('hidden'); $('rs').classList.remove('hidden'); $('rb').classList.remove('on'); $('rh').textContent = 'Listen, then save · or tap red to record again'; };
+      mr.start(); t0 = Date.now(); $('rb').classList.add('on'); $('rh').textContent = 'Recording… tap to stop'; $('ra').classList.add('hidden'); $('rs').classList.add('hidden');
+      tick = setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); $('rt').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }, 250);
+    } catch (e) { toast('Please allow the microphone for this page.'); }
+  };
+  $('rs').onclick = () => { d.remove(); save(book, number, blob); };
+}
+
 // ---------------------------------------------------------------- E · app content
 let ctab = 'satsangs';
 async function showContent() {
   const live = ticket();
-  const tabs = `<div class="tabs">${[['satsangs', 'Satsangs'], ['learn', 'Learn'], ['thoughts', 'Thoughts']].map(([k, t]) => `<button class="tab ${ctab === k ? 'on' : ''}" data-ct="${k}">${t}</button>`).join('')}</div>`;
+  const tabs = `<div class="tabs">${[['satsangs', 'Satsangs'], ['learn', 'Learn'], ['recordings', 'Recordings'], ['thoughts', 'Thoughts']].map(([k, t]) => `<button class="tab ${ctab === k ? 'on' : ''}" data-ct="${k}">${t}</button>`).join('')}</div>`;
   const wire = () => on('[data-ct]', 'click', e => { ctab = e.currentTarget.dataset.ct; showContent(); });
   page('App content', tabs + '<div class="empty">Loading…</div>'); wire();
   const note = '<div class="hint">Changes reach every phone the next time the app opens online.</div>';
@@ -434,17 +709,10 @@ async function showContent() {
     on('[data-ev]', 'click', e => showEvent(ev.find(x => x.id === e.currentTarget.dataset.ev)));
     document.getElementById('ae').onclick = () => showEvent(null);
   } else if (ctab === 'learn') {
-    const s = await guard(() => api.settings()); if (!s || !live()) return;
-    page('App content', tabs + `<label class="f">Google Meet link for the daily session<input id="mu" value="${esc(s.meet_url || '')}"></label>
-      <label class="f">This week’s songs<input id="ps" value="${esc(s.practice_songs || '')}" placeholder="22.7, 5.2, 24.1"></label>
-      <div class="hint">Song numbers from Divya Nama Sankeertanam, separated by commas.</div>
-      <button class="btn deep" id="sv">Save</button>` + note);
-    wire();
-    document.getElementById('sv').onclick = async () => {
-      const songs = document.getElementById('ps').value.split(/[,\s]+/).filter(Boolean).join(',');
-      await guard(async () => { await api.setSetting('meet_url', document.getElementById('mu').value.trim()); await api.setSetting('practice_songs', songs); });
-      toast('Saved');
-    };
+    const st = await guard(() => api.settings()); if (!st || !live()) return;
+    await showLearnEditor(st, tabs, wire, note, live);
+  } else if (ctab === 'recordings') {
+    showRecordings(tabs, wire, live);
   } else {
     const [th, rx] = await Promise.all([guard(() => api.thoughts()), api.reactions().catch(() => [])]); if (!th || !live()) return;
     const rxOf = n => (rx || []).filter(r => r.tfd === n).map(r => r.emoji + ' ' + r.n).join('  ');

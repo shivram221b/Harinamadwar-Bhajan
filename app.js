@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.3';
+const WEB_VERSION = '4.4';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -11,7 +11,7 @@ const BOOKS = {
   ndp: { id: 'ndp', base: 'prabandham/', hash: '#ndp/', title: 'Naalaayira Divya Prabandham', search: 'Search: pāsuram no. or words', unit: 'pāsurams' },
 };
 // the Prabandham's name follows the chosen language
-const bookTitle = id => (id === 'ndp' ? NDP_BOOK[ndpLang()][0] : BOOKS[id].title);
+const bookTitle = id => (id === 'ndp' ? NDP_BOOK[ndpLang()][0] : T(id)[0]);
 let book = BOOKS.dns;
 const loaded = {}; // book id -> {songs, indexItems}
 const LANGS = [
@@ -28,7 +28,7 @@ const store = {
   set(k, v) { try { localStorage.setItem('hg.' + k, JSON.stringify(v)); } catch (e) {} },
 };
 const prefs = {
-  get lang() { return store.get('lang', 'en'); }, set lang(v) { store.set('lang', v); },
+  get lang() { return store.get('lang', 'en'); }, set lang(v) { store.set('lang', v); if (typeof applyLang === 'function') applyLang(); },
   get scale() { return store.get('scale', 1); }, set scale(v) { store.set('scale', Math.max(MIN_SCALE, Math.min(MAX_SCALE, v))); },
   get night() { return store.get('night', false); }, set night(v) { store.set('night', v); },
   get screenOn() { return store.get('screenOn', true); }, set screenOn(v) { store.set('screenOn', v); },
@@ -63,6 +63,7 @@ const part = (h, i) => (h.length > i ? h[i].trim() : '');
 function parseSongs(txt) {
   const s = [], idx = [];
   let chapter = '', header = null, body = [];
+  let ayiram = '', workNo = '', decade = '', decadeName = '';   // Prabandham structure (SCRUM: index drop-down)
   const flush = () => {
     if (!header) return;
     const page = parseInt(part(header, 3), 10) || 0;
@@ -70,7 +71,7 @@ function parseSongs(txt) {
       number: part(header, 0), title: part(header, 1), raga: part(header, 2), page,
       lyrics: body.join('\n').trim(), chapter,
       displayTitle: part(header, 4) || part(header, 1), displayRaga: part(header, 5) || part(header, 2),
-      pos: s.length,
+      pos: s.length, ayiram, workNo, decade, decadeName,
     };
     s.push(song); idx.push({ type: 'song', song });
   };
@@ -79,12 +80,14 @@ function parseSongs(txt) {
     if (isChap || isSub || isSong) { flush(); header = null; body = []; }
     if (isSub) {
       const h = line.slice(4).split('|');
-      idx.push({ type: 'chap', heading: h[0].trim() + '   ' + part(h, 1) });
+      decade = h[0].trim(); decadeName = part(h, 1);
+      idx.push({ type: 'chap', key: '### ' + h[0].trim(), num: h[0].trim(), heading: h[0].trim() + '   ' + part(h, 1) });
     } else if (isChap) {
       const h = line.slice(3).split('|');
       const num = h[0].trim();
+      if (num === '0') ayiram = part(h, 1); else { workNo = num; decade = ''; decadeName = ''; }
       chapter = part(h, 1);
-      idx.push({ type: 'chap', heading: num === '0' ? chapter : num + '.  ' + chapter });
+      idx.push({ type: 'chap', key: '## ' + num, num, heading: num === '0' ? chapter : num + '.  ' + chapter });
     } else if (isSong) {
       header = line.slice(2).split('|');
     } else if (header) {
@@ -121,16 +124,27 @@ async function loadText(file) {
 const lyricsFile = lang => 'songs_' + lang + '.txt';
 const meaningFile = lang => (lang === 'kn' ? 'meanings_kn.txt' : lang === 'ta' ? 'meanings_ta.txt' : 'meanings_en.txt');
 
+// Recordings the admins mark Complete (admin page › App content › Recordings) live in Supabase storage.
+const REC_URL = 'https://rjjpgxiyncgjrwmvnbhg.supabase.co', REC_KEY = 'sb_publishable_v_qO0MNpMCGvuaEo3oWGEQ_NyiOylEM';   // public address and public key
+let recP = null;
+function adminRecordings() {
+  if (!recP) recP = fetch(REC_URL + '/rest/v1/rpc/app_recordings', { method: 'POST', headers: { apikey: REC_KEY, 'Content-Type': 'application/json' }, body: '{}' })
+    .then(r => r.ok ? r.json() : Promise.reject(r.status)).then(l => { store.set('recs', l); return l; })
+    .catch(() => store.get('recs', []));
+  return recP;
+}
 function loadAudio(b) {
   b = b || book;
   // one shared promise per book, so a second caller never sees a half-filled list
   if (!audioMaps[b.id]) {
-    audioMaps[b.id] = fetchText(b.base + 'audio.txt').then(txt => {
+    audioMaps[b.id] = Promise.all([fetchText(b.base + 'audio.txt').catch(() => ''), adminRecordings()]).then(([txt, recs]) => {
       const m = new Map();
       for (const line of txt.split('\n')) {
         const bar = line.indexOf('|');
         if (bar > 0) m.set(line.slice(0, bar).trim(), line.slice(bar + 1).trim());
       }
+      for (const r of recs || []) if (r.book === b.id)   // a newer recording from the admin page wins
+        m.set(r.number, REC_URL + '/storage/v1/object/public/recordings/' + r.path.split('/').map(encodeURIComponent).join('/') + '?v=' + Date.parse(r.at));
       return m;
     }).catch(() => new Map());
   }
@@ -181,19 +195,21 @@ async function renderIndex(filter) {
   const am = await loadAudio();
   const q = norm(filter || '');
   const ul = $('song-list');
+  if (indexBook === 'ndp' && !q) { renderNdpTree(t, am); return; }
+  const heads = lang === 'en' ? null : await loadHeads(lyricsFile(lang));
   const out = [];
   let pendingChap = null, shown = 0;
   for (const it of indexItems) {
-    if (it.type === 'chap') { pendingChap = it; if (!q) out.push(`<li class="chap">${esc(it.heading)}</li>`); continue; }
+    if (it.type === 'chap') { pendingChap = it; if (!q) out.push(`<li class="chap">${esc(chapHeading(it, heads))}</li>`); continue; }
     const s = it.song;
     const tr = t && t.get(s.number);
     const title = tr && tr.title ? tr.title : s.displayTitle;
     if (q) {
       const hay = norm([s.number, s.title, s.displayTitle, tr ? tr.title : '', s.chapter].join(' '));
       if (!(s.number.startsWith(q) || hay.includes(q))) continue;
-      if (pendingChap) { out.push(`<li class="chap">${esc(pendingChap.heading)}</li>`); pendingChap = null; }
+      if (pendingChap) { out.push(`<li class="chap">${esc(chapHeading(pendingChap, heads))}</li>`); pendingChap = null; }
     }
-    const sub = [tr && tr.title && tr.title !== s.displayTitle ? s.displayTitle : '', s.displayRaga].filter(Boolean).join('  ·  ');
+    const sub = lang === 'en' ? s.displayRaga : (tr && tr.raga && !/^\S+\s+[\d-]+$/.test(tr.raga) ? tr.raga : '');
     out.push(`<li class="row" data-pos="${s.pos}"><span class="badge">${esc(s.number)}</span>` +
       `<div class="row-text"><div class="row-title">${esc(title)}</div>${sub ? `<div class="row-sub">${esc(sub)}</div>` : ''}</div>` +
       (am.has(s.number) ? '<span class="has-audio" aria-label="Audio available">♪</span>' : '') + '</li>');
@@ -201,6 +217,132 @@ async function renderIndex(filter) {
   }
   ul.innerHTML = out.join('');
   $('empty').classList.toggle('hidden', shown > 0);
+}
+
+
+// ---------- Prabandham index: Āyiram › work › decade › pāsurams, as drop-downs ----------
+const AYIRAM_NAMES = {
+  'Mudhal Ayiram': { en: 'Mudhal Āyiram', ta: 'முதலாயிரம்', kn: 'ಮುದಲಾಯಿರಂ', sa: 'मुदलायिरम्' },
+  'Irandam Ayiram · Periya Thirumozhi': { en: 'Iraṇḍām Āyiram', ta: 'இரண்டாமாயிரம்', kn: 'ಇರಂಡಾಮಾಯಿರಂ', sa: 'इरण्डामायिरम्' },
+  'Moonram Ayiram · Iyarpa': { en: 'Mūnṛām Āyiram · Iyaṛpā', ta: 'மூன்றாமாயிரம் · இயற்பா', kn: 'ಮೂನ್ಱಾಮಾಯಿರಂ · ಇಯಱ್ಪಾ', sa: 'मून्ऱामायिरम् · इयऱ्पा' },
+  'Nangam Ayiram · Thiruvaymozhi': { en: 'Nāṅgām Āyiram · Thiruvāymozhi', ta: 'நான்காமாயிரம் · திருவாய்மொழி', kn: 'ನಾಂಗಾಮಾಯಿರಂ · ತಿರುವಾಯ್ಮೊಳಿ', sa: 'नान्गामायिरम् · तिरुवाय्मॊळि' },
+  'Appendix': { en: 'Appendix', ta: 'பின்னிணைப்பு', kn: 'ಅನುಬಂಧ', sa: 'परिशिष्टम्' },
+};
+const AZHVAR_NAMES = {
+  'Periyazhvar': ['பெரியாழ்வார்', 'ಪೆರಿಯಾಳ್ವಾರ್', 'पॆरियाळ्वार्'], 'Andal': ['ஆண்டாள்', 'ಆಂಡಾಳ್', 'आण्डाळ्'],
+  'Kulasekhara Azhvar': ['குலசேகர ஆழ்வார்', 'ಕುಲಶೇಖರ ಆಳ್ವಾರ್', 'कुलशेखर आळ्वार्'], 'Thirumazhisai Azhvar': ['திருமழிசை ஆழ்வார்', 'ತಿರುಮಳಿಸೈ ಆಳ್ವಾರ್', 'तिरुमळिसै आळ्वार्'],
+  'Thondaradippodi Azhvar': ['தொண்டரடிப்பொடி ஆழ்வார்', 'ತೊಂಡರಡಿಪ್ಪೊಡಿ ಆಳ್ವಾರ್', 'तॊण्डरडिप्पॊडि आळ्वार्'], 'Thiruppan Azhvar': ['திருப்பாணாழ்வார்', 'ತಿರುಪ್ಪಾಣಾಳ್ವಾರ್', 'तिरुप्पाणाळ्वार्'],
+  'Madhurakavi Azhvar': ['மதுரகவி ஆழ்வார்', 'ಮಧುರಕವಿ ಆಳ್ವಾರ್', 'मधुरकवि आळ्वार्'], 'Thirumangai Azhvar': ['திருமங்கை ஆழ்வார்', 'ತಿರುಮಂಗೈ ಆಳ್ವಾರ್', 'तिरुमङ्गै आळ्वार्'],
+  'Poigai Azhvar': ['பொய்கை ஆழ்வார்', 'ಪೊಯ್ಗೈ ಆಳ್ವಾರ್', 'पॊय्गै आळ्वार्'], 'Bhoothathazhvar': ['பூதத்தாழ்வார்', 'ಭೂತತ್ತಾಳ್ವಾರ್', 'भूतत्ताळ्वार्'],
+  'Peyazhvar': ['பேயாழ்வார்', 'ಪೇಯಾಳ್ವಾರ್', 'पेयाळ्वार्'], 'Nammazhvar': ['நம்மாழ்வார்', 'ನಮ್ಮಾಳ್ವಾರ್', 'नम्माळ्वार्'],
+  'Thiruvarangathamudhanar': ['திருவரங்கத்தமுதனார்', 'ತಿರುವರಂಗತ್ತಮುದನಾರ್', 'तिरुवरङ्गत्तमुदनार्'],
+};
+const NX_UI = {
+  pas: { en: 'pāsurams', ta: 'பாசுரங்கள்', kn: 'ಪಾಶುರಗಳು', sa: 'पाशुराः' },
+  dec: { en: 'decades', ta: 'பதிகங்கள்', kn: 'ಪದಿಗಗಳು', sa: 'दशकाः' },
+};
+const nxT = k => NX_UI[k][prefs.lang] || NX_UI[k].en;
+let nxOpen = store.get('nxOpen', { work: '', dec: '' });   // remembered, so Back from a pāsuram returns to the same place
+function ndpTree() {
+  const tree = [];
+  let ay = null, wk = null, dc = null;
+  for (const it of indexItems) {
+    if (it.type !== 'song') continue;
+    const s = it.song;
+    if (!ay || ay.name !== s.ayiram) { ay = { name: s.ayiram, works: [] }; tree.push(ay); wk = null; }
+    if (!wk || wk.no !== s.workNo) { wk = { no: s.workNo, name: s.chapter, decades: [], songs: [] }; ay.works.push(wk); dc = null; }
+    wk.songs.push(s);
+    if (s.decade) {
+      if (!dc || dc.ref !== s.decade) { dc = { ref: s.decade, name: s.decadeName, songs: [] }; wk.decades.push(dc); }
+      dc.songs.push(s);
+    }
+  }
+  return tree;
+}
+const nxRange = l => l.length === 1 ? l[0].number : l[0].number + '–' + l[l.length - 1].number;
+function renderNdpTree(t, am) {
+  const lang = prefs.lang, tree = ndpTree();
+  const songRow = s => {
+    const tr = t && t.get(s.number), title = tr && tr.title ? tr.title : s.displayTitle;
+    return `<li class="row nx-song" data-pos="${s.pos}"><span class="badge">${esc(s.number)}</span>` +
+      `<div class="row-text"><div class="row-title">${esc(title)}</div></div>` +
+      (am.has(s.number) ? '<span class="has-audio" aria-label="Audio available">♪</span>' : '') + '</li>';
+  };
+  const workName = w => {
+    const [title, poet] = w.name.split(' · ');
+    const tr = t && t.get(w.songs[0].number);
+    const local = tr && tr.raga ? tr.raga.replace(/\s+[\d-]+$/, '') : '';
+    const pl = AZHVAR_NAMES[poet] && { ta: 0, kn: 1, sa: 2 }[lang] !== undefined ? AZHVAR_NAMES[poet][{ ta: 0, kn: 1, sa: 2 }[lang]] : poet;
+    return { title: local || title, poet: pl || '' };
+  };
+  const out = [];
+  for (const ay of tree) {
+    const all = ay.works.flatMap(w => w.songs);
+    const an = (AYIRAM_NAMES[ay.name] || {})[lang] || (AYIRAM_NAMES[ay.name] || {}).en || ay.name;
+    out.push(`<li class="nx-ay"><span>${esc(an)}</span><span class="nx-ay-n">${esc(nxRange(all))}</span></li>`);
+    for (const w of ay.works) {
+      const open = nxOpen.work === w.no, wn = workName(w);
+      out.push(`<li class="nx-work ${open ? 'open' : ''}"><button class="nx-head" data-nx-work="${esc(w.no)}" aria-expanded="${open}">` +
+        `<span class="nx-no">${esc(w.no)}</span><span class="nx-t"><b>${esc(wn.title)}</b>` +
+        (wn.poet ? `<span>${esc(wn.poet)}</span>` : '') + `<span class="nx-meta">${w.songs.length} ${nxT('pas')}${w.decades.length ? ' · ' + w.decades.length + ' ' + nxT('dec') : ''}</span></span>` +
+        `<span class="nx-rng">${esc(nxRange(w.songs))}</span>` +
+        `<svg class="nx-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`);
+      if (open) {
+        out.push('<ul class="nx-body">');
+        if (w.decades.length) {
+          for (const d of w.decades) {
+            const dOpen = nxOpen.dec === d.ref;
+            const tr = t && t.get(d.songs[0].number);
+            const dn = lang === 'en' ? d.name : (tr && tr.title ? tr.title.split(/\s+/).slice(0, 3).join(' ') : d.name);
+            out.push(`<li class="nx-dec ${dOpen ? 'open' : ''}"><button class="nx-dhead" data-nx-dec="${esc(d.ref)}" aria-expanded="${dOpen}">` +
+              `<span class="nx-ref">${esc(d.ref)}</span><span class="nx-t"><b>${esc(dn)}</b><span>${d.songs.length} ${nxT('pas')}</span></span><span class="nx-rng">${esc(nxRange(d.songs))}</span>` +
+              `<svg class="nx-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>` +
+              (dOpen ? '<ul class="nx-songs">' + d.songs.map(songRow).join('') + '</ul>' : '') + '</li>');
+          }
+        } else out.push('<li><ul class="nx-songs">' + w.songs.map(songRow).join('') + '</ul></li>');
+        out.push('</ul>');
+      }
+      out.push('</li>');
+    }
+  }
+  $('song-list').innerHTML = out.join('');
+  $('empty').classList.add('hidden');
+}
+document.addEventListener('click', e => {
+  const w = e.target.closest('[data-nx-work]'), d = e.target.closest('[data-nx-dec]');
+  if (!w && !d) return;
+  if (w) nxOpen = { work: nxOpen.work === w.dataset.nxWork ? '' : w.dataset.nxWork, dec: '' };
+  else nxOpen = { work: nxOpen.work, dec: nxOpen.dec === d.dataset.nxDec ? '' : d.dataset.nxDec };
+  store.set('nxOpen', nxOpen);
+  renderIndex('').then(() => {   // keep the tapped heading in view, just under the top bar
+    const sel = w ? `[data-nx-work="${w.dataset.nxWork}"]` : `[data-nx-dec="${d.dataset.nxDec}"]`;
+    const h = document.querySelector(sel); if (h) h.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  });
+});
+
+
+// chapter names in the chosen language: the "## n | name" and "### n | name" lines of songs_<lang>.txt
+const headCache = {};
+function loadHeads(file) {
+  const key = bf(file);
+  if (!headCache[key]) {
+    headCache[key] = fetchText(key).then(t => {
+      const m = new Map();
+      for (const line of t.replace(/\r/g, '').split('\n')) {
+        const sub = line.startsWith('### '), top = !sub && line.startsWith('## ');
+        if (!sub && !top) continue;
+        const h = line.slice(sub ? 4 : 3).split('|'), k = (sub ? '### ' : '## ') + h[0].trim();
+        if (!m.has(k)) m.set(k, part(h, 1));
+      }
+      return m;
+    }).catch(() => new Map());
+  }
+  return headCache[key];
+}
+function chapHeading(it, heads) {
+  const n = heads && it.num !== undefined ? heads.get(it.key.startsWith('### ') ? it.key : '## ' + it.num) : '';
+  if (!n) return it.heading;
+  return it.key.startsWith('### ') ? it.num + '   ' + n : it.num === '0' ? n : it.num + '.  ' + n;
 }
 
 function openSearch() {
@@ -308,9 +450,10 @@ async function showSong(pos, keepTab, keepScroll) {
   $('song-title').textContent = title;
   $('song-meta').dataset.raga = raga || (t ? s.displayTitle : '');
   $('song-meta').textContent = $('song-meta').dataset.raga;
-  $('crumb').textContent = s.number + '  ·  ' + (cur + 1) + ' of ' + songs.length;
+  $('crumb').textContent = s.number + '  ·  ' + (cur + 1) + ({ en: ' of ', ta: ' / ', kn: ' / ', sa: ' / ' }[prefs.lang] || ' of ') + songs.length;
   $('lyrics').innerHTML = lyrics;
   $('audio-lyrics').innerHTML = lyrics;
+  $('btn-sruti').href = 'sruti.html?book=' + book.id + '&n=' + encodeURIComponent(s.number) + '&title=' + encodeURIComponent((s.number ? s.number + ' · ' : '') + ($('song-title') ? $('song-title').textContent : s.displayTitle));
   renderLangChips();
   const prev = songs[cur - 1], next = songs[cur + 1];
   $('btn-prev').textContent = prev ? '‹ ' + prev.number + ' ' + short(prev.displayTitle, 14) : '';
@@ -359,12 +502,12 @@ function selectTab(t) {
   const meaningChips = t === 1 && +($('mean-chips').dataset.n || 0) > 0;
   $('mean-chips').classList.toggle('hidden', !meaningChips);
   $('lang-chips').classList.toggle('hidden', t === 1 || t === 3);
-  $('song-meta').textContent = t === 1 ? 'Meaning in ' + (LANGS.find(l => l.code === (prefs.lang === 'sa' ? 'en' : prefs.lang)).name)
+  $('song-meta').textContent = t === 1 ? ({ en: 'Meaning in English', ta: 'தமிழில் பொருள்', kn: 'ಕನ್ನಡದಲ್ಲಿ ಅರ್ಥ', sa: 'अर्थः आङ्ग्लभाषायाम्' })[prefs.lang]
     : ($('song-meta').dataset.raga || '');
 }
 
 function openSong(pos) { go(book.hash + songs[pos].number); }
-function closeSong() { back('#book/' + book.id); }
+function closeSong() { back(navStack.length > 1 ? undefined : '#book/' + book.id); }   // back to where we came from (Learn, Favourites…)
 
 function setScale(v) {
   prefs.scale = v;
@@ -433,7 +576,7 @@ function togglePlay() {
   $('btn-speed').onclick = () => {
     sp = (sp + 1) % SPEEDS.length;
     a.playbackRate = a.defaultPlaybackRate = SPEEDS[sp];
-    $('btn-speed').textContent = 'Speed ' + SPEEDS[sp] + '×';
+    $('btn-speed').textContent = tr('Speed') + ' ' + SPEEDS[sp] + '×';
     $('btn-speed').classList.toggle('on', SPEEDS[sp] !== 1);
   };
   a.addEventListener('loadedmetadata', () => { a.playbackRate = SPEEDS[sp]; });
@@ -529,8 +672,8 @@ async function useBook(id) {
 async function showIndex(id, fromSong) {
   const fresh = indexBook !== id;
   $('book-title').textContent = bookTitle(id);
-  $('search-input').placeholder = BOOKS[id].search;
-  $('empty').textContent = 'No ' + BOOKS[id].unit + ' found';
+  $('search-input').placeholder = tr(BOOKS[id].search);
+  $('empty').textContent = tr('No ' + BOOKS[id].unit + ' found');
   if (fresh) {
     $('search-input').value = '';
     $('search-row').classList.add('hidden'); $('title-row').classList.remove('hidden');
@@ -761,6 +904,7 @@ const ICONS = {"scroll": "<path d=\"M7,4h11a2,2 0,0 1,2 2v1h-3 M7,4a2,2 0,0 0,-2
 // =====================================================================
 // v4.0 – same home and screens as the Android app v13.1
 // =====================================================================
+ICONS.mic = '<rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
 const svgI = (name, cls) => `<svg class="ic ${cls || ''}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ''}</svg>`;
 // The third book: its name and line follow the chosen language
 const NDP_BOOK = {
@@ -769,6 +913,203 @@ const NDP_BOOK = {
   kn: ['ನಾಲಾಯಿರ ದಿವ್ಯ ಪ್ರಬಂಧಂ', 'ಆಳ್ವಾರರ 4000 ಪಾಶುರಗಳು'],
   sa: ['नालायिर दिव्य प्रबन्धम्', 'आळ्वाराणां ४००० पाशुराः'],
 };
+
+// ---------- SCRUM-74: the whole screen follows the chosen language ----------
+const UI = {
+  hello:   { en: 'Hari Om', ta: 'ஹரி ஓம்', kn: 'ಹರಿ ಓಂ', sa: 'हरि ॐ' },
+  tagline: { en: 'A doorway to the Lord’s Name', ta: 'இறைவன் திருநாமத்திற்கு ஒரு வாசல்', kn: 'ಭಗವಂತನ ನಾಮಕ್ಕೆ ಒಂದು ಬಾಗಿಲು', sa: 'भगवन्नाम्नः द्वारम्' },
+  choose:  { en: 'CHOOSE A BOOK', ta: 'ஒரு நூலைத் தேர்ந்தெடுங்கள்', kn: 'ಒಂದು ಪುಸ್ತಕವನ್ನು ಆರಿಸಿ', sa: 'ग्रन्थं चिनुत' },
+  dns:     { en: ['Divya Nama Sankeertanam', 'Bhajans of many saints'], ta: ['திவ்ய நாம ஸங்கீர்த்தனம்', 'பல மகான்களின் பஜனைகள்'], kn: ['ದಿವ್ಯ ನಾಮ ಸಂಕೀರ್ತನಂ', 'ಅನೇಕ ಸಂತರ ಭಜನೆಗಳು'], sa: ['दिव्यनामसङ्कीर्तनम्', 'बहूनां सन्तानां भजनानि'] },
+  ashta:   { en: ['Śrī Gīta Govindam', '24 Aṣṭapadis of<br>Śrī Jayadeva'], ta: ['ஸ்ரீ கீத கோவிந்தம்', 'ஸ்ரீ ஜயதேவரின்<br>24 அஷ்டபதிகள்'], kn: ['ಶ್ರೀ ಗೀತ ಗೋವಿಂದಂ', 'ಶ್ರೀ ಜಯದೇವರ<br>24 ಅಷ್ಟಪದಿಗಳು'], sa: ['श्रीगीतगोविन्दम्', 'श्रीजयदेवस्य<br>२४ अष्टपद्यः'] },
+  cont:    { en: 'Continue where you left off', ta: 'விட்ட இடத்திலிருந்து தொடருங்கள்', kn: 'ನಿಲ್ಲಿಸಿದಲ್ಲಿಂದ ಮುಂದುವರಿಸಿ', sa: 'यत्र विरतं ततः अनुवर्तताम्' },
+  diary:   { en: 'Upcoming<br>Satsangs', ta: 'வரவிருக்கும்<br>சத்சங்கங்கள்', kn: 'ಮುಂಬರುವ<br>ಸತ್ಸಂಗಗಳು', sa: 'आगामिनः<br>सत्सङ्गाः' },
+  learn:   { en: 'Learn<br>&nbsp;', ta: 'கற்க<br>&nbsp;', kn: 'ಕಲಿಯಿರಿ<br>&nbsp;', sa: 'अध्ययनम्<br>&nbsp;' },
+  favs:    { en: 'My<br>favourites', ta: 'எனக்குப்<br>பிடித்தவை', kn: 'ನನ್ನ<br>ಮೆಚ್ಚಿನವು', sa: 'मम<br>प्रियाणि' },
+  tfd:     { en: 'THOUGHT FOR THE DAY', ta: 'இன்றைய சிந்தனை', kn: 'ಇಂದಿನ ಚಿಂತನೆ', sa: 'अद्यतनं चिन्तनम्' },
+  read:    { en: 'Read ›', ta: 'படிக்க ›', kn: 'ಓದಿ ›', sa: 'पठत ›' },
+  sod:     { en: 'SONG OF THE DAY', ta: 'இன்றைய பாடல்', kn: 'ಇಂದಿನ ಹಾಡು', sa: 'अद्यतनं गीतम्' },
+  raga:    { en: 'Rāgam', ta: 'ராகம்', kn: 'ರಾಗ', sa: 'रागः' },
+  listen:  { en: 'Listen', ta: 'கேள்', kn: 'ಕೇಳಿ', sa: 'शृणुत' },
+  share:   { en: 'Share', ta: 'பகிர்', kn: 'ಹಂಚಿಕೊಳ್ಳಿ', sa: 'प्रेषयत' },
+  about:   { en: ['About Harinamadwar', 'Our satsangs, our guide, and how to invite us'], ta: ['ஹரிநாமத்வார் பற்றி', 'எங்கள் சத்சங்கங்கள், வழிகாட்டி, எங்களை அழைப்பது எப்படி'], kn: ['ಹರಿನಾಮದ್ವಾರದ ಬಗ್ಗೆ', 'ನಮ್ಮ ಸತ್ಸಂಗಗಳು, ಮಾರ್ಗದರ್ಶಕರು, ನಮ್ಮನ್ನು ಆಹ್ವಾನಿಸುವುದು ಹೇಗೆ'], sa: ['हरिनामद्वारविषये', 'अस्माकं सत्सङ्गाः, मार्गदर्शकः, आह्वानविधिः च'] },
+  change:  { en: 'Change what I see on this page ›', ta: 'இந்தப் பக்கத்தில் தெரிவதை மாற்ற ›', kn: 'ಈ ಪುಟದಲ್ಲಿ ಕಾಣುವುದನ್ನು ಬದಲಿಸಿ ›', sa: 'अस्मिन् पृष्ठे दृश्यं परिवर्तयत ›' },
+  pasuram: { en: 'Pāsuram ', ta: 'பாசுரம் ', kn: 'ಪಾಶುರ ', sa: 'पाशुरम् ' },
+  ashtapadi: { en: 'Aṣṭapadi ', ta: 'அஷ்டபதி ', kn: 'ಅಷ್ಟಪದಿ ', sa: 'अष्टपदी ' },
+};
+const T = k => { const v = UI[k]; return v ? (v[prefs.lang] || v.en) : k; };
+// ---------- SCRUM-74: every screen in the chosen language ----------
+// Exact English phrase → [Tamil, Kannada, Sanskrit]. Text on screen that matches is shown in the chosen language;
+// lyrics and meanings are never touched (they already come from the language's own file).
+const I18N = {
+  '‹ Back': ['‹ பின்செல்', '‹ ಹಿಂದೆ', '‹ पृष्ठतः'],
+  'Back': ['பின்செல்', 'ಹಿಂದೆ', 'पृष्ठतः'],
+  'Welcome': ['வரவேற்பு', 'ಸ್ವಾಗತ', 'स्वागतम्'],
+  'Upcoming Satsangs': ['வரவிருக்கும் சத்சங்கங்கள்', 'ಮುಂಬರುವ ಸತ್ಸಂಗಗಳು', 'आगामिनः सत्सङ्गाः'],
+  'Learn': ['கற்க', 'ಕಲಿಯಿರಿ', 'अध्ययनम्'],
+  'My favourites': ['எனக்குப் பிடித்தவை', 'ನನ್ನ ಮೆಚ್ಚಿನವು', 'मम प्रियाणि'],
+  'Thought for the Day': ['இன்றைய சிந்தனை', 'ಇಂದಿನ ಚಿಂತನೆ', 'अद्यतनं चिन्तनम्'],
+  'Thoughts for the Day': ['தினசரி சிந்தனைகள்', 'ದಿನದ ಚಿಂತನೆಗಳು', 'दैनिकचिन्तनानि'],
+  'Share a song': ['ஒரு பாடலைப் பகிர்', 'ಹಾಡನ್ನು ಹಂಚಿಕೊಳ್ಳಿ', 'गीतं प्रेषयत'],
+  'About Harinamadwar': ['ஹரிநாமத்வார் பற்றி', 'ಹರಿನಾಮದ್ವಾರದ ಬಗ್ಗೆ', 'हरिनामद्वारविषये'],
+  'A doorway to the Lord’s Name': ['இறைவன் திருநாமத்திற்கு ஒரு வாசல்', 'ಭಗವಂತನ ನಾಮಕ್ಕೆ ಒಂದು ಬಾಗಿಲು', 'भगवन्नाम्नः द्वारम्'],
+  'Settings': ['அமைப்புகள்', 'ಸೆಟ್ಟಿಂಗ್‌ಗಳು', 'विन्यासाः'],
+  'Language': ['மொழி', 'ಭಾಷೆ', 'भाषा'],
+  'Language of lyrics': ['மொழி', 'ಭಾಷೆ', 'भाषा'],
+  'Lyrics': ['பாடல் வரிகள்', 'ಸಾಹಿತ್ಯ', 'पाठः'],
+  'Meaning': ['பொருள்', 'ಅರ್ಥ', 'अर्थः'],
+  'Audio': ['ஒலி', 'ಧ್ವನಿ', 'श्रव्यम्'],
+  'Composer': ['இயற்றியவர்', 'ರಚನಕಾರ', 'रचयिता'],
+  'Coming soon': ['விரைவில்', 'ಶೀಘ್ರದಲ್ಲೇ', 'शीघ्रम्'],
+  'The life and story of the saint who composed this song will be added here.': ['இந்தப் பாடலை இயற்றிய மகானின் வாழ்க்கை வரலாறு இங்கே சேர்க்கப்படும்.', 'ಈ ಹಾಡನ್ನು ರಚಿಸಿದ ಸಂತರ ಜೀವನ ಕಥೆ ಇಲ್ಲಿ ಸೇರಿಸಲಾಗುವುದು.', 'अस्य गीतस्य रचयितुः सन्तस्य जीवनचरितम् अत्र योजयिष्यते।'],
+  'No songs found': ['பாடல்கள் எதுவும் இல்லை', 'ಯಾವುದೇ ಹಾಡುಗಳು ಸಿಗಲಿಲ್ಲ', 'गीतानि न लब्धानि'],
+  'No pāsurams found': ['பாசுரங்கள் எதுவும் இல்லை', 'ಯಾವುದೇ ಪಾಶುರಗಳು ಸಿಗಲಿಲ್ಲ', 'पाशुराः न लब्धाः'],
+  'No aṣṭapadis found': ['அஷ்டபதிகள் எதுவும் இல்லை', 'ಯಾವುದೇ ಅಷ್ಟಪದಿಗಳು ಸಿಗಲಿಲ್ಲ', 'अष्टपद्यः न लब्धाः'],
+  'Search: section no. or song title': ['தேடல்: பகுதி எண் அல்லது பாடல் பெயர்', 'ಹುಡುಕಿ: ವಿಭಾಗ ಸಂಖ್ಯೆ ಅಥವಾ ಹಾಡಿನ ಹೆಸರು', 'अन्विष्यत: विभागसङ्ख्या गीतनाम वा'],
+  'Search: aṣṭapadi no. or title': ['தேடல்: அஷ்டபதி எண் அல்லது பெயர்', 'ಹುಡುಕಿ: ಅಷ್ಟಪದಿ ಸಂಖ್ಯೆ ಅಥವಾ ಹೆಸರು', 'अन्विष्यत: अष्टपदीसङ्ख्या नाम वा'],
+  'Search: pāsuram no. or words': ['தேடல்: பாசுர எண் அல்லது சொற்கள்', 'ಹುಡುಕಿ: ಪಾಶುರ ಸಂಖ್ಯೆ ಅಥವಾ ಪದಗಳು', 'अन्विष्यत: पाशुरसङ्ख्या शब्दाः वा'],
+  'Loading…': ['ஏற்றுகிறது…', 'ಲೋಡ್ ಆಗುತ್ತಿದೆ…', 'आनीयते…'],
+  'Repeat song': ['பாடலை மீண்டும் இசை', 'ಹಾಡನ್ನು ಪುನರಾವರ್ತಿಸಿ', 'गीतं पुनः'],
+  'Speed': ['வேகம்', 'ವೇಗ', 'वेगः'],
+  'About the book': ['நூலைப் பற்றி', 'ಪುಸ್ತಕದ ಬಗ್ಗೆ', 'ग्रन्थविषये'],
+  'Text size': ['எழுத்தின் அளவு', 'ಅಕ್ಷರದ ಗಾತ್ರ', 'अक्षरमानम्'],
+  'Drag to make the lyrics bigger or smaller. You can also use A− / A+ on any song.': ['பாடல் வரிகளைப் பெரிதாக்க அல்லது சிறிதாக்க இழுக்கவும். எந்தப் பாடலிலும் A− / A+ பயன்படுத்தலாம்.', 'ಸಾಹಿತ್ಯವನ್ನು ದೊಡ್ಡದು ಅಥವಾ ಚಿಕ್ಕದು ಮಾಡಲು ಎಳೆಯಿರಿ. ಯಾವುದೇ ಹಾಡಿನಲ್ಲಿ A− / A+ ಬಳಸಬಹುದು.', 'पाठं बृहत् लघु वा कर्तुं कर्षत। प्रत्येकस्मिन् गीते A− / A+ अपि उपयोक्तुं शक्यते।'],
+  'Keep screen on while a song is open': ['பாடல் திறந்திருக்கும்போது திரையை அணையாமல் வை', 'ಹಾಡು ತೆರೆದಿರುವಾಗ ಪರದೆ ಆನ್ ಇರಲಿ', 'गीते उद्घाटिते पटलं प्रकाशितं स्थापयत'],
+  'Night mode (light text on dark page)': ['இரவு முறை (இருண்ட பக்கத்தில் வெளிர் எழுத்து)', 'ರಾತ್ರಿ ಮೋಡ್ (ಕಪ್ಪು ಪುಟದಲ್ಲಿ ತಿಳಿ ಅಕ್ಷರ)', 'रात्रिविधिः (कृष्णपृष्ठे शुभ्राक्षराणि)'],
+  'Done': ['முடிந்தது', 'ಮುಗಿದಿದೆ', 'सम्पन्नम्'],
+  'Listening…': ['கேட்கிறது…', 'ಕೇಳುತ್ತಿದೆ…', 'शृणोति…'],
+  'Say a song name or a rāgam': ['பாடலின் பெயர் அல்லது ராகத்தைச் சொல்லுங்கள்', 'ಹಾಡಿನ ಹೆಸರು ಅಥವಾ ರಾಗವನ್ನು ಹೇಳಿ', 'गीतनाम रागं वा वदत'],
+  '🎤 Try again': ['🎤 மீண்டும் முயல்க', '🎤 ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ', '🎤 पुनः प्रयतध्वम्'],
+  'Try again': ['மீண்டும் முயல்க', 'ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ', 'पुनः प्रयतध्वम्'],
+  'See all matches': ['எல்லாப் பொருத்தங்களும்', 'ಎಲ್ಲಾ ಹೊಂದಾಣಿಕೆಗಳು', 'सर्वाणि दर्शयत'],
+  'Close': ['மூடு', 'ಮುಚ್ಚಿ', 'पिधत्त'],
+  'Continue': ['தொடர்க', 'ಮುಂದುವರಿಸಿ', 'अग्रे'],
+  'Your phone number': ['உங்கள் தொலைபேசி எண்', 'ನಿಮ್ಮ ಫೋನ್ ಸಂಖ್ಯೆ', 'भवतः दूरभाषसङ्ख्या'],
+  'Invite code': ['அழைப்புக் குறியீடு', 'ಆಹ್ವಾನ ಕೋಡ್', 'आमन्त्रणसङ्केतः'],
+  'Welcome to Harinamadwar': ['ஹரிநாமத்வாருக்கு வருக', 'ಹರಿನಾಮದ್ವಾರಕ್ಕೆ ಸ್ವಾಗತ', 'हरिनामद्वारे स्वागतम्'],
+  'Enter the code you received on WhatsApp': ['WhatsApp-இல் வந்த குறியீட்டை உள்ளிடவும்', 'WhatsApp ನಲ್ಲಿ ಬಂದ ಕೋಡ್ ನಮೂದಿಸಿ', 'WhatsApp द्वारा प्राप्तं सङ्केतं लिखत'],
+  'No code? Ask your satsang admin.': ['குறியீடு இல்லையா? உங்கள் சத்சங்க நிர்வாகியிடம் கேளுங்கள்.', 'ಕೋಡ್ ಇಲ್ಲವೇ? ನಿಮ್ಮ ಸತ್ಸಂಗ ನಿರ್ವಾಹಕರನ್ನು ಕೇಳಿ.', 'सङ्केतः नास्ति? सत्सङ्गव्यवस्थापकं पृच्छत।'],
+  'I understand': ['புரிந்துகொண்டேன்', 'ನನಗೆ ಅರ್ಥವಾಯಿತು', 'अवगतम्'],
+  'For our class only': ['எங்கள் வகுப்புக்கு மட்டும்', 'ನಮ್ಮ ತರಗತಿಗೆ ಮಾತ್ರ', 'अस्माकं कक्षायै एव'],
+  'Share': ['பகிர்', 'ಹಂಚಿಕೊಳ್ಳಿ', 'प्रेषयत'],
+  'Listen': ['கேள்', 'ಕೇಳಿ', 'शृणुत'],
+  'Sing': ['பாடுங்கள்', 'ಹಾಡಿ', 'गायत'],
+  'Understand': ['புரிந்துகொள்ளுங்கள்', 'ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ', 'अवगच्छत'],
+  'Suggestion': ['பரிந்துரை', 'ಸಲಹೆ', 'सूचना'],
+  'Feedback': ['கருத்து', 'ಪ್ರತಿಕ್ರಿಯೆ', 'प्रतिक्रिया'],
+  'Your name': ['உங்கள் பெயர்', 'ನಿಮ್ಮ ಹೆಸರು', 'भवतः नाम'],
+  'Your message': ['உங்கள் செய்தி', 'ನಿಮ್ಮ ಸಂದೇಶ', 'भवतः सन्देशः'],
+  'Send by': ['அனுப்பும் வழி', 'ಕಳುಹಿಸುವ ವಿಧಾನ', 'प्रेषणमार्गः'],
+  'This is a': ['இது ஒரு', 'ಇದು ಒಂದು', 'एषा'],
+  'Call to invite': ['அழைக்க போன் செய்யுங்கள்', 'ಆಹ್ವಾನಿಸಲು ಕರೆ ಮಾಡಿ', 'आह्वानाय दूरभाषं कुरुत'],
+  'Phone': ['தொலைபேசி', 'ಫೋನ್', 'दूरभाषः'],
+  'AT A SATSANG': ['ஒரு சத்சங்கத்தில்', 'ಸತ್ಸಂಗದಲ್ಲಿ', 'सत्सङ्गे'],
+  'IN THIS APP': ['இந்தச் செயலியில்', 'ಈ ಆ್ಯಪ್‌ನಲ್ಲಿ', 'अस्मिन् अनुप्रयोगे'],
+  'WHY SING THE NAME': ['நாமத்தை ஏன் பாட வேண்டும்', 'ನಾಮವನ್ನು ಏಕೆ ಹಾಡಬೇಕು', 'किमर्थं नामगानम्'],
+  'GUIDED BY': ['வழிகாட்டுபவர்', 'ಮಾರ್ಗದರ್ಶಕರು', 'मार्गदर्शकः'],
+  'HOST A SATSANG': ['சத்சங்கம் நடத்துங்கள்', 'ಸತ್ಸಂಗ ಆಯೋಜಿಸಿ', 'सत्सङ्गम् आयोजयत'],
+  'FEEDBACK & SUGGESTIONS': ['கருத்துகளும் பரிந்துரைகளும்', 'ಪ್ರತಿಕ್ರಿಯೆ ಮತ್ತು ಸಲಹೆಗಳು', 'प्रतिक्रियाः सूचनाः च'],
+  'STAY CONNECTED': ['தொடர்பில் இருங்கள்', 'ಸಂಪರ್ಕದಲ್ಲಿರಿ', 'सम्पर्के तिष्ठत'],
+  'Invite us to your home': ['எங்களை உங்கள் இல்லத்துக்கு அழையுங்கள்', 'ನಮ್ಮನ್ನು ನಿಮ್ಮ ಮನೆಗೆ ಆಹ್ವಾನಿಸಿ', 'अस्मान् स्वगृहम् आह्वयत'],
+  'Share your thoughts': ['உங்கள் கருத்துகளைப் பகிருங்கள்', 'ನಿಮ್ಮ ಅಭಿಪ್ರಾಯ ಹಂಚಿಕೊಳ್ಳಿ', 'स्वविचारान् प्रेषयत'],
+  'Your practice companion': ['உங்கள் பயிற்சித் துணை', 'ನಿಮ್ಮ ಅಭ್ಯಾಸದ ಸಂಗಾತಿ', 'भवतः अभ्याससहायः'],
+  'What devotees feel': ['பக்தர்கள் உணர்வது', 'ಭಕ್ತರು ಅನುಭವಿಸುವುದು', 'भक्तानाम् अनुभवः'],
+  'DAILY SESSION': ['தினசரி வகுப்பு', 'ದೈನಂದಿನ ತರಗತಿ', 'दैनिककक्षा'],
+  'Join on Google Meet': ['Google Meet-இல் இணையுங்கள்', 'Google Meet ನಲ್ಲಿ ಸೇರಿ', 'Google Meet द्वारा सम्मिलत'],
+  'Join today’s session': ['இன்றைய வகுப்பில் சேருங்கள்', 'ಇಂದಿನ ತರಗತಿಗೆ ಸೇರಿ', 'अद्यतनकक्षायां सम्मिलत'],
+  'MY PROGRESS': ['என் முன்னேற்றம்', 'ನನ್ನ ಪ್ರಗತಿ', 'मम प्रगतिः'],
+  'Hide my progress': ['என் முன்னேற்றத்தை மறை', 'ನನ್ನ ಪ್ರಗತಿ ಮರೆಮಾಡಿ', 'मम प्रगतिं गोपयत'],
+  'Show my progress': ['என் முன்னேற்றத்தைக் காட்டு', 'ನನ್ನ ಪ್ರಗತಿ ತೋರಿಸಿ', 'मम प्रगतिं दर्शयत'],
+  'THIS WEEK’S SONGS FROM JANAKIRAMAN JI': ['ஜானகிராமன் ஜியின் இந்த வாரப் பாடல்கள்', 'ಜಾನಕಿರಾಮನ್ ಜಿ ಅವರ ಈ ವಾರದ ಹಾಡುಗಳು', 'जानकिरामन्-महोदयस्य अस्य सप्ताहस्य गीतानि'],
+  'Tick a song when you can sing it. Only you see this.': ['பாட முடிந்ததும் பாடலைக் குறியிடுங்கள். இது உங்களுக்கு மட்டுமே தெரியும்.', 'ಹಾಡಲು ಬಂದಾಗ ಹಾಡನ್ನು ಗುರುತಿಸಿ. ಇದು ನಿಮಗೆ ಮಾತ್ರ ಕಾಣುತ್ತದೆ.', 'यदा गातुं शक्नुथ तदा गीतं चिह्नयत। एतत् भवद्भिः एव दृश्यते।'],
+  'All of this week’s songs. Wonderful!': ['இந்த வாரப் பாடல்கள் அனைத்தும். அருமை!', 'ಈ ವಾರದ ಎಲ್ಲಾ ಹಾಡುಗಳು. ಅದ್ಭುತ!', 'अस्य सप्ताहस्य सर्वाणि गीतानि। अद्भुतम्!'],
+  'Message from Janakiraman Ji': ['ஜானகிராமன் ஜியின் செய்தி', 'ಜಾನಕಿರಾಮನ್ ಜಿ ಅವರ ಸಂದೇಶ', 'जानकिरामन्-महोदयस्य सन्देशः'],
+  'About this week’s songs': ['இந்த வாரப் பாடல்கள் பற்றி', 'ಈ ವಾರದ ಹಾಡುಗಳ ಬಗ್ಗೆ', 'अस्य सप्ताहस्य गीतविषये'],
+  'Audio message · coming soon': ['ஒலிச் செய்தி · விரைவில்', 'ಧ್ವನಿ ಸಂದೇಶ · ಶೀಘ್ರದಲ್ಲೇ', 'श्रव्यसन्देशः · शीघ्रम्'],
+  'No favourites yet': ['இன்னும் பிடித்தவை இல்லை', 'ಇನ್ನೂ ಮೆಚ್ಚಿನವು ಇಲ್ಲ', 'अद्यापि प्रियाणि न सन्ति'],
+  'Tap a song to open it. Tap the heart to remove it.': ['பாடலைத் திறக்கத் தொடுங்கள். நீக்க இதயத்தைத் தொடுங்கள்.', 'ಹಾಡು ತೆರೆಯಲು ಸ್ಪರ್ಶಿಸಿ. ತೆಗೆದುಹಾಕಲು ಹೃದಯವನ್ನು ಸ್ಪರ್ಶಿಸಿ.', 'गीतम् उद्घाटयितुं स्पृशत। अपनेतुं हृदयं स्पृशत।'],
+  'Added to My favourites': ['பிடித்தவையில் சேர்க்கப்பட்டது', 'ಮೆಚ್ಚಿನವುಗಳಿಗೆ ಸೇರಿಸಲಾಗಿದೆ', 'प्रियेषु योजितम्'],
+  'Removed from My favourites': ['பிடித்தவையிலிருந்து நீக்கப்பட்டது', 'ಮೆಚ್ಚಿನವುಗಳಿಂದ ತೆಗೆಯಲಾಗಿದೆ', 'प्रियेभ्यः अपनीतम्'],
+  'UPCOMING': ['வரவிருப்பவை', 'ಮುಂಬರುವ', 'आगामि'],
+  'Upcoming': ['வரவிருப்பவை', 'ಮುಂಬರುವ', 'आगामि'],
+  'NEXT SATSANG': ['அடுத்த சத்சங்கம்', 'ಮುಂದಿನ ಸತ್ಸಂಗ', 'अग्रिमः सत्सङ्गः'],
+  'PHOTOS': ['புகைப்படங்கள்', 'ಫೋಟೋಗಳು', 'चित्राणि'],
+  'FROM PAST SATSANGS · YOUTUBE SHORTS': ['முந்தைய சத்சங்கங்களிலிருந்து · YouTube Shorts', 'ಹಿಂದಿನ ಸತ್ಸಂಗಗಳಿಂದ · YouTube Shorts', 'पूर्वसत्सङ्गेभ्यः · YouTube Shorts'],
+  'No satsangs announced yet. Please check again soon.': ['இன்னும் சத்சங்கங்கள் அறிவிக்கப்படவில்லை. விரைவில் மீண்டும் பாருங்கள்.', 'ಇನ್ನೂ ಸತ್ಸಂಗಗಳನ್ನು ಪ್ರಕಟಿಸಿಲ್ಲ. ಶೀಘ್ರದಲ್ಲೇ ಮತ್ತೆ ನೋಡಿ.', 'अद्यापि सत्सङ्गाः न घोषिताः। शीघ्रं पुनः पश्यत।'],
+  'Watch clips from past satsangs': ['முந்தைய சத்சங்கக் காணொளிகளைப் பாருங்கள்', 'ಹಿಂದಿನ ಸತ್ಸಂಗಗಳ ಕ್ಲಿಪ್‌ಗಳನ್ನು ನೋಡಿ', 'पूर्वसत्सङ्गानां चलचित्राणि पश्यत'],
+  'Satsangs': ['சத்சங்கங்கள்', 'ಸತ್ಸಂಗಗಳು', 'सत्सङ्गाः'],
+  'Past thoughts': ['முந்தைய சிந்தனைகள்', 'ಹಿಂದಿನ ಚಿಂತನೆಗಳು', 'पूर्वचिन्तनानि'],
+  'How did this thought touch you?': ['இந்தச் சிந்தனை உங்களை எப்படித் தொட்டது?', 'ಈ ಚಿಂತನೆ ನಿಮ್ಮನ್ನು ಹೇಗೆ ತಟ್ಟಿತು?', 'इदं चिन्तनं भवतः हृदयं कथं स्पृष्टवत्?'],
+  'SING WITH TODAY’S THOUGHT': ['இன்றைய சிந்தனையுடன் பாடுங்கள்', 'ಇಂದಿನ ಚಿಂತನೆಯೊಂದಿಗೆ ಹಾಡಿ', 'अद्यतनचिन्तनेन सह गायत'],
+  'New thoughts will appear here as they are shared.': ['புதிய சிந்தனைகள் பகிரப்படும்போது இங்கே தோன்றும்.', 'ಹೊಸ ಚಿಂತನೆಗಳು ಹಂಚಿಕೊಂಡಂತೆ ಇಲ್ಲಿ ಕಾಣುತ್ತವೆ.', 'नूतनचिन्तनानि अत्र दृश्यन्ते।'],
+  'The meaning of this song will be added soon.': ['இந்தப் பாடலின் பொருள் விரைவில் சேர்க்கப்படும்.', 'ಈ ಹಾಡಿನ ಅರ್ಥ ಶೀಘ್ರದಲ್ಲೇ ಸೇರಿಸಲಾಗುವುದು.', 'अस्य गीतस्य अर्थः शीघ्रं योजयिष्यते।'],
+  'A recording of this song will be added soon.': ['இந்தப் பாடலின் ஒலிப்பதிவு விரைவில் சேர்க்கப்படும்.', 'ಈ ಹಾಡಿನ ಧ್ವನಿಮುದ್ರಣ ಶೀಘ್ರದಲ್ಲೇ ಸೇರಿಸಲಾಗುವುದು.', 'अस्य गीतस्य ध्वनिमुद्रणं शीघ्रं योजयिष्यते।'],
+  'Could not load. Please check the internet.': ['ஏற்ற முடியவில்லை. இணைய இணைப்பைச் சரிபாருங்கள்.', 'ಲೋಡ್ ಆಗಲಿಲ್ಲ. ಇಂಟರ್ನೆಟ್ ಪರಿಶೀಲಿಸಿ.', 'आनेतुं न शक्यते। अन्तर्जालं परीक्षध्वम्।'],
+  'How would you like to use Harinamadwar?': ['ஹரிநாமத்வாரை எப்படிப் பயன்படுத்த விரும்புகிறீர்கள்?', 'ಹರಿನಾಮದ್ವಾರವನ್ನು ಹೇಗೆ ಬಳಸಲು ಬಯಸುತ್ತೀರಿ?', 'हरिनामद्वारं कथम् उपयोक्तुम् इच्छथ?'],
+  'Listen and sing along': ['கேட்டுக் கூடவே பாடுங்கள்', 'ಕೇಳಿ ಜೊತೆಗೆ ಹಾಡಿ', 'शृणुत सह गायत'],
+  'Bhajans, meanings and recordings': ['பஜனைகள், பொருள், ஒலிப்பதிவுகள்', 'ಭಜನೆಗಳು, ಅರ್ಥ, ಧ್ವನಿಮುದ್ರಣಗಳು', 'भजनानि, अर्थाः, ध्वनिमुद्रणानि'],
+  'Join satsangs': ['சத்சங்கங்களில் சேருங்கள்', 'ಸತ್ಸಂಗಗಳಿಗೆ ಸೇರಿ', 'सत्सङ्गेषु सम्मिलत'],
+  'Upcoming satsangs, photos and clips': ['வரவிருக்கும் சத்சங்கங்கள், புகைப்படங்கள், காணொளிகள்', 'ಮುಂಬರುವ ಸತ್ಸಂಗಗಳು, ಫೋಟೋಗಳು, ಕ್ಲಿಪ್‌ಗಳು', 'आगामिसत्सङ्गाः, चित्राणि, चलचित्राणि'],
+  'Learn in the daily sessions': ['தினசரி வகுப்புகளில் கற்றுக்கொள்ளுங்கள்', 'ದೈನಂದಿನ ತರಗತಿಗಳಲ್ಲಿ ಕಲಿಯಿರಿ', 'दैनिककक्षासु अधीध्वम्'],
+  'Daily session, this week’s songs, your own progress': ['தினசரி வகுப்பு, இந்த வாரப் பாடல்கள், உங்கள் முன்னேற்றம்', 'ದೈನಂದಿನ ತರಗತಿ, ಈ ವಾರದ ಹಾಡುಗಳು, ನಿಮ್ಮ ಪ್ರಗತಿ', 'दैनिककक्षा, अस्य सप्ताहस्य गीतानि, भवतः प्रगतिः'],
+  'Dates and venues, photos and clips': ['தேதிகள், இடங்கள், புகைப்படங்கள், காணொளிகள்', 'ದಿನಾಂಕಗಳು, ಸ್ಥಳಗಳು, ಫೋಟೋಗಳು, ಕ್ಲಿಪ್‌ಗಳು', 'दिनाङ्काः, स्थानानि, चित्राणि, चलचित्राणि'],
+  'Our satsangs, our guide, how to invite us': ['எங்கள் சத்சங்கங்கள், வழிகாட்டி, எங்களை அழைப்பது எப்படி', 'ನಮ್ಮ ಸತ್ಸಂಗಗಳು, ಮಾರ್ಗದರ್ಶಕರು, ನಮ್ಮನ್ನು ಆಹ್ವಾನಿಸುವುದು ಹೇಗೆ', 'अस्माकं सत्सङ्गाः, मार्गदर्शकः, आह्वानविधिः च'],
+  'Our satsangs, our guide, and how to invite us': ['எங்கள் சத்சங்கங்கள், வழிகாட்டி, எங்களை அழைப்பது எப்படி', 'ನಮ್ಮ ಸತ್ಸಂಗಗಳು, ಮಾರ್ಗದರ್ಶಕರು, ನಮ್ಮನ್ನು ಆಹ್ವಾನಿಸುವುದು ಹೇಗೆ', 'अस्माकं सत्सङ्गाः, मार्गदर्शकः, आह्वानविधिः च'],
+  'OPEN TO EVERYONE': ['அனைவருக்கும் திறந்தது', 'ಎಲ್ಲರಿಗೂ ಮುಕ್ತ', 'सर्वेभ्यः मुक्तम्'],
+  'Shri Janakiraman’s reflections': ['ஸ்ரீ ஜானகிராமனின் சிந்தனைகள்', 'ಶ್ರೀ ಜಾನಕಿರಾಮನ್ ಅವರ ಚಿಂತನೆಗಳು', 'श्रीजानकिरामनस्य चिन्तनानि'],
+  'Today I sang': ['இன்று நான் பாடியது', 'ಇಂದು ನಾನು ಹಾಡಿದ್ದು', 'अद्य मया गीतम्'],
+  'TODAY I SANG': ['இன்று நான் பாடியது', 'ಇಂದು ನಾನು ಹಾಡಿದ್ದು', 'अद्य मया गीतम्'],
+  'Record with sruti': ['ஸ்ருதியுடன் பதிவு செய்', 'ಶ್ರುತಿಯೊಂದಿಗೆ ರೆಕಾರ್ಡ್ ಮಾಡಿ', 'श्रुत्या सह ध्वनिमुद्रणम्'],
+  'Sing with sruti and record yourself': ['ஸ்ருதியுடன் பாடி உங்கள் குரலைப் பதிவு செய்யுங்கள்', 'ಶ್ರುತಿಯೊಂದಿಗೆ ಹಾಡಿ ನಿಮ್ಮ ಧ್ವನಿಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಿ', 'श्रुत्या सह गायत, स्वस्वरं मुद्रयत'],
+};
+const LI = { ta: 0, kn: 1, sa: 2 };
+const trWrap = orig => orig.match(/^[\s\u00a0]*/)[0] + tr(i18nKey(orig)) + orig.match(/[\s\u00a0]*$/)[0];
+const i18nKey = s => s.replace(/[\s ]+/g, ' ').trim();
+/** a fixed English phrase in the chosen language */
+function tr(s) { const i = LI[prefs.lang]; if (i === undefined) return s; const v = I18N[i18nKey(s)]; return v ? v[i] : s; }
+const trText = new Map();   // text node → its English original
+const trAttr = new Map();   // element → { attribute: English original }
+const TR_ATTRS = ['placeholder', 'aria-label', 'title'];
+let trBusy = false;
+function trNode(n) {
+  if (n.nodeType === 3) {
+    if (n.parentElement && n.parentElement.closest('[data-notr], script, style')) return;
+    let orig = trText.get(n);
+    if (orig === undefined || (n.nodeValue !== orig && n.nodeValue !== trWrap(orig))) {
+      if (!I18N[i18nKey(n.nodeValue)]) { trText.delete(n); return; }
+      orig = n.nodeValue; trText.set(n, orig);
+    }
+    const out = trWrap(orig);
+    if (n.nodeValue !== out) n.nodeValue = out;
+  } else if (n.nodeType === 1) {
+    if (n.closest('[data-notr]')) return;
+    for (const a of TR_ATTRS) {
+      if (!n.hasAttribute(a)) continue;
+      const rec = trAttr.get(n) || {}, cur = n.getAttribute(a);
+      if (rec[a] === undefined || (cur !== rec[a] && cur !== tr(rec[a]))) { if (!I18N[i18nKey(cur)]) continue; rec[a] = cur; trAttr.set(n, rec); }
+      const out = tr(rec[a]); if (cur !== out) n.setAttribute(a, out);
+    }
+  }
+}
+function trTree(root) {
+  if (!root) return;
+  trBusy = true;
+  try {
+    if (root.nodeType === 3) { trNode(root); return; }
+    trNode(root);
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+    for (let n = w.nextNode(); n; n = w.nextNode()) trNode(n);
+  } finally { trBusy = false; }
+}
+function applyLang() {
+  document.documentElement.lang = prefs.lang === 'sa' ? 'sa' : prefs.lang;
+  document.body.dataset.lang = prefs.lang;
+  for (const [n, orig] of trText) { if (!n.isConnected) { trText.delete(n); continue; } n.nodeValue = trWrap(orig); }
+  for (const [el, rec] of trAttr) { if (!el.isConnected) { trAttr.delete(el); continue; } for (const a in rec) el.setAttribute(a, tr(rec[a])); }
+  trTree(document.body);
+}
+new MutationObserver(ms => { if (trBusy) return; for (const m of ms) { if (m.type === 'childList') m.addedNodes.forEach(trTree); else trTree(m.target); } })
+  .observe(document.documentElement, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: TR_ATTRS });
+
 const ndpLang = () => NDP_BOOK[prefs.lang] ? prefs.lang : 'en';
 const badge = (name, cls) => `<span class="ibadge ${cls || ''}">${svgI(name)}</span>`;
 const CHANNEL = 'https://www.youtube.com/@HariNamadwar';
@@ -798,6 +1139,20 @@ async function learnValue(key) {
   return '';
 }
 async function practice() { const v = await learnValue('songs'); return v ? v.split(',').map(x => x.trim()).filter(Boolean) : []; }
+const pracRef = r => { const i = r.indexOf(':'); return i > 0 && BOOKS[r.slice(0, i)] ? { id: r.slice(0, i), number: r.slice(i + 1) } : { id: 'dns', number: r }; };
+async function pracSong(r) {
+  const { id, number } = pracRef(r);
+  try {
+    const s = (await loadBook(id)).songs.find(x => x.number === number); if (!s) return null;
+    let title = s.displayTitle;
+    if (prefs.lang !== 'en') {
+      const f = BOOKS[id].base + lyricsFile(prefs.lang);
+      const tm = texts[f] || (texts[f] = parseBlocks(await fetchText(f).catch(() => '')));
+      const tt = tm.get(number); if (tt && tt.title) title = tt.title;
+    }
+    return { ref: r, id, number, title, sub: id === 'dns' ? s.number + ' · ' + (s.displayRaga || s.chapter) : (id === 'ashta' ? T('ashtapadi') : T('pasuram')) + s.number + (s.displayRaga ? ' · ' + s.displayRaga : ''), hash: BOOKS[id].hash + number };
+  } catch (e) { return null; }
+}
 
 // Thought for the Day: @@ number | series | title | book:song, then paragraphs separated by blank lines
 async function tfds() {
@@ -869,38 +1224,41 @@ function eventRows(list, big) {
 let homeBusy = 0;
 async function showHome() {
   showView('v-home');
+  document.body.dataset.lang = prefs.lang;   // Indian scripts: no letter-spacing in labels
   const my = ++homeBusy;
   const who = store.get('name', '').trim();
-  $('home-hello').innerHTML = who ? `<span>Hari Om,</span><b>${esc(who)}</b>` : `<b>Hari Om</b><span>A doorway to the Lord’s Name</span>`;
+  $('home-hello').innerHTML = who ? `<span>${T('hello')},</span><b>${esc(who)}</b>` : `<b>${T('hello')}</b><span>${T('tagline')}</span>`;
   const [ev, sod, tf, prac, meet] = await Promise.all([events(), interest('listen') ? songOfTheDay() : null, tfds(), practice(), learnValue('meet')]);
   if (my !== homeBusy) return;
   const out = [];
   // home order: books · continue · upcoming satsangs/learn/favourites · thought for the day · song of the day · about (Coming Up removed; it lives in Upcoming Satsangs)
-  out.push(`<span class="lbl sect">CHOOSE A BOOK</span><div class="books">` +
-    `<button class="arch-card" data-go="#book/dns">${badge('book', 'big')}<b>Divya Nama Sankeertanam</b><span>Bhajans · lyrics,<br>meanings, audio</span></button>` +
-    `<button class="arch-card" data-go="#book/ashta">${badge('feather', 'big')}<b>Śrī Gīta Govindam</b><span>24 Aṣṭapadis of<br>Śrī Jayadeva</span></button>` +
+  out.push(`<span class="lbl sect">${T('choose')}</span><div class="books">` +
+    `<button class="arch-card" data-go="#book/dns">${badge('book', 'big')}<b>${T('dns')[0]}</b><span>${T('dns')[1]}</span></button>` +
+    `<button class="arch-card" data-go="#book/ashta">${badge('feather', 'big')}<b>${T('ashta')[0]}</b><span>${T('ashta')[1]}</span></button>` +
     `<button class="arch-card wide" data-go="#book/ndp">${badge('scroll', 'big')}<span class="hc-soon"><b>${NDP_BOOK[ndpLang()][0]}</b><span>${NDP_BOOK[ndpLang()][1]}</span></span></button></div>`);
   const l = store.get('last', null);   // after the books, above the tiles
   if (l && BOOKS[l.book]) {
-    out.push(`<button class="h-cont" data-go="${BOOKS[l.book].hash}${esc(l.number)}">${badge('history', 'plain')}<span class="hc-t"><span class="mut">Continue where you left off</span>` +
-      `<b>${esc((l.book === 'ashta' ? 'Aṣṭapadi ' : l.book === 'ndp' ? 'Pāsuram ' : '') + l.number)}&nbsp; ${esc(l.title)}</b></span>${svgI('chevron', 'chev2')}</button>`);
+    out.push(`<button class="h-cont" data-go="${BOOKS[l.book].hash}${esc(l.number)}">${badge('history', 'plain')}<span class="hc-t"><span class="mut">${T('cont')}</span>` +
+      `<b>${esc((l.book === 'ashta' ? T('ashtapadi') : l.book === 'ndp' ? T('pasuram') : '') + l.number)}&nbsp; ${esc(l.title)}</b></span>${svgI('chevron', 'chev2')}</button>`);
   }
-  const tiles = [`<button class="tile" data-go="#diary">${badge('calendar')}<b>Upcoming<br>Satsangs</b></button>`];
-  if (interest('learn') && (prac.length || meet)) tiles.push(`<button class="tile" data-go="#learn">${badge('class')}<b>Learn<br>&nbsp;</b></button>`);
-  tiles.push(`<button class="tile" data-go="#favs">${badge('heart')}<b>My<br>favourites</b></button>`);
+  const tiles = [`<button class="tile" data-go="#diary">${badge('calendar')}<b>${T('diary')}</b></button>`];
+  if (interest('learn') && (prac.length || meet)) tiles.push(`<button class="tile" data-go="#learn">${badge('class')}<b>${T('learn')}</b></button>`);
+  tiles.push(`<button class="tile" data-go="#favs">${badge('heart')}<b>${T('favs')}</b></button>`);
   out.push(`<div class="tiles">${tiles.join('')}</div>`);
   if (tf.length) {
     const t = tf[0];
-    out.push(`<button class="h-tfd" data-go="#tfd/${esc(t.number)}"><span class="h-tfd-top">${svgI('lotus')}<span class="lbl">THOUGHT FOR THE DAY · TFD ${esc(t.number)}</span></span>` +
-      `<b>${esc(t.title)}</b><span class="teaser">${esc(t.paras[0] || '')}</span><span class="more">Read ›</span></button>`);
+    out.push(`<button class="h-tfd" data-go="#tfd/${esc(t.number)}"><span class="h-tfd-top">${svgI('lotus')}<span class="lbl">${T('tfd')} · TFD ${esc(t.number)}</span></span>` +
+      `<b>${esc(t.title)}</b><span class="teaser">${esc(t.paras[0] || '')}</span><span class="more">${T('read')}</span></button>`);
   }
   if (sod) {
-    out.push(`<div class="card h-sod"><div class="sod-tile">${svgI('music')}</div><div class="sod-t"><span class="lbl">SONG OF THE DAY</span>` +
-      `<b>${esc(sod.displayTitle)}</b><span class="mut">${esc(sod.displayRaga || sod.chapter)}</span>` +
-      `<div class="sod-btns"><button class="btn-acc" data-go="#song/${esc(sod.number)}" data-open-tab="2">▶&nbsp; Listen</button><button class="btn-line" data-go="#share/${esc(sod.number)}">${svgI('share')}Share</button></div></div></div>`);
+    const sl = prefs.lang === 'en' ? null : (texts[lyricsFile(prefs.lang)] || (texts[lyricsFile(prefs.lang)] = parseBlocks(await fetchText(lyricsFile(prefs.lang)).catch(() => '')))).get(sod.number);
+    const sodTitle = sl && sl.title ? sl.title : sod.displayTitle, sodRaga = sl && sl.raga ? sl.raga : (sod.displayRaga || sod.chapter);
+    out.push(`<div class="card h-sod"><div class="sod-tile">${svgI('music')}</div><div class="sod-t"><span class="lbl">${T('sod')}</span>` +
+      `<b>${esc(sodTitle)}</b><span class="mut">${esc(sodRaga)}</span>` +
+      `<div class="sod-btns"><button class="btn-acc" data-go="#song/${esc(sod.number)}" data-open-tab="2">▶&nbsp; ${T('listen')}</button><button class="btn-line" data-go="#share/${esc(sod.number)}">${svgI('share')}${T('share')}</button></div></div></div>`);
   }
-  out.push(`<button class="h-about" data-go="#about">${badge('lotus', 'white')}<span class="hc-t"><b>About Harinamadwar</b><span class="mut">Our satsangs, our guide, and how to invite us</span></span>${svgI('chevron', 'chev2')}</button>`);
-  out.push(`<button class="h-change" data-go="#welcome">Change what I see on this page ›</button>`);
+  out.push(`<button class="h-about" data-go="#about">${badge('lotus', 'white')}<span class="hc-t"><b>${T('about')[0]}</b><span class="mut">${T('about')[1]}</span></span>${svgI('chevron', 'chev2')}</button>`);
+  out.push(`<button class="h-change" data-go="#welcome">${T('change')}</button>`);
   $('home-box').innerHTML = out.join('');
   $('home-scroll').scrollTop = homeScroll;   // come back to the same place, not the top (SCRUM-51)
 }
@@ -958,7 +1316,7 @@ async function showDiary() {
 async function showLearn() {
   showView('v-learn');
   const [meet, prac] = await Promise.all([learnValue('meet'), practice()]);
-  const list = (await Promise.all(prac.map(dnsSong))).filter(Boolean);
+  const list = (await Promise.all(prac.map(pracSong))).filter(Boolean);
   const done = prac.filter(learnt).length, showP = store.get('showProgress', true);
   const frac = prac.length ? Math.min(1, done / prac.length) : 0, C = 2 * Math.PI * 34;
   const out = [];
@@ -969,12 +1327,14 @@ async function showLearn() {
     `</svg><b>${done}</b></div><span class="hc-t"><span class="lbl">MY PROGRESS</span><b>${done === 1 ? '1 song I can sing' : done + ' songs I can sing'}</b>` +
     `<span class="mut">${prac.length && done >= prac.length ? 'All of this week’s songs. Wonderful!' : 'Tick a song when you can sing it. Only you see this.'}</span></span></div>`);
   out.push(`<button class="l-toggle" id="l-toggle">${showP ? 'Hide my progress' : 'Show my progress'}</button>`);
+  // tap the name: the song's lyrics · tap ▶: the song's recording (Audio tab) · Back returns here
   out.push(`<span class="lbl sect">THIS WEEK’S SONGS FROM JANAKIRAMAN JI</span><div class="card list">` + list.map(s => {
-    const on = learnt(s.number);
-    return `<div class="l-row"><button class="tickbox${on ? ' on' : ''}" data-n="${esc(s.number)}" aria-label="${on ? 'I can sing this' : 'Mark as a song I can sing'}">${on ? svgI('check') : ''}</button>` +
-      `<span class="hc-t"><b>${esc(s.displayTitle)}</b><span class="mut">${esc(s.number + ' · ' + (s.displayRaga || s.chapter))}</span></span>` +
-      `<button class="ibadge" data-go="#song/${esc(s.number)}" aria-label="Open ${esc(s.displayTitle)}">${svgI('play')}</button></div>`;
+    const on = learnt(s.ref);
+    return `<div class="l-row"><button class="tickbox${on ? ' on' : ''}" data-n="${esc(s.ref)}" aria-label="${on ? 'I can sing this' : 'Mark as a song I can sing'}">${on ? svgI('check') : ''}</button>` +
+      `<button class="hc-t l-open" data-go="${esc(s.hash)}" data-open-tab="0"><b>${esc(s.title)}</b><span class="mut">${esc(s.sub)}</span></button>` +
+      `<button class="ibadge" data-go="${esc(s.hash)}" data-open-tab="2" aria-label="Listen to ${esc(s.title)}">${svgI('play')}</button></div>`;
   }).join('') + `</div>`);
+  out.push(`<a class="sruti-btn" href="sruti.html?title=${encodeURIComponent(tr('Learn'))}">${badge('mic')}<span class="hc-t"><b>${tr('Record with sruti')}</b><span class="mut">${tr('Sing with sruti and record yourself')}</span></span></a>`);
   out.push(`<div class="l-msg"><img src="icons/about-jk.jpg" alt=""><span class="hc-t"><span class="l-msg-l">Message from Janakiraman Ji</span><b>About this week’s songs</b><span class="soon">Audio message · coming soon</span></span></div>`);
   $('learn-box').innerHTML = out.join('');
   $('l-toggle').onclick = () => { store.set('showProgress', !showP); keepScroll('learn', showLearn); };
@@ -1167,3 +1527,5 @@ function splash() {
 }
 
 start();
+
+applyLang();   // SCRUM-74: the whole app in the chosen language

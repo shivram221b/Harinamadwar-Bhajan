@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1D4E9E">
+<title>Record with sruti · Harinamadwar</title>
+<link rel="icon" href="icons/icon-192.png">
+<style>
+@font-face { font-family: 'Mukta'; font-weight: 400; font-display: swap; src: url('fonts/mukta-latin-400-normal.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Mukta'; font-weight: 600; font-display: swap; src: url('fonts/mukta-latin-600-normal.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Mukta'; font-weight: 700; font-display: swap; src: url('fonts/mukta-latin-700-normal.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Mukta'; font-weight: 400; font-display: swap; src: url('fonts/mukta-latin-ext-400-normal.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Mukta'; font-weight: 700; font-display: swap; src: url('fonts/mukta-latin-ext-700-normal.woff2') format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Mukta'; font-weight: 400; font-display: swap; src: url('fonts/mukta-devanagari-400-normal.woff2') format('woff2'); unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B09; }
+@font-face { font-family: 'Mukta'; font-weight: 700; font-display: swap; src: url('fonts/mukta-devanagari-700-normal.woff2') format('woff2'); unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+20F0, U+25CC, U+A830-A839, U+A8E0-A8FF, U+11B00-11B09; }
+@font-face { font-family: 'Mukta Malar'; font-weight: 400; font-display: swap; src: url('fonts/mukta-malar-tamil-400-normal.woff2') format('woff2'); unicode-range: U+0964-0965, U+0B82-0BFA, U+200C-200D, U+20B9, U+25CC; }
+@font-face { font-family: 'Mukta Malar'; font-weight: 700; font-display: swap; src: url('fonts/mukta-malar-tamil-700-normal.woff2') format('woff2'); unicode-range: U+0964-0965, U+0B82-0BFA, U+200C-200D, U+20B9, U+25CC; }
+@font-face { font-family: 'Baloo Tamma 2'; font-weight: 400; font-display: swap; src: url('fonts/baloo-tamma-2-kannada-400-normal.woff2') format('woff2'); unicode-range: U+0951-0952, U+0964-0965, U+0C80-0CF3, U+1CD0, U+1CD2-1CD3, U+1CDA, U+1CF2, U+1CF4, U+200C-200D, U+20B9, U+25CC, U+A830-A835; }
+@font-face { font-family: 'Baloo Tamma 2'; font-weight: 700; font-display: swap; src: url('fonts/baloo-tamma-2-kannada-700-normal.woff2') format('woff2'); unicode-range: U+0951-0952, U+0964-0965, U+0C80-0CF3, U+1CD0, U+1CD2-1CD3, U+1CDA, U+1CF2, U+1CF4, U+200C-200D, U+20B9, U+25CC, U+A830-A835; }
+</style>
+<style>
+:root { --page:#FAF6F0; --text:#1B2638; --muted:#4D5D76; --line:#D3DFF0; --soft:#E6EEF9; --bar:#1D4E9E; --deep:#163E7E; --acc:#CA7E0B; --label:#B06A00; --ok:#2E7D4F; --bad:#B3261E; --card:#fff; --gold:#F6E3B4; }
+body.night { --page:#0E131C; --text:#fff; --muted:#AFBBD0; --line:#2C3A50; --soft:#18202E; --bar:#18325E; --deep:#8FB4EE; --card:#18202E; --gold:#3A3120; --label:#E8B865; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--page); color: var(--text); font: 17px/1.45 Mukta, 'Mukta Malar', 'Baloo Tamma 2', -apple-system, sans-serif; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; padding: 0; }
+.hidden { display: none !important; }
+.top { position: sticky; top: 0; z-index: 5; background: var(--bar); color: #fff; border-bottom: 3px solid var(--acc); padding: calc(10px + env(safe-area-inset-top)) 14px 12px; }
+.top-row { max-width: 560px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
+.top h1 { margin: 0; font-size: 20px; line-height: 1.25; }
+.top .sub { font-size: 14px; color: #DCE8F8; }
+.back { font-weight: 700; padding: 6px 8px; margin-left: -8px; border-radius: 18px; color: #fff; white-space: nowrap; }
+main { max-width: 560px; margin: 0 auto; padding: 16px 18px calc(30px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 14px; }
+.lbl { font-size: 12.5px; font-weight: 700; letter-spacing: 1.4px; color: var(--label); text-transform: uppercase; }
+body:not([data-lang="en"]) .lbl { letter-spacing: 0; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { min-width: 52px; min-height: 44px; padding: 4px 12px; border-radius: 22px; border: 1.5px solid var(--line); background: var(--card); color: var(--deep); font-weight: 700; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; }
+.chip small { font-size: 11.5px; font-weight: 600; color: var(--muted); }
+.chip.sel { background: var(--bar); border-color: var(--bar); color: #fff; } .chip.sel small { color: #DCE8F8; }
+.row { display: flex; align-items: center; gap: 12px; }
+.row > .grow { flex: 1; min-width: 0; }
+input[type=range] { width: 100%; accent-color: var(--acc); height: 32px; }
+.btn { min-height: 52px; border-radius: 26px; padding: 0 20px; font-weight: 700; font-size: 17px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn.acc { background: var(--acc); color: #1B1206; } .btn.deep { background: var(--bar); color: #fff; } .btn.line { background: var(--card); border: 1.5px solid var(--line); color: var(--deep); }
+.btn.bad { background: var(--card); border: 1.5px solid #E8B8B3; color: var(--bad); } .btn.wa { background: #1E7A46; color: #fff; }
+.btn svg { width: 20px; height: 20px; }
+.pair { display: flex; gap: 10px; } .pair > * { flex: 1; }
+.hint { font-size: 14.5px; color: var(--muted); }
+.tip { display: flex; gap: 10px; padding: 12px 14px; border-radius: 14px; background: var(--gold); font-size: 14.5px; }
+.tip svg { width: 22px; height: 22px; flex-shrink: 0; color: var(--label); }
+.meter { height: 10px; border-radius: 5px; background: var(--soft); overflow: hidden; }
+.meter i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--ok) 0 70%, var(--acc) 70% 90%, var(--bad) 90%); transition: width .08s; }
+.sw { display: flex; align-items: center; gap: 12px; font-weight: 600; }
+.sw input { width: 22px; height: 22px; accent-color: var(--bar); flex-shrink: 0; }
+.big-time { font-size: 56px; font-weight: 800; color: var(--deep); text-align: center; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.rec-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--bad); margin-right: 8px; animation: blink 1s infinite; vertical-align: 6px; }
+.paused .rec-dot { animation: none; background: var(--muted); }
+@keyframes blink { 50% { opacity: .2; } }
+canvas.wave { width: 100%; height: 90px; border-radius: 14px; background: var(--soft); }
+.ctrls { display: flex; justify-content: center; gap: 22px; align-items: center; }
+.round { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: var(--card); border: 2px solid var(--line); color: var(--deep); }
+.round.stop { width: 84px; height: 84px; border-color: #F0C9C4; } .round.stop i { width: 30px; height: 30px; border-radius: 6px; background: var(--bad); }
+.round svg { width: 26px; height: 26px; }
+.round-l { font-size: 13px; font-weight: 700; color: var(--muted); text-align: center; margin-top: 4px; }
+.player { display: flex; align-items: center; gap: 12px; }
+.pp { width: 56px; height: 56px; border-radius: 50%; background: var(--acc); color: #1B1206; display: grid; place-items: center; flex-shrink: 0; }
+.pp svg { width: 26px; height: 26px; }
+.times { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.warn { padding: 10px 12px; border-radius: 12px; background: #FBE3DC; color: var(--bad); font-size: 14.5px; font-weight: 600; }
+.mic { font-size: 13.5px; color: var(--muted); }
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 20; background: rgba(27,38,56,.94); color: #fff; padding: 11px 20px; border-radius: 22px; font-size: 16px; max-width: 90%; text-align: center; }
+</style>
+</head>
+<body>
+<header class="top"><div class="top-row"><button class="back" id="back" data-t="back">‹ Back</button>
+  <div style="flex:1;min-width:0"><h1 data-t="title">Record with sruti</h1><div class="sub" id="song"></div></div></div></header>
+
+<!-- 1 · set up the sruti -->
+<main id="v-setup">
+  <span class="lbl" data-t="kattai">Your sruti (kattai)</span>
+  <div class="chips" id="kattai"></div>
+  <span class="lbl" data-t="drone">Tanpura strings</span>
+  <div class="chips" id="drone"></div>
+  <div class="card">
+    <div class="row"><span class="grow"><b data-t="ear">Sruti in earphones</b></span><button class="btn line" id="preview" style="width:auto;min-height:44px"><span id="pv-ic"></span><span id="pv-t" data-t="hear">Hear the sruti</span></button></div>
+    <input type="range" id="ear" min="0" max="100" value="60" aria-label="Sruti volume">
+    <label class="sw"><input type="checkbox" id="speaker"><span><b data-t="spk">Sruti through the speaker</b><br><span class="hint" data-t="spkHint">For two singers on one phone. The sruti then becomes part of the recording.</span></span></label>
+  </div>
+  <div class="card">
+    <div class="row"><b class="grow" data-t="mic">Your microphone</b><span class="mic" id="mic-name"></span></div>
+    <div class="meter"><i id="lvl"></i></div>
+    <span class="hint" id="mic-hint" data-t="micHint">Sing a little: the bar should reach the orange part on your loudest notes.</span>
+  </div>
+  <div class="tip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>
+    <span data-t="earTip">Use wired earphones without a microphone (on iPhone, a USB-C to 3.5 mm adapter). Then only your voice is recorded and the sruti stays clean. Bluetooth earphones add a delay.</span></div>
+  <button class="btn acc" id="start"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="7"/></svg><span data-t="start">Start recording</span></button>
+</main>
+
+<!-- 2 · recording -->
+<main id="v-rec" class="hidden">
+  <div class="big-time" id="rec-box"><span class="rec-dot"></span><span id="rt">0:00</span></div>
+  <canvas class="wave" id="wave" width="1000" height="180"></canvas>
+  <div class="card"><b data-t="ear">Sruti in earphones</b><input type="range" id="ear2" min="0" max="100" value="60" aria-label="Sruti volume"><span class="hint" data-t="earOnly">Only changes what you hear, not the recording.</span></div>
+  <div class="ctrls">
+    <div><button class="round" id="discard" aria-label="Discard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button><div class="round-l" data-t="discard">Discard</div></div>
+    <div><button class="round stop" id="stop" aria-label="Stop"><i></i></button><div class="round-l" data-t="stop">Stop</div></div>
+    <div><button class="round" id="pause" aria-label="Pause"><svg id="pause-ic" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg></button><div class="round-l" id="pause-l" data-t="pause">Pause</div></div>
+  </div>
+</main>
+
+<!-- 3 · listen, balance, share -->
+<main id="v-review" class="hidden">
+  <div class="card">
+    <div class="player"><button class="pp" id="play" aria-label="Play"></button>
+      <div class="grow" style="flex:1"><input type="range" id="seek" min="0" max="1000" value="0" aria-label="Position"><div class="times"><span id="pos">0:00</span><span id="len">0:00</span></div></div></div>
+  </div>
+  <div class="card">
+    <b data-t="voice">My voice</b><input type="range" id="gv" min="0" max="150" value="100" aria-label="Voice level">
+    <div id="sr-box"><b data-t="sruti">Sruti</b><input type="range" id="gs" min="0" max="100" value="35" aria-label="Sruti level"></div>
+    <div class="warn hidden" id="cover" data-t="cover">The sruti may cover your voice. Bring the sruti down a little.</div>
+    <label class="sw" id="inc-box"><input type="checkbox" id="inc" checked><b data-t="include">Include sruti in the shared file</b></label>
+  </div>
+  <button class="btn wa" id="share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg><span data-t="share">Share (WhatsApp and more)</span></button>
+  <div class="pair"><button class="btn deep" id="save" data-t="save">Save</button><button class="btn line" id="again" data-t="again">Record again</button></div>
+  <span class="hint" data-t="keep">Your recording stays on this phone. Nothing is uploaded unless you share it.</span>
+</main>
+<div id="toast" class="toast hidden"></div>
+
+<script>
+'use strict';
+// =====================================================================================
+// Recording with sruti (feature notes, 19 Nov 2026). Web Audio only: works in iPhone Safari,
+// the iPhone home-screen app and the Android app (WebView). The sruti is synthesised here,
+// so there are no recorded samples. The voice is kept on its own; the sruti is regenerated on
+// playback, so the balance can still be changed before sharing.
+// =====================================================================================
+const $ = id => document.getElementById(id);
+const store = { get(k, d) { try { const v = localStorage.getItem('hg.' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('hg.' + k, JSON.stringify(v)); } catch (e) {} } };
+const Q = new URLSearchParams(location.search);
+const LANG0 = Q.get('lang') || store.get('lang', 'en'), LANG = ['ta', 'kn', 'sa'].includes(LANG0) ? LANG0 : 'en';   // ?lang= from the Android app
+document.body.dataset.lang = LANG;
+if (Q.has('night') ? Q.get('night') === '1' : store.get('night', false)) document.body.classList.add('night');
+
+const TX = {
+  back: ['‹ Back', '‹ பின்செல்', '‹ ಹಿಂದೆ', '‹ पृष्ठतः'],
+  title: ['Record with sruti', 'ஸ்ருதியுடன் பதிவு செய்', 'ಶ್ರುತಿಯೊಂದಿಗೆ ರೆಕಾರ್ಡ್ ಮಾಡಿ', 'श्रुत्या सह ध्वनिमुद्रणम्'],
+  kattai: ['Your sruti (kattai)', 'உங்கள் ஸ்ருதி (கட்டை)', 'ನಿಮ್ಮ ಶ್ರುತಿ (ಕಟ್ಟೆ)', 'भवतः श्रुतिः (कट्टै)'],
+  drone: ['Tanpura strings', 'தம்புரா நரம்புகள்', 'ತಂಬೂರಿ ತಂತಿಗಳು', 'तम्बूरातन्त्र्यः'],
+  ear: ['Sruti in earphones', 'காதொலிப்பானில் ஸ்ருதி', 'ಇಯರ್‌ಫೋನ್‌ನಲ್ಲಿ ಶ್ರುತಿ', 'कर्णयन्त्रे श्रुतिः'],
+  hear: ['Hear the sruti', 'ஸ்ருதியைக் கேள்', 'ಶ್ರುತಿ ಕೇಳಿ', 'श्रुतिं शृणुत'],
+  stopHear: ['Stop', 'நிறுத்து', 'ನಿಲ್ಲಿಸಿ', 'विरमत'],
+  spk: ['Sruti through the speaker', 'ஒலிபெருக்கியில் ஸ்ருதி', 'ಸ್ಪೀಕರ್‌ನಲ್ಲಿ ಶ್ರುತಿ', 'ध्वनिवर्धके श्रुतिः'],
+  spkHint: ['For two singers on one phone. The sruti then becomes part of the recording.', 'ஒரே போனில் இருவர் பாட. அப்போது ஸ்ருதியும் பதிவில் சேரும்.', 'ಒಂದೇ ಫೋನ್‌ನಲ್ಲಿ ಇಬ್ಬರು ಹಾಡಲು. ಆಗ ಶ್ರುತಿಯೂ ರೆಕಾರ್ಡಿಂಗ್‌ನಲ್ಲಿ ಸೇರುತ್ತದೆ.', 'एकस्मिन् दूरभाषे द्वयोः गायनाय। तदा श्रुतिः अपि मुद्रणे भवति।'],
+  mic: ['Your microphone', 'உங்கள் மைக்', 'ನಿಮ್ಮ ಮೈಕ್', 'भवतः ध्वनिग्राहकः'],
+  micHint: ['Sing a little: the bar should reach the orange part on your loudest notes.', 'சற்றுப் பாடுங்கள்: உரத்த ஸ்வரங்களில் கோடு ஆரஞ்சு பகுதியைத் தொட வேண்டும்.', 'ಸ್ವಲ್ಪ ಹಾಡಿ: ಜೋರಾದ ಸ್ವರಗಳಲ್ಲಿ ಪಟ್ಟಿ ಕಿತ್ತಳೆ ಭಾಗ ತಲುಪಬೇಕು.', 'किञ्चित् गायत: उच्चस्वरेषु रेखा नारङ्गभागं प्राप्नुयात्।'],
+  earTip: ['Use wired earphones without a microphone (on iPhone, a USB-C to 3.5 mm adapter). Then only your voice is recorded and the sruti stays clean. Bluetooth earphones add a delay.', 'மைக் இல்லாத கம்பி காதொலிப்பானைப் பயன்படுத்துங்கள் (iPhone-இல் USB-C to 3.5 mm அடாப்டர்). அப்போது உங்கள் குரல் மட்டும் பதிவாகும். Bluetooth காதொலிப்பான்கள் தாமதம் தரும்.', 'ಮೈಕ್ ಇಲ್ಲದ ತಂತಿಯ ಇಯರ್‌ಫೋನ್ ಬಳಸಿ (iPhone ನಲ್ಲಿ USB-C to 3.5 mm ಅಡಾಪ್ಟರ್). ಆಗ ನಿಮ್ಮ ಧ್ವನಿ ಮಾತ್ರ ರೆಕಾರ್ಡ್ ಆಗುತ್ತದೆ. Bluetooth ಇಯರ್‌ಫೋನ್ ವಿಳಂಬ ಮಾಡುತ್ತದೆ.', 'ध्वनिग्राहकरहितं तन्त्रीयुक्तं कर्णयन्त्रम् उपयुङ्ध्वम् (iPhone मध्ये USB-C to 3.5 mm)। तदा केवलं भवतः स्वरः मुद्र्यते। Bluetooth विलम्बं करोति।'],
+  start: ['Start recording', 'பதிவைத் தொடங்கு', 'ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಾರಂಭಿಸಿ', 'मुद्रणम् आरभत'],
+  earOnly: ['Only changes what you hear, not the recording.', 'நீங்கள் கேட்பதை மட்டும் மாற்றும்; பதிவை அல்ல.', 'ನೀವು ಕೇಳುವುದನ್ನು ಮಾತ್ರ ಬದಲಿಸುತ್ತದೆ, ರೆಕಾರ್ಡಿಂಗ್ ಅಲ್ಲ.', 'भवन्तः यत् शृण्वन्ति तत् एव परिवर्तते, मुद्रणं न।'],
+  discard: ['Discard', 'நீக்கு', 'ತ್ಯಜಿಸಿ', 'त्यजत'], stop: ['Stop', 'நிறுத்து', 'ನಿಲ್ಲಿಸಿ', 'विरमत'],
+  pause: ['Pause', 'இடைநிறுத்து', 'ವಿರಾಮ', 'विरामः'], resume: ['Resume', 'தொடர்', 'ಮುಂದುವರಿಸಿ', 'अनुवर्तत'],
+  voice: ['My voice', 'என் குரல்', 'ನನ್ನ ಧ್ವನಿ', 'मम स्वरः'], sruti: ['Sruti', 'ஸ்ருதி', 'ಶ್ರುತಿ', 'श्रुतिः'],
+  cover: ['The sruti may cover your voice. Bring the sruti down a little.', 'ஸ்ருதி உங்கள் குரலை மறைக்கலாம். ஸ்ருதியைச் சற்றுக் குறையுங்கள்.', 'ಶ್ರುತಿ ನಿಮ್ಮ ಧ್ವನಿಯನ್ನು ಮುಚ್ಚಬಹುದು. ಶ್ರುತಿಯನ್ನು ಸ್ವಲ್ಪ ಕಡಿಮೆ ಮಾಡಿ.', 'श्रुतिः भवतः स्वरम् आच्छादयेत्। श्रुतिं किञ्चित् न्यूनीकुरुत।'],
+  include: ['Include sruti in the shared file', 'பகிரும் கோப்பில் ஸ்ருதியையும் சேர்', 'ಹಂಚುವ ಫೈಲ್‌ನಲ್ಲಿ ಶ್ರುತಿಯನ್ನೂ ಸೇರಿಸಿ', 'प्रेष्यसञ्चिकायां श्रुतिम् अपि योजयत'],
+  share: ['Share (WhatsApp and more)', 'பகிர் (WhatsApp மற்றும் பிற)', 'ಹಂಚಿಕೊಳ್ಳಿ (WhatsApp ಇತ್ಯಾದಿ)', 'प्रेषयत (WhatsApp इत्यादि)'],
+  save: ['Save', 'சேமி', 'ಉಳಿಸಿ', 'रक्षत'], again: ['Record again', 'மீண்டும் பதிவு செய்', 'ಮತ್ತೆ ರೆಕಾರ್ಡ್ ಮಾಡಿ', 'पुनः मुद्रयत'],
+  keep: ['Your recording stays on this phone. Nothing is uploaded unless you share it.', 'உங்கள் பதிவு இந்தப் போனில் மட்டுமே இருக்கும். நீங்கள் பகிர்ந்தால் மட்டுமே வெளியே செல்லும்.', 'ನಿಮ್ಮ ರೆಕಾರ್ಡಿಂಗ್ ಈ ಫೋನ್‌ನಲ್ಲೇ ಇರುತ್ತದೆ. ನೀವು ಹಂಚಿಕೊಂಡರೆ ಮಾತ್ರ ಹೊರಗೆ ಹೋಗುತ್ತದೆ.', 'भवतः मुद्रणम् अस्मिन् दूरभाषे एव तिष्ठति। प्रेषणं विना न गच्छति।'],
+  allowMic: ['Please allow the microphone for Harinamadwar, then try again.', 'ஹரிநாமத்வாருக்கு மைக்கை அனுமதித்து மீண்டும் முயலுங்கள்.', 'ಹರಿನಾಮದ್ವಾರಕ್ಕೆ ಮೈಕ್ ಅನುಮತಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.', 'हरिनामद्वाराय ध्वनिग्राहकम् अनुमन्यध्वम्।'],
+  saved: ['Saved', 'சேமிக்கப்பட்டது', 'ಉಳಿಸಲಾಗಿದೆ', 'रक्षितम्'],
+  making: ['Preparing the file…', 'கோப்பைத் தயாரிக்கிறது…', 'ಫೈಲ್ ಸಿದ್ಧವಾಗುತ್ತಿದೆ…', 'सञ्चिका सज्जीक्रियते…'],
+  sure: ['Discard this recording?', 'இந்தப் பதிவை நீக்கவா?', 'ಈ ರೆಕಾರ್ಡಿಂಗ್ ತ್ಯಜಿಸಬೇಕೇ?', 'इदं मुद्रणं त्यजाम?'],
+};
+const LIX = { en: 0, ta: 1, kn: 2, sa: 3 }[LANG];
+const t = k => (TX[k] || [k])[LIX] || TX[k][0];
+document.querySelectorAll('[data-t]').forEach(e => { e.textContent = t(e.dataset.t); });
+$('song').textContent = Q.get('title') || '';
+function toast(m) { const e = $('toast'); e.textContent = m; e.classList.remove('hidden'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.add('hidden'), 2600); }
+const fmt = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+const ICON = { play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>', pause: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg>',
+  rec: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="7"/></svg>' };
+
+// ---------- settings ----------
+// kattai 1 = C … 6 = A; Sa for kattai 1 = 130.81 Hz (C3), one semitone per half-kattai step
+const KATTAI = [['1', 'C'], ['1½', 'C♯'], ['2', 'D'], ['2½', 'D♯'], ['3', 'E'], ['4', 'F'], ['4½', 'F♯'], ['5', 'G'], ['5½', 'G♯'], ['6', 'A']];
+const DRONES = [['pa', 'Sa – Pa', 3 / 4], ['ma', 'Sa – Ma', 2 / 3], ['ni', 'Sa – Ni', 15 / 16]];
+const set = Object.assign({ k: 4, d: 'pa', ear: 60, spk: false }, store.get('sruti', {}));
+const saveSet = () => store.set('sruti', set);
+const saHz = () => 130.81 * Math.pow(2, set.k / 12);
+
+function drawChips() {
+  $('kattai').innerHTML = KATTAI.map(([k, n], i) => `<button class="chip ${i === set.k ? 'sel' : ''}" data-k="${i}">${k}<small>${n}</small></button>`).join('');
+  $('drone').innerHTML = DRONES.map(([id, n]) => `<button class="chip ${id === set.d ? 'sel' : ''}" data-d="${id}">${n}</button>`).join('');
+}
+$('kattai').onclick = e => { const b = e.target.closest('[data-k]'); if (!b) return; set.k = +b.dataset.k; saveSet(); drawChips(); retune(); };
+$('drone').onclick = e => { const b = e.target.closest('[data-d]'); if (!b) return; set.d = b.dataset.d; saveSet(); drawChips(); retune(); };
+$('ear').value = $('ear2').value = set.ear; $('speaker').checked = set.spk;
+const setEar = v => { set.ear = +v; saveSet(); $('ear').value = $('ear2').value = v; if (earGain) earGain.gain.setTargetAtTime(earLevel(), ctx.currentTime, 0.05); };
+$('ear').oninput = e => setEar(e.target.value); $('ear2').oninput = e => setEar(e.target.value);
+$('speaker').onchange = e => { set.spk = e.target.checked; saveSet(); };
+const earLevel = () => Math.pow(set.ear / 100, 1.6) * 0.9;
+
+// ---------- audio set-up ----------
+let ctx = null, earGain = null, srutiSrc = null, srutiBuf = null, srutiT0 = 0, micStream = null, micNode = null, analyser = null;
+function audio() {
+  if (!ctx) {
+    try { if (navigator.audioSession) navigator.audioSession.type = 'play-and-record'; } catch (e) {}   // iPhone: play the sruti even on silent
+    ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
+    earGain = ctx.createGain(); earGain.gain.value = 0; earGain.connect(ctx.destination);
+  }
+  if (ctx.state === 'suspended') ctx.resume();
+  return ctx;
+}
+
+// ---------- the tanpura: synthesised, four strings plucked mandra Pa → Sa → Sa → low Sa ----------
+const LOOP = 4.8, PLUCK = [0, 1.2, 2.4, 3.6];   // seconds
+function makeSruti(rate) {
+  const n = Math.round(LOOP * rate), out = new Float32Array(n);
+  const sa = saHz(), x = DRONES.find(d => d[0] === set.d)[2];
+  const strings = [sa * x, sa, sa, sa / 2];   // first string: mandra Pa / Ma / Ni
+  const ring = 4.6;   // each string rings on into the next cycle (wrapped round so the loop is seamless)
+  strings.forEach((f, si) => {
+    const start = PLUCK[si], len = Math.round(ring * rate), amp = si === 3 ? 0.9 : 0.75;
+    const H = Math.min(32, Math.floor(9000 / f));
+    for (let h = 1; h <= H; h++) {
+      const fh = f * h * (1 + 0.00035 * h * h);            // slight stiffness
+      const a0 = amp / Math.pow(h, 1.05);
+      const rise = 0.35 + 0.05 * h;                        // jawari: upper partials bloom after the pluck
+      const decay = 2.6 - Math.min(1.6, h * 0.045);
+      const w = 2 * Math.PI * fh / rate, cw = Math.cos(w), sw = Math.sin(w);
+      let sn = Math.sin(Math.random() * 6.283), cs = Math.sqrt(1 - sn * sn);   // oscillator by rotation (fast)
+      const dm = Math.exp(-1 / (decay * rate)), rm = Math.exp(-1 / (rise * 0.6 * rate)), atkN = 0.004 * rate;
+      const beatW = 2 * Math.PI * (0.13 + 0.02 * h) / rate, k = 0.55 + 0.45 * Math.min(1, h / 6), base = Math.round(start * rate);
+      let d = 1, r = 1, am = 1;
+      for (let i = 0; i < len; i++) {
+        if ((i & 63) === 0) am = 1 + 0.15 * Math.sin(beatW * i);          // gentle shimmer
+        const env = (h === 1 ? 1 : (1 - r) * k) * d * (i < atkN ? i / atkN : 1);
+        out[(base + i) % n] += a0 * env * sn * am;
+        const s2 = sn * cw + cs * sw; cs = cs * cw - sn * sw; sn = s2;
+        d *= dm; r *= rm;
+      }
+    }
+  });
+  // light reverb: a few early reflections
+  const taps = [[0.029, 0.32], [0.047, 0.24], [0.071, 0.18], [0.113, 0.12], [0.157, 0.08]], dry = out.slice();
+  for (const [d, g] of taps) { const k = Math.round(d * rate); for (let i = 0; i < n; i++) out[(i + k) % n] += dry[i] * g; }
+  let peak = 0; for (let i = 0; i < n; i++) peak = Math.max(peak, Math.abs(out[i]));
+  for (let i = 0; i < n; i++) out[i] *= 0.6 / (peak || 1);
+  return out;
+}
+function srutiBuffer(c) {
+  const b = c.createBuffer(1, Math.round(LOOP * c.sampleRate), c.sampleRate);
+  b.copyToChannel(makeSruti(c.sampleRate), 0);
+  return b;
+}
+function startSruti() {
+  audio(); stopSruti();
+  srutiBuf = srutiBuffer(ctx);
+  srutiSrc = ctx.createBufferSource(); srutiSrc.buffer = srutiBuf; srutiSrc.loop = true; srutiSrc.connect(earGain);
+  srutiT0 = ctx.currentTime + 0.05; srutiSrc.start(srutiT0);
+  earGain.gain.setTargetAtTime(earLevel(), ctx.currentTime, 0.08);
+}
+function stopSruti() { if (srutiSrc) { try { srutiSrc.stop(); } catch (e) {} srutiSrc.disconnect(); srutiSrc = null; } }
+function retune() { if (srutiSrc) startSruti(); }
+let previewing = false;
+function drawPreview() { $('pv-ic').innerHTML = previewing ? ICON.pause : ICON.play; $('pv-t').textContent = previewing ? t('stopHear') : t('hear'); }
+$('preview').onclick = () => { previewing = !previewing; if (previewing) startSruti(); else stopSruti(); drawPreview(); };
+
+// ---------- microphone: no echo cancelling, no noise suppression, no auto gain ----------
+async function openMic() {
+  if (micStream) return true;
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
+  } catch (e) { toast(t('allowMic')); return false; }
+  audio();
+  micNode = ctx.createMediaStreamSource(micStream);
+  analyser = ctx.createAnalyser(); analyser.fftSize = 1024; micNode.connect(analyser);
+  const tr = micStream.getAudioTracks()[0]; $('mic-name').textContent = tr && tr.label ? tr.label : '';
+  meterLoop();
+  return true;
+}
+const lvlBuf = new Float32Array(1024);
+function level() { if (!analyser) return 0; analyser.getFloatTimeDomainData(lvlBuf); let p = 0; for (const v of lvlBuf) p = Math.max(p, Math.abs(v)); return p; }
+function meterLoop() { const v = level(); $('lvl').style.width = Math.min(100, Math.pow(v, 0.6) * 100) + '%'; if (!$('v-setup').classList.contains('hidden')) requestAnimationFrame(meterLoop); }
+
+// ---------- recording ----------
+let rec = null, chunks = [], recStart = 0, pausedFor = 0, pauseAt = 0, tick = null, srutiPhase = 0, wake = null, wavePts = [];
+function show(v) { ['v-setup', 'v-rec', 'v-review'].forEach(id => $(id).classList.toggle('hidden', id !== v)); window.scrollTo(0, 0); }
+$('start').onclick = async () => {
+  if (!(await openMic())) return;
+  startSruti(); previewing = false; drawPreview();
+  if (set.spk) earGain.gain.value = Math.max(0.25, earLevel());   // through the speaker for duets
+  const mt = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm', 'audio/ogg'].find(m => window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || '';
+  rec = new MediaRecorder(micStream, mt ? { mimeType: mt, audioBitsPerSecond: 128000 } : undefined);
+  chunks = []; rec.ondataavailable = e => e.data.size && chunks.push(e.data);
+  rec.onstop = finish;
+  rec.start(250);
+  recStart = ctx.currentTime; pausedFor = 0; pauseAt = 0; wavePts = [];
+  srutiPhase = ((recStart - srutiT0) % LOOP + LOOP) % LOOP;   // where the tanpura cycle was when singing started
+  try { wake = await navigator.wakeLock.request('screen'); } catch (e) {}
+  show('v-rec'); $('rec-box').classList.remove('paused'); $('pause-ic').innerHTML = ICON.pause.replace(/<\/?svg[^>]*>/g, ''); $('pause-l').textContent = t('pause');
+  tick = setInterval(() => { $('rt').textContent = fmt(elapsed()); }, 200);
+  waveLoop();
+};
+const elapsed = () => (pauseAt || ctx.currentTime) - recStart - pausedFor;
+$('pause').onclick = () => {
+  if (!rec) return;
+  if (rec.state === 'recording') { rec.pause(); pauseAt = ctx.currentTime; $('rec-box').classList.add('paused'); $('pause-ic').innerHTML = ICON.rec.replace(/<\/?svg[^>]*>/g, ''); $('pause-l').textContent = t('resume'); }
+  else if (rec.state === 'paused') { pausedFor += ctx.currentTime - pauseAt; pauseAt = 0; rec.resume(); $('rec-box').classList.remove('paused'); $('pause-ic').innerHTML = ICON.pause.replace(/<\/?svg[^>]*>/g, ''); $('pause-l').textContent = t('pause'); }
+};
+$('stop').onclick = () => { if (rec && rec.state !== 'inactive') rec.stop(); };
+$('discard').onclick = () => { if (!confirm(t('sure'))) return; if (rec) { rec.onstop = null; if (rec.state !== 'inactive') rec.stop(); } endRec(); show('v-setup'); meterLoop(); };
+function endRec() { clearInterval(tick); stopSruti(); if (wake) { wake.release().catch(() => {}); wake = null; } }
+function waveLoop() {
+  const c = $('wave'), x = c.getContext('2d'); if ($('v-rec').classList.contains('hidden')) return;
+  if (rec && rec.state === 'recording') { wavePts.push(level()); if (wavePts.length > 200) wavePts.shift(); }
+  x.clearRect(0, 0, c.width, c.height); x.fillStyle = getComputedStyle(document.body).getPropertyValue('--acc') || '#CA7E0B';
+  const w = c.width / 200;
+  wavePts.forEach((v, i) => { const h = Math.max(4, Math.min(1, Math.pow(v, 0.6)) * c.height * 0.9); x.fillRect(i * w + 1, (c.height - h) / 2, Math.max(2, w - 2), h); });
+  requestAnimationFrame(waveLoop);
+}
+
+// ---------- listen, balance, share ----------
+let voiceBuf = null, voiceBlob = null, playing = false, playFrom = 0, playT0 = 0, vSrc = null, sSrc = null, vGain = null, sGain = null, seekTimer = null;
+async function finish() {
+  endRec();
+  voiceBlob = new Blob(chunks, { type: rec.mimeType || 'audio/webm' });
+  try { voiceBuf = await ctx.decodeAudioData(await voiceBlob.arrayBuffer()); } catch (e) { voiceBuf = null; }
+  playFrom = 0; show('v-review');
+  $('sr-box').classList.toggle('hidden', set.spk); $('inc-box').classList.toggle('hidden', set.spk);
+  $('len').textContent = fmt(voiceBuf ? voiceBuf.duration : elapsed());
+  drawPlay(); checkCover();
+}
+const gv = () => +$('gv').value / 100, gs = () => set.spk ? 0 : Math.pow(+$('gs').value / 100, 1.5);
+function drawPlay() { $('play').innerHTML = playing ? ICON.pause : ICON.play; }
+function stopPlay() { [vSrc, sSrc].forEach(s => { if (s) { try { s.stop(); } catch (e) {} s.disconnect(); } }); vSrc = sSrc = null; clearInterval(seekTimer); }
+function startPlay() {
+  if (!voiceBuf) return;
+  audio(); stopPlay();
+  vGain = ctx.createGain(); vGain.gain.value = gv(); vGain.connect(ctx.destination);
+  sGain = ctx.createGain(); sGain.gain.value = gs(); sGain.connect(ctx.destination);
+  vSrc = ctx.createBufferSource(); vSrc.buffer = voiceBuf; vSrc.connect(vGain);
+  if (!srutiBuf || srutiBuf.sampleRate !== ctx.sampleRate) srutiBuf = srutiBuffer(ctx);
+  sSrc = ctx.createBufferSource(); sSrc.buffer = srutiBuf; sSrc.loop = true; sSrc.connect(sGain);
+  const at = ctx.currentTime + 0.05; playT0 = at - playFrom;
+  vSrc.start(at, playFrom); sSrc.start(at, (srutiPhase + playFrom) % LOOP);
+  vSrc.onended = () => { if (playing && ctx.currentTime - playT0 >= voiceBuf.duration - 0.1) { playing = false; playFrom = 0; stopPlay(); drawPlay(); showPos(0); } };
+  seekTimer = setInterval(() => showPos(ctx.currentTime - playT0), 200);
+}
+function showPos(p) { if (!voiceBuf) return; $('pos').textContent = fmt(Math.max(0, p)); $('seek').value = Math.round(1000 * Math.min(1, p / voiceBuf.duration)); }
+$('play').onclick = () => { if (playing) { playFrom = ctx.currentTime - playT0; stopPlay(); } else startPlay(); playing = !playing; drawPlay(); };
+$('seek').oninput = e => { if (!voiceBuf) return; playFrom = voiceBuf.duration * e.target.value / 1000; showPos(playFrom); if (playing) startPlay(); };
+$('gv').oninput = () => { if (vGain) vGain.gain.setTargetAtTime(gv(), ctx.currentTime, 0.03); checkCover(); };
+$('gs').oninput = () => { if (sGain) sGain.gain.setTargetAtTime(gs(), ctx.currentTime, 0.03); checkCover(); };
+function checkCover() {   // warn when the sruti is likely to drown the voice
+  if (!voiceBuf || set.spk) return $('cover').classList.add('hidden');
+  const d = voiceBuf.getChannelData(0); let sum = 0, n = 0;
+  for (let i = 0; i < d.length; i += 64) { sum += d[i] * d[i]; n++; }
+  const vRms = Math.sqrt(sum / Math.max(1, n)) * gv(), sRms = 0.2 * gs();
+  $('cover').classList.toggle('hidden', !(sRms > vRms * 0.8));
+}
+$('again').onclick = () => { playing = false; stopPlay(); voiceBuf = null; show('v-setup'); meterLoop(); };
+
+// the mix as a WAV file (mono, 22 kHz: small enough for WhatsApp)
+async function mixFile() {
+  const rate = 22050, dur = voiceBuf.duration;
+  const oc = new OfflineAudioContext(1, Math.ceil(dur * rate), rate);
+  const v = oc.createBufferSource(); v.buffer = voiceBuf; const vg = oc.createGain(); vg.gain.value = gv(); v.connect(vg).connect(oc.destination); v.start(0);
+  if (!set.spk && $('inc').checked) {
+    const s = oc.createBufferSource(); s.buffer = srutiBuffer(oc); s.loop = true; const sg = oc.createGain(); sg.gain.value = gs(); s.connect(sg).connect(oc.destination); s.start(0, srutiPhase);
+  }
+  const b = await oc.startRendering(), d = b.getChannelData(0);
+  let peak = 0; for (const x of d) peak = Math.max(peak, Math.abs(x)); const norm = peak > 0.98 ? 0.98 / peak : 1;
+  const buf = new ArrayBuffer(44 + d.length * 2), dv = new DataView(buf);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, 'RIFF'); dv.setUint32(4, 36 + d.length * 2, true); w(8, 'WAVE'); w(12, 'fmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 1, true);
+  dv.setUint32(24, rate, true); dv.setUint32(28, rate * 2, true); dv.setUint16(32, 2, true); dv.setUint16(34, 16, true); w(36, 'data'); dv.setUint32(40, d.length * 2, true);
+  for (let i = 0; i < d.length; i++) dv.setInt16(44 + i * 2, Math.max(-1, Math.min(1, d[i] * norm)) * 0x7FFF, true);
+  const name = ((Q.get('title') || 'Harinamadwar').replace(/[^\p{L}\p{N} _-]+/gu, '').trim().slice(0, 40) || 'Harinamadwar') + ' - ' + new Date().toISOString().slice(0, 10) + '.wav';
+  return new File([buf], name, { type: 'audio/wav' });
+}
+async function toBase64(f) { const b = new Uint8Array(await f.arrayBuffer()); let s = ''; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(s); }
+async function deliver(share) {
+  if (!voiceBuf) return;
+  toast(t('making'));
+  const f = await mixFile();
+  if (window.HNAndroid) { window.HNAndroid[share ? 'shareFile' : 'saveFile'](await toBase64(f), f.name, f.type); return; }   // the Android app
+  if (share && navigator.canShare && navigator.canShare({ files: [f] })) { try { await navigator.share({ files: [f], title: f.name }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 30000); if (!share) toast(t('saved'));
+}
+$('share').onclick = () => deliver(true);
+$('save').onclick = () => deliver(false);
+
+// ---------- back ----------
+$('back').onclick = () => { stopSruti(); stopPlay(); if (micStream) micStream.getTracks().forEach(x => x.stop()); if (window.HNAndroid && window.HNAndroid.close) { window.HNAndroid.close(); return; } if (history.length > 1) history.back(); else location.href = './'; };
+drawChips(); drawPreview();
+openMic();
+</script>
+</body>
+</html>
