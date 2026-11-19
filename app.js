@@ -894,7 +894,7 @@ async function start() {
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(() => {});
   });
   navigator.serviceWorker.addEventListener('message', e => {
     if (e.data === 'content-updated') toast('Songs and meanings updated');

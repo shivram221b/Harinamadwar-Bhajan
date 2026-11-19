@@ -1,7 +1,7 @@
 /* Offline support: the app itself is kept on the phone; song and meaning files are
  * always fetched fresh when there is internet, and the last copy is used when there isn't.
  * Audio is streamed and not stored. */
-const SHELL = 'hg-shell-v13s';
+const SHELL = 'hg-shell-v14s';
 const DATA = 'hg-data';
 const SHELL_FILES = ['./', 'index.html', 'style.css', 'app.js', 'access.js', 'sruti.html', 'manifest.webmanifest',
   'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png',
@@ -40,14 +40,14 @@ self.addEventListener('fetch', e => {
   if (url.pathname.endsWith('.txt')) {
     // network first, so new songs and meanings show up as soon as they are pushed
     const key = new Request(url.origin + url.pathname);
-    e.respondWith(fetch(req).then(res => {
+    e.respondWith(fetch(req, { cache: 'no-cache' }).then(res => {
       if (res.ok) { const copy = res.clone(); caches.open(DATA).then(c => c.put(key, copy)); }
       return res;
     }).catch(() => caches.match(key).then(r => r || Response.error())));
     return;
   }
   // app files: network first too (small), falling back to the stored copy offline
-  e.respondWith(fetch(req).then(res => {
+  e.respondWith(fetch(req, { cache: 'no-cache' }).then(res => {   // no-cache: a new version shows on the next open, not 10 minutes later
     if (res.ok) { const copy = res.clone(); caches.open(SHELL).then(c => c.put(req, copy)); }
     return res;
   }).catch(() => caches.match(req).then(r => r || caches.match('index.html'))));
