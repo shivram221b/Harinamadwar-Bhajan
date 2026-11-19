@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#1D4E9E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&family=Mukta+Malar:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root { --page:#FAF6F0; --text:#1B2638; --muted:#4D5D76; --line:#D3DFF0; --soft:#E6EEF9; --bar:#1D4E9E; --deep:#163E7E;
   --acc:#CA7E0B; --label:#B06A00; --ok:#2E7D4F; --bad:#B3261E; --card:#fff; }
@@ -122,6 +122,20 @@ details.rec-g .pn { font-size: 13px; min-width: 30px; }
 .rec-big { width: 84px; height: 84px; border-radius: 50%; border: 4px solid #F0C9C4; display: grid; place-items: center; background: #fff; }
 .rec-big span { width: 54px; height: 54px; border-radius: 50%; background: var(--bad); transition: all .2s; }
 .rec-big.on span { width: 30px; height: 30px; border-radius: 6px; }
+.rec-sheet.lyr { height: 94vh; height: 94dvh; text-align: left; align-items: stretch; gap: 10px; padding-top: 14px; }
+.ly-top { display: flex; align-items: center; gap: 10px; }
+.ly-h { flex: 1; min-width: 0; font-size: 18px; color: var(--deep); line-height: 1.3; }
+.ly-h span { color: var(--text); }
+.ly-x { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--line); background: #fff; display: grid; place-items: center; color: var(--muted); }
+.ly-x svg { width: 18px; height: 18px; }
+.ly-tools { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.ly-size { display: flex; gap: 6px; }
+.ly-text { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; white-space: pre-wrap; line-height: 1.6; color: var(--text); font-family: 'Mukta', 'Mukta Malar', system-ui, sans-serif; }
+.lyr.live .ly-text { border-color: #F0C9C4; box-shadow: 0 0 0 3px #FDECEA; }
+.ly-bar { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.lyr .rec-time { font-size: 30px; }
+.lyr .rec-big { width: 72px; height: 72px; } .lyr .rec-big span { width: 46px; height: 46px; } .lyr .rec-big.on span { width: 26px; height: 26px; }
+.lyr audio { width: 100%; }
 /* learn: chosen songs */
 .q-list { overflow: hidden; }
 .q-row { display: flex; align-items: center; gap: 8px; padding: 10px 8px 10px 4px; border-bottom: 1px solid var(--soft); background: #fff; transition: transform .15s; position: relative; }
@@ -670,15 +684,46 @@ async function showRecordings(tabs, wire, live) {
   }
   draw();
 }
+// the words of one song from the app's own files (English or Tamil)
+const lyricCache = {};
+async function lyricsOf(book, number, lang) {
+  const f = BOOKS[book].base + (lang === 'ta' ? 'songs_ta.txt' : 'songs.txt');
+  const t = lyricCache[f] || (lyricCache[f] = (await appFile(f)).replace(/\r/g, ''));
+  const blocks = t.split(/\n(?=@@)/);
+  const b = blocks.find(x => { const h = x.match(/^@@\s*([^|\n]+?)\s*\|/); return h && h[1] === number; });
+  if (!b) return null;
+  const lines = b.split('\n'), h = lines[0].slice(2).split('|').map(x => x.trim());
+  const body = lines.slice(1).join('\n').split(/\n##/)[0].replace(/^\s+|\s+$/g, '');
+  return { title: h[4] || h[1] || '', text: body };
+}
+let lyrLang = (() => { try { return localStorage.getItem('adm.lyrLang') || 'ta'; } catch (e) { return 'ta'; } })();
+let lyrSize = (() => { try { return +localStorage.getItem('adm.lyrSize') || 21; } catch (e) { return 21; } })();
 function recordSheet(book, number, save) {
   const d = document.createElement('div'); d.className = 'ask';
-  d.innerHTML = `<div class="ask-box rec-sheet"><p><b>Recording ${esc(number)}</b></p><div class="rec-time" id="rt">0:00</div>
-    <button class="rec-big" id="rb" aria-label="Start recording"><span></span></button><div class="hint" id="rh">Tap the red button to start</div>
-    <audio id="ra" controls class="hidden"></audio><button class="btn deep hidden" id="rs">Save recording</button><button class="btn line" id="rc">Cancel</button></div>`;
+  d.innerHTML = `<div class="ask-box rec-sheet lyr">
+    <div class="ly-top"><div class="ly-h"><b>${esc(number)}</b> <span id="lt"></span></div><button class="ly-x" id="rc" aria-label="Close">${ICON.x}</button></div>
+    <div class="ly-tools"><span class="lang-row" style="margin:0">${[['ta', 'தமிழ்'], ['en', 'English']].map(([c, n]) => `<button class="lchip ${c === lyrLang ? 'on' : ''}" data-ll="${c}">${n}</button>`).join('')}</span>
+      <span class="ly-size"><button class="lchip" id="ls" aria-label="Smaller words">A−</button><button class="lchip" id="lb" aria-label="Bigger words">A+</button></span></div>
+    <div class="ly-text" id="lx">Loading the words…</div>
+    <div class="ly-bar"><div class="rec-time" id="rt">0:00</div>
+      <button class="rec-big" id="rb" aria-label="Start recording"><span></span></button>
+      <div class="hint" id="rh">Tap the red button to start · the words stay on screen</div>
+      <audio id="ra" controls class="hidden"></audio><button class="btn deep hidden" id="rs">Save recording</button></div></div>`;
   document.body.appendChild(d);
-  let mr = null, chunks = [], t0 = 0, tick = null, blob = null;
+  let mr = null, chunks = [], t0 = 0, tick = null, blob = null, lock = null;
   const $ = id => d.querySelector('#' + id);
-  $('rc').onclick = () => { if (mr && mr.state === 'recording') mr.stop(); clearInterval(tick); d.remove(); };
+  const showWords = async () => {
+    $('lx').style.fontSize = lyrSize + 'px';
+    const w = await lyricsOf(book, number, lyrLang) || (lyrLang === 'ta' ? await lyricsOf(book, number, 'en') : null);
+    $('lt').textContent = w ? w.title : '';
+    $('lx').textContent = w && w.text ? w.text : 'The words of this song are not in the app yet.';
+  };
+  showWords();
+  d.querySelectorAll('[data-ll]').forEach(b => b.onclick = () => { lyrLang = b.dataset.ll; try { localStorage.setItem('adm.lyrLang', lyrLang); } catch (e) {} d.querySelectorAll('[data-ll]').forEach(x => x.classList.toggle('on', x === b)); showWords(); });
+  const size = k => { lyrSize = Math.max(15, Math.min(34, lyrSize + k)); try { localStorage.setItem('adm.lyrSize', lyrSize); } catch (e) {} $('lx').style.fontSize = lyrSize + 'px'; };
+  $('ls').onclick = () => size(-2); $('lb').onclick = () => size(2);
+  const done = () => { clearInterval(tick); if (lock) { lock.release().catch(() => {}); lock = null; } };
+  $('rc').onclick = () => { if (mr && mr.state === 'recording') mr.stop(); done(); d.remove(); };
   $('rb').onclick = async () => {
     if (mr && mr.state === 'recording') { mr.stop(); return; }
     try {
@@ -686,8 +731,9 @@ function recordSheet(book, number, save) {
       const mt = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm'].find(m => MediaRecorder.isTypeSupported(m)) || '';
       mr = new MediaRecorder(stream, mt ? { mimeType: mt } : undefined); chunks = [];
       mr.ondataavailable = e => chunks.push(e.data);
-      mr.onstop = () => { stream.getTracks().forEach(t => t.stop()); clearInterval(tick); blob = new Blob(chunks, { type: (mr.mimeType || 'audio/webm').split(';')[0] }); $('ra').src = URL.createObjectURL(blob); $('ra').classList.remove('hidden'); $('rs').classList.remove('hidden'); $('rb').classList.remove('on'); $('rh').textContent = 'Listen, then save · or tap red to record again'; };
-      mr.start(); t0 = Date.now(); $('rb').classList.add('on'); $('rh').textContent = 'Recording… tap to stop'; $('ra').classList.add('hidden'); $('rs').classList.add('hidden');
+      mr.onstop = () => { stream.getTracks().forEach(t => t.stop()); done(); blob = new Blob(chunks, { type: (mr.mimeType || 'audio/webm').split(';')[0] }); $('ra').src = URL.createObjectURL(blob); $('ra').classList.remove('hidden'); $('rs').classList.remove('hidden'); $('rb').classList.remove('on'); d.querySelector('.lyr').classList.remove('live'); $('rh').textContent = 'Listen, then save · or tap red to record again'; };
+      mr.start(); t0 = Date.now(); $('rb').classList.add('on'); d.querySelector('.lyr').classList.add('live'); $('rh').textContent = 'Recording… tap to stop'; $('ra').classList.add('hidden'); $('rs').classList.add('hidden');
+      try { lock = await navigator.wakeLock.request('screen'); } catch (e) {}   // keep the screen on while singing
       tick = setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); $('rt').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }, 250);
     } catch (e) { toast('Please allow the microphone for this page.'); }
   };
