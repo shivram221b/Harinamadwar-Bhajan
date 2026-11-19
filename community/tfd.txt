@@ -1,7 +1,7 @@
 # Thoughts for the Day by Shri Janakiraman (Jani). Newest first.
 # @@ number | series | title | related song (book:number, optional), then paragraphs separated by blank lines.
 
-@@ 253 | Epic Series 123 | Why Do We Suffer Twice? | dns:8.4
+@@ 254 | Epic Series 123 | Why Do We Suffer Twice? | dns:8.4
 Have you noticed how often we worry about things that haven’t even happened?
 
 Our daughter is late returning from office. We know she may be held up with work. But as the minutes pass, our mind starts imagining all kinds of things. We call her, but she doesn’t answer. We don’t want to disturb her by calling again. Yet, how do we stop worrying?
@@ -82,7 +82,7 @@ Don’t fight tomorrow’s battle today. Let us take care of today. Tomorrow, we
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 252 | Epic Series 122 | Do we wait until we have enough to give? | 
+@@ 253 | Epic Series 122 | Do we wait until we have enough to give? | 
 Recently, I got a query from one of the TFD readers :
 
 “Sometimes I feel like helping someone or contributing to a good cause. But then I start thinking about my own commitments, future needs and financial security. I tell myself that I will give more when I am in a better position. Is there anything wrong with thinking this way?”
@@ -137,7 +137,7 @@ After all, what we have is Your gift. May I learn to share it with gratitude.
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 251 | Epic Series 121 | When is enough, enough? | 
+@@ 252 | Epic Series 121 | When is enough, enough? | 
 Today, I met one of our TFD readers who told me that he would soon be turning 80.
 
 As he spoke about his life, he mentioned how his thinking and way of living had changed when he turned 60 and 70. Now, as he approaches 80, he feels that he may travel less and spend more time looking within.
@@ -212,7 +212,7 @@ I hope I can learn to do that.
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 250 | Epic Series 120 | When love becomes worry | 
+@@ 251 | Epic Series 120 | When love becomes worry | 
 A question posed to me by one of our TFD readers :
 
 “I am constantly worried about my children, their studies, careers and future. I know worrying doesn’t help, but I cannot stop. How do I learn to let go?”
@@ -299,7 +299,7 @@ May we have the wisdom to guide our children, the patience to let them grow, and
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 249 | Epic Series 119 | When the mind knows, but the heart does not listen | 
+@@ 250 | Epic Series 119 | When the mind knows, but the heart does not listen | 
 Another question from the same reader:
 
 “Many of us pray to God for different reasons. Does prayer help us balance our emotions? Sometimes emotions take over and we do things without even realising it. Later, we wonder whether what we did was right or wrong. What makes our emotions change so much? Could planetary influences be responsible?”
@@ -394,7 +394,7 @@ Dhanyosmi 🙏🙇‍♂️
 
 P.S: From TFD 250 onwards, we will remove the “Read Only” restriction for 12 hours, so you can share your feedback, thoughts and opinions. Looking forward to hearing from you. After 12 hours, the group will be reverted to Read Only.
 
-@@ 248 | Epic Series 118 | Who Is Really in Control? | 
+@@ 249 | Epic Series 118 | Who Is Really in Control? | 
 Dear Friends,
 
 A reader sent me a very candid question. I read it once, then read it again, and for a few seconds wondered whether I should answer it at all. I don’t want to dig my own grave. 😃
@@ -471,7 +471,7 @@ And if all else fails, take a deep breath, smile, and remember that sometimes ma
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 247 | Epic Series 117 | Why do good people suffer? | 
+@@ 248 | Epic Series 117 | Why do good people suffer? | 
 Dear Friends,
 
 A reader in his sixties sent me a difficult question.
@@ -566,7 +566,7 @@ With His grace, may we learn to face our own future without fear and meet anothe
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 246 | Epic Series 116 | I thought it was not working | 
+@@ 247 | Epic Series 116 | I thought it was not working | 
 Dear Friends,
 
 My cousin wrote a very thoughtful comment on my last TFD. She shared her experience with her Yoga group. Hundreds join, but only a few continue regularly. Many attend the training, learn what they have to do and then stop. Some have genuine reasons such as work or health. But many think, “Now I know what to do. I will practise on my own.” Slowly, the practice stops. This happens in almost every part of our life.
@@ -623,7 +623,7 @@ With His grace, let us keep going.
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 245 | Epic Series 115 | The story I created was not the truth | 
+@@ 246 | Epic Series 115 | The story I created was not the truth | 
 Dear Friends,
 
 It has been a while since I wrote a TFD. The last few days have once again been quite full with travel and Namasankeerthanam programmes.
@@ -702,7 +702,7 @@ Let us be careful about the stories we create when we do not know the whole trut
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 244 | Epic Series 114 | I thought I had gone beyond this | 
+@@ 245 | Epic Series 114 | I thought I had gone beyond this | 
 Dear Friends,
 
 It has been a few days since I wrote to you. I have missed these quiet moments of sharing with all of you.
@@ -797,7 +797,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 P.S. - We will be in Chennai this weekend. On Sunday, 6th September, from 5:30 PM to 8:00 PM, we will be at Sri Pattabhiramaswamy Oppiliappan Temple, Madipakkam for Hari Nama Sankeerthanam. If you are in Chennai, please do join us. It will be wonderful to sing the Nama together once again. Looking forward to seeing many of you
 
-@@ 243 | Epic Series 113 | Why does one small incident stay in our mind for so long? | 
+@@ 244 | Epic Series 113 | Why does one small incident stay in our mind for so long? | 
 Have you noticed this?. Someone says something to us. It may be just one sentence. Perhaps they did not even mean to hurt us. We smile, move on and continue with our day.
 
 But later, when we are alone, our mind goes back to that one sentence. “Why did he say that?” “What did she mean?” “Maybe I should have answered differently?” “I should have told him this.”
@@ -894,7 +894,7 @@ Dhanyosmi 🙏🙇‍♂️
 
 P.S. Please continue sending your thoughts, questions and suggestions. Many of these TFDs begin with something very ordinary that happens in our lives. When we look at it a little more deeply, we often discover that the Bhagavatham has already given us a beautiful way to understand it.
 
-@@ 242 | Epic Series 112 | Why does someone else’s life make me feel smaller? | 
+@@ 243 | Epic Series 112 | Why does someone else’s life make me feel smaller? | 
 First, a big thank you to all those who keep sending me your questions, thoughts and suggestions for the TFD. I genuinely value them.
 
 I keep all these questions in a little “to-do list”. Whenever I am looking for a topic, I go through the list and pick one that touches me.
@@ -1047,7 +1047,7 @@ Dhanyosmi 🙏🙇‍♂️
 
 PS: Please continue sending your thoughts, questions and suggestions. They genuinely help me discover what we should reflect upon together - Jani /9845204620
 
-@@ 241 | Epic Series 111 | When Did We Become So Calculative? | 
+@@ 242 | Epic Series 111 | When Did We Become So Calculative? | 
 There is something I have been noticing, and perhaps many of us will recognise it in ourselves.
 
 We have slowly become very good at calculating. Almost everything has a price now. Even when something is being done for a good cause, our first thought is often not, “How can I help?” but, “How much should I give?”
@@ -1192,7 +1192,7 @@ Dhsnyosmi 🙇‍♂️🙏
 
 Ps: Please share your thoughts/ feedback/questions if any directly to me - Jani 9845204620
 
-@@ 240 | Epic Series 110 | We live in the same house, But different worlds | 
+@@ 241 | Epic Series 110 | We live in the same house, But different worlds | 
 A reader sent me a message, “Jani , please write something about today’s children. Their attitude and behaviour have become very difficult. They seem impatient and insensitive. Their tantrums and the way they respond to parents can be painful.”
 
 I am sure many parents will relate to this. This is not about blaming an entire generation. There are many wonderful and caring young people. But perhaps there is something happening around us that is worth looking at quietly.
@@ -1269,7 +1269,7 @@ And perhaps we may discover that the person we were trying to reach through What
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 239 | Epic Series 109 | Are we giving ourselves enough time to be with ourselves? | 
+@@ 240 | Epic Series 109 | Are we giving ourselves enough time to be with ourselves? | 
 I sometimes wonder what has happened to our relationship with silence.
 
 Earlier, if we had a few free minutes, we simply sat. We watched people passing by, listened to music, looked out of the window, or allowed our thoughts to wander. Today, the moment there is a little gap, our hand naturally reaches for the phone.
@@ -1342,7 +1342,7 @@ Perhaps we don’t always need more connection. Sometimes, we may simply need a 
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 238 | Epic Series 108 | How do I make peace with what I cannot change? | 
+@@ 239 | Epic Series 108 | How do I make peace with what I cannot change? | 
 A reader wrote to me recently.
 
 She said, “I am 67 now. When I look back at my life, there are some things I still cannot accept. There were family problems that were never resolved. There were people who hurt me and never apologised. There were decisions I made that I still regret. I have tried to forgive, but sometimes the old pain comes back. I keep asking myself, why did all this happen? How do I make peace with things that I cannot change?”
@@ -1467,7 +1467,7 @@ Dhanyosmi 🙏🙇‍♂️
 
 PS: If you have any questions, thoughts or experiences that you would like to share, please feel free to write to me directly. I will try my best to take them up in one of the upcoming TFDs. Janakiraman / 9845204620
 
-@@ 237 | Epic Series 107 | When someone we love is no longer there | 
+@@ 238 | Epic Series 107 | When someone we love is no longer there | 
 TFD 235 was about the loneliness that can come when someone we love is no longer with us.
 
 After reading it, one of our readers shared a deeply moving story with me. I am sharing it anonymously because, in a way, this is not just her story. It is a story about love, loss and the strange courage that life sometimes asks of us.
@@ -1556,7 +1556,7 @@ Dhanyosmi 🙏🙇‍♂️
 
 PS: If you have any questions, thoughts, or clarifications, please feel free to share them with me directly. I will try my best to address them in one of the upcoming TFD..Janakiraman/9845204620
 
-@@ 236 | Epic Series 106 | Tell God what you want. Then let Him decide | 
+@@ 237 | Epic Series 106 | Tell God what you want. Then let Him decide | 
 This morning, a reader sent me a beautiful question. She told me about something her mother had taught her about prayer. Her mother used to say, “First, thank God for everything. Then pray for the good of everyone.
 
 And when you ask God for something, don’t be too specific. Don’t say, ‘God, I want this particular job.’ Don’t say, ‘God, my child must get this particular opportunity.’ Just say, ‘God, please give us what is good for us.’”
@@ -1649,7 +1649,7 @@ It may be looking back one day and whispering with a grateful heart, “God, now
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 235 | Epic series 105 | The loneliness we never prepared for | 
+@@ 236 | Epic series 105 | The loneliness we never prepared for | 
 Yesterday, one of our readers sent me a message.
 
 “One of my very close friend’s children have settled abroad. His wife passed away recently. He is now living alone. Every day he keeps saying, ‘I am praying to God to take me away.’ I wanted to comfort him… but I had no words.
@@ -1708,7 +1708,7 @@ Perhaps the best way to honour those we miss is not by waiting to join them…bu
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 234 | Epic Series 104 | When does “Enough” arrive? | 
+@@ 235 | Epic Series 104 | When does “Enough” arrive? | 
 One of the greatest blessings of participating in Namasankeerthanam over the years has been the opportunity to spend time with hundreds of families.
 
 The bhajan may last only a few hours, but the conversations afterwards often stay with me for years.
@@ -1775,75 +1775,7 @@ And perhaps true wealth is not measured only by what we preserve for tomorrow, b
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 233 | Epic Series 103 | The race that quietly steals our life · When love becomes control | 
-( _I hesitated before sharing something this personal. But if this touches even one heart caught in the same race, it is worth it_)
-
-There are some moments in life that quietly break our heart. Not because something bad happens, but because we suddenly realise what we have missed.
-
-Last week, I visited the home of one of my very close friends. His eight-month-old granddaughter was playing on the floor. As I sat beside her, she looked straight into my eyes. Then she slowly wrapped her tiny fingers around one of mine and held it tightly.
-
-She kept looking at me, smiled innocently, and soon burst into laughter. I don’t know why, but my heart simply melted.
-
-For those few minutes, nothing else mattered. There was no past, no future, only the joy of being with a little child.
-
-As we travelled back home, a painful thought entered my mind. I could hardly remember such moments with my own children. When they were babies, I was always busy building my career.
-
-There was always another customer to meet, another deadline to achieve, another journey to make. I sincerely believed I was doing it all for my family.
-
-Today, I have many photographs of my children’s childhood. I have videos too. But I have surprisingly few memories of simply sitting beside them, holding their tiny fingers, watching them smile, or listening to their laughter. Then another thought touched my heart. If I had missed those precious moments, someone else had not.
-
-My wife had quietly lived them all. She was there for their first smile, their first steps, their first words, their first day at school, their little victories, their tears and their laughter. While I was busy earning for the family, she was quietly building the family.
-
-Looking back today, I feel she received blessings that money could never buy. Some of life’s greatest treasures are not earned. They are simply experienced, one ordinary moment at a time.
-
-As I reflected on this experience, my mind went to a deeply moving episode from the Bhagavatam.
-
-There lived a noble king named Muchukunda. He was known for his righteousness, courage and unwavering sense of duty. When the devas were engaged in a fierce war against the asuras, they sought his help. Without a second thought, Muchukunda left his kingdom and joined the battle.
-
-The war did not last for a few weeks or months. It continued for an unimaginably long time. Muchukunda kept fighting with complete dedication, never complaining and never asking what it was costing him personally. His only concern was to fulfil his duty.
-
-At last, the devas won the war. Filled with gratitude, they said, “O King, ask for any boon.”
-
-Muchukunda stood silently. His body was exhausted. His mind was exhausted. His heart was exhausted. Then he looked back at the life he had left behind.
-
-Time had quietly moved on.
-
-His parents were no more. His wife was no more. His children were no more. His relatives were no more. The kingdom he had once ruled had changed beyond recognition.
-
-He had spent the finest years of his life fighting battles for others. By the time his duty was over, the people for whom life had meaning were no longer there.
-
-He did not ask for another kingdom. He did not ask for wealth. He did not ask for fame or power.
-
-With folded hands, he simply said, “Please… allow me to sleep.”
-
-The devas blessed him. They granted him deep, uninterrupted sleep in a lonely mountain cave. They also gave him another boon that anyone who disturbed his sleep would instantly be reduced to ashes by his very glance.
-
-Many years later, Krishna deliberately led the arrogant king Kalayavana into that very cave. Mistaking the sleeping king for Krishna, Kalayavana angrily kicked him.
-
-Muchukunda slowly opened his eyes. In that very moment, Kalayavana was reduced to ashes.
-
-As I reflected on this story, one thought would not leave me. Kalayavana did not create the fire. He merely awakened it.
-
-Perhaps burnout is like that. Years of carrying responsibilities… years of postponing life… years of saying, “After this project… after this promotion… after I earn a little more…” slowly become a hidden fire within us.
-
-Then one small request from our spouse, one innocent question from our child, one interruption, one small mistake and the fire bursts out.
-
-The people closest to us are not hurt because they deserve it. They are hurt because they happen to stand closest to our unhealed exhaustion.
-
-Muchukunda’s story is not merely about a king asking for sleep. It is the story of a good man who gave everything to his responsibilities, only to discover that time had quietly taken away moments that could never return. His greatest loss was not his kingdom. It was the years he could never live again.
-
-As I reached home that evening, I did not feel guilty. I felt grateful. Grateful that an eight-month-old baby had taught me a lesson that I had somehow missed for many years.
-
-Life is not made only of achievements. It is made of moments. We cannot relive the moments we have already missed. But we can still protect the ones waiting for us today.
-
-If someone we love asks for five minutes, may we not always answer, “Later.”
-
-Because one day…”Later” quietly becomes “too late.”
-
-Dhanyosmi 🙇‍♂️🙏
-
-When love becomes control
-
+@@ 234 | Epic Series 103 | When love becomes control | 
 There is a scene that quietly plays out in thousands of homes.
 
 For nearly thirty years, a mother lovingly runs her home. She decides what to cook. She knows where every small item is kept. Festivals, family functions, guests, finances… everything passes through her hands.
@@ -1907,6 +1839,73 @@ Anyone can build a house. But only a loving elder can build harmony.
 May we all grow from being the centre of the family…to becoming the strength behind the family.
 
 That is not losing our place. That is becoming the foundation on which the next generation stands.
+
+Dhanyosmi 🙇‍♂️🙏
+
+@@ 233 | Epic Series 103 | The race that quietly steals our life | 
+( _I hesitated before sharing something this personal. But if this touches even one heart caught in the same race, it is worth it_)
+
+There are some moments in life that quietly break our heart. Not because something bad happens, but because we suddenly realise what we have missed.
+
+Last week, I visited the home of one of my very close friends. His eight-month-old granddaughter was playing on the floor. As I sat beside her, she looked straight into my eyes. Then she slowly wrapped her tiny fingers around one of mine and held it tightly.
+
+She kept looking at me, smiled innocently, and soon burst into laughter. I don’t know why, but my heart simply melted.
+
+For those few minutes, nothing else mattered. There was no past, no future, only the joy of being with a little child.
+
+As we travelled back home, a painful thought entered my mind. I could hardly remember such moments with my own children. When they were babies, I was always busy building my career.
+
+There was always another customer to meet, another deadline to achieve, another journey to make. I sincerely believed I was doing it all for my family.
+
+Today, I have many photographs of my children’s childhood. I have videos too. But I have surprisingly few memories of simply sitting beside them, holding their tiny fingers, watching them smile, or listening to their laughter. Then another thought touched my heart. If I had missed those precious moments, someone else had not.
+
+My wife had quietly lived them all. She was there for their first smile, their first steps, their first words, their first day at school, their little victories, their tears and their laughter. While I was busy earning for the family, she was quietly building the family.
+
+Looking back today, I feel she received blessings that money could never buy. Some of life’s greatest treasures are not earned. They are simply experienced, one ordinary moment at a time.
+
+As I reflected on this experience, my mind went to a deeply moving episode from the Bhagavatam.
+
+There lived a noble king named Muchukunda. He was known for his righteousness, courage and unwavering sense of duty. When the devas were engaged in a fierce war against the asuras, they sought his help. Without a second thought, Muchukunda left his kingdom and joined the battle.
+
+The war did not last for a few weeks or months. It continued for an unimaginably long time. Muchukunda kept fighting with complete dedication, never complaining and never asking what it was costing him personally. His only concern was to fulfil his duty.
+
+At last, the devas won the war. Filled with gratitude, they said, “O King, ask for any boon.”
+
+Muchukunda stood silently. His body was exhausted. His mind was exhausted. His heart was exhausted. Then he looked back at the life he had left behind.
+
+Time had quietly moved on.
+
+His parents were no more. His wife was no more. His children were no more. His relatives were no more. The kingdom he had once ruled had changed beyond recognition.
+
+He had spent the finest years of his life fighting battles for others. By the time his duty was over, the people for whom life had meaning were no longer there.
+
+He did not ask for another kingdom. He did not ask for wealth. He did not ask for fame or power.
+
+With folded hands, he simply said, “Please… allow me to sleep.”
+
+The devas blessed him. They granted him deep, uninterrupted sleep in a lonely mountain cave. They also gave him another boon that anyone who disturbed his sleep would instantly be reduced to ashes by his very glance.
+
+Many years later, Krishna deliberately led the arrogant king Kalayavana into that very cave. Mistaking the sleeping king for Krishna, Kalayavana angrily kicked him.
+
+Muchukunda slowly opened his eyes. In that very moment, Kalayavana was reduced to ashes.
+
+As I reflected on this story, one thought would not leave me. Kalayavana did not create the fire. He merely awakened it.
+
+Perhaps burnout is like that. Years of carrying responsibilities… years of postponing life… years of saying, “After this project… after this promotion… after I earn a little more…” slowly become a hidden fire within us.
+
+Then one small request from our spouse, one innocent question from our child, one interruption, one small mistake and the fire bursts out.
+
+The people closest to us are not hurt because they deserve it. They are hurt because they happen to stand closest to our unhealed exhaustion.
+
+Muchukunda’s story is not merely about a king asking for sleep. It is the story of a good man who gave everything to his responsibilities, only to discover that time had quietly taken away moments that could never return. His greatest loss was not his kingdom. It was the years he could never live again.
+
+As I reached home that evening, I did not feel guilty. I felt grateful. Grateful that an eight-month-old baby had taught me a lesson that I had somehow missed for many years.
+
+Life is not made only of achievements. It is made of moments. We cannot relive the moments we have already missed. But we can still protect the ones waiting for us today.
+
+If someone we love asks for five minutes, may we not always answer, “Later.”
+
+Because one day…”Later” quietly becomes “too late.”
 
 Dhanyosmi 🙇‍♂️🙏
 
@@ -8127,7 +8126,7 @@ And sometimes…That itself is more than enough.
 
 Dhanyosmi 🙏
 
-@@ 158 | Epic Series - 41 | I Did So Much… But No One Noticed | 
+@@ 159 | Epic Series - 41 | I Did So Much… But No One Noticed | 
 Today, I received a message from someone I know well.
 
 “I am feeling very upset. At home, I keep doing everything taking care of work, family, responsibilities. I don’t complain. I adjust. But honestly… nobody seems to value it. Sometimes I feel like I don’t matter.”
@@ -8210,7 +8209,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: The “Epic Series” draws wisdom from human psychology and ancient epics to reflect on our everyday lives.
 
-@@ 157 | Epic Series - 40 | Comfort… or Chain? | 
+@@ 158 | Epic Series - 40 | Comfort… or Chain? | 
 One rich man had to stay one night in a small village.
 
 No AC.
@@ -8293,7 +8292,7 @@ That is true simplicity.
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 156 | Epic Series - 39 | What if something goes wrong? | 
+@@ 157 | Epic Series - 39 | What if something goes wrong? | 
 A message from a reader:
 
 “Hi, I need clarity…I get sudden episodes where
@@ -8386,7 +8385,7 @@ Dhanyosmi 🙇‍♂️
 
 PS: The “Epic Series” draws insights from human psychology and the epics, offering reflections for our daily lives.
 
-@@ 155 | Epic Series - 38 | What Will People Think? | 
+@@ 156 | Epic Series - 38 | What Will People Think? | 
 Sunday morning…Relatives are coming home…A Small get-together…Nothing big…
 
 Since morning…House is active…Cleaning… arranging… planning snacks…
@@ -8475,7 +8474,7 @@ And even if they do…We don’t have to live our life…Inside their thoughts�
 
 Dhanyosmi 🙇‍♂️🙏.
 
-@@ 154 | Epic Series - 37 | Know Yourself… Re-Discover Yourself | 
+@@ 155 | Epic Series - 37 | Know Yourself… Re-Discover Yourself | 
 A few days back, I was listening to a guest speaker in my class. One line he said really touched me:
 
 “People don’t become less with age… they just start thinking they are less.”
@@ -8590,7 +8589,7 @@ Dhanyosmi 🙏😊
 
 PS: The “Epic Series” shares simple lessons from human psychology and our epics. If you have any questions or need any clarification, please message me directly – Jani (9845204620).
 
-@@ 153 | Epic Series - 36 | I Was Not Hungry… Still I Kept Eating… | 
+@@ 154 | Epic Series - 36 | I Was Not Hungry… Still I Kept Eating… | 
 I Was Not Hungry… Still I Kept Eating…
 
 Night…Everyone has eaten….Kitchen is closed….Lights are dim….House is quiet…
@@ -8743,7 +8742,7 @@ It starts with gently asking…
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 152 | Epic Series -35 | Why Are You Always On The Phone? | 
+@@ 153 | Epic Series -35 | Why Are You Always On The Phone? | 
 A scene from a reader’s home:
 
 Night time…Dinner is over…..Father is sitting with the news…Mother is clearing the kitchen…
@@ -8852,7 +8851,7 @@ We need to stay closer…without making them feel controlled
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 151 | Epic Series - 34 | That Small Pause… I Missed That Day… | 
+@@ 152 | Epic Series - 34 | That Small Pause… I Missed That Day… | 
 Let me share something I observed in myself a few months ago…
 
 After a long day at office…Deadlines… discussions… constant movement… and the usual traffic…
@@ -8957,7 +8956,7 @@ A small pause in the right moment…can prevent a long regret later…
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 150 | Epic Series -33 | How much is enough? | 
+@@ 151 | Epic Series -33 | How much is enough? | 
 One reader asked me: “I am working… earning… saving decently . Still… I am not peaceful…
 
 If I slow down… I feel scared…
@@ -9040,7 +9039,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: “Epic Series” draws wisdom from human psychology and epics to reflect on our day-to-day lives. Please feel free to send me your questions directly ; they may be answered in upcoming TFDs.
 
-@@ 149 | Epic Series - 32 | Am I living… or just waiting? | 
+@@ 150 | Epic Series - 32 | Am I living… or just waiting? | 
 One of the readers wrote to me… not casually… but from somewhere very deep:
 
 “Children are settled abroad… I feel proud saying that to everyone. But when I come back home… it is very quiet.
@@ -9133,7 +9132,7 @@ Let it remain a living space… where your presence itself brings warmth.
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 148 | Epic Series - 31 | Acceptance… is not weakness… It is freedom… | 
+@@ 149 | Epic Series - 31 | Acceptance… is not weakness… It is freedom… | 
 Acceptance… is not weakness… It is freedom…
 
 Today is Sri Rama Navami…
@@ -9252,7 +9251,7 @@ PS: This “Epic Series” draws wisdom from our epics and Human Psychology to r
 
 Contact: Janakiraman - 9845204620
 
-@@ 147 | Epic Series - 30 | After us… what will happen? | 
+@@ 148 | Epic Series - 30 | After us… what will happen? | 
 One reader wrote…
 
 “We have lived with values. My husband may not be very ritualistic…but he is spiritual… involved in satsangs. Together… we have done pitru karma sincerely…maybe not perfectly… but with devotion…
@@ -9421,7 +9420,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: Please feel free to message me directly if you have any questions. Contact Janakiraman at 9845204620.
 
-@@ 146 |  | A clarification to all the readers (TFD-146) | 
+@@ 147 |  | A clarification to all the readers (TFD-146) | 
 Many of you asked me a simple question after yesterday’s story (TFD-145):
 
 • “If my heart is breaking, what can I do?”
@@ -9552,7 +9551,7 @@ P.S.: If you have any questions, feel free to message me directly!
 
 Contact: Janakiraman 9845204620
 
-@@ 145 | Epic Series - 29 | When the heart cannot bear the pain… | 
+@@ 146 | Epic Series - 29 | When the heart cannot bear the pain… | 
 Yesterday… something small happened…But it touched me deeply…
 
 I was coming back to Bangalore from Tamilnadu … heavy traffic… vehicles rushing… nobody slowing down…
@@ -9647,7 +9646,7 @@ A wise heart turns that pain into compassion…
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 144 | Epic Series – 28 | The unseen power within us… | 
+@@ 145 | Epic Series – 28 | The unseen power within us… | 
 One reader asked a very simple question…
 
 “Why do I feel happy some days and suddenly very low on other days, even when nothing has changed outside?”
@@ -9784,7 +9783,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: This TFD from the “Epic Series” brings together timeless wisdom from the Mahabharata, Ramayana, and modern psychology, helping us reflect deeply on our everyday life, choices, and relationships.
 
-@@ 143 | Epic Series - 27 | Why is it so hard to let go? | 
+@@ 144 | Epic Series - 27 | Why is it so hard to let go? | 
 One day, during an upanyasam… a very touching story was shared…
 
 There was an old lady… very simple… very devoted…
@@ -9921,7 +9920,7 @@ Peace does not come by holding more. It comes, by needing less
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 142 | Epic Series – 26 | Did we forget to say Thank You? | 
+@@ 143 | Epic Series – 26 | Did we forget to say Thank You? | 
 One reader shared something very honest… “I realized that I keep expecting from everyone ; But I rarely feel or express gratitude… Even for small things… I simply take it for granted.”
 
 A Simple Real-Life Moment
@@ -10060,7 +10059,7 @@ Gratitude is not just a word… It is the highest habit of a beautiful heart.
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 141 | Epic Series – 25 | Why do we keep finding fault? | 
+@@ 142 | Epic Series – 25 | Why do we keep finding fault? | 
 One reader shared a small pain…
 
 “There are some people… wherever they go… they keep complaining”.
@@ -10215,7 +10214,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 P.S.: Kindly send any questions or feedback directly to my number, 9845204620. – Jani
 
-@@ 140 | Epic series - 24 | What is Real Happiness? | 
+@@ 141 | Epic series - 24 | What is Real Happiness? | 
 One reader asked… a simple but powerful question: “What is real happiness?”
 
 Reflecting from Mahabharata..
@@ -10276,7 +10275,7 @@ Let us stop running behind happiness…Let us learn to be still inside.
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 139 | Epic Series-23 | பணமா? பாசமா?” - Money or Relationship? | 
+@@ 140 | Epic Series-23 | பணமா? பாசமா?” - Money or Relationship? | 
 In almost every family… this moment comes. Not as a big drama. But as a silent question… inside the heart.
 
 A Story We All Know…
@@ -10385,7 +10384,7 @@ Money builds life. But presence… gives it meaning.
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 138 | Epic Series - 22 | What Is Karma Really? | 
+@@ 139 | Epic Series - 22 | What Is Karma Really? | 
 Many people use the word karma. But very few people really understand it.
 
 Some think karma means only pitru karma , the rituals we do for our ancestors. Some think karma means something bad that comes back to punish us.
@@ -10434,7 +10433,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: For any questions regarding TFD / any other query / anyone to be added to this group, please reach out to me directly or contact Janakiraman at 9845204620. 🙏
 
-@@ 137 | Epic Series - 21 | The Invisible Wall Called Ego | 
+@@ 138 | Epic Series - 21 | The Invisible Wall Called Ego | 
 There is something in human life that is very difficult to notice. It quietly shapes many of our reactions and relationships. It is what we often call ego.
 
 The interesting thing about ego is this: it is easier for us to notice it in others than to recognize it within ourselves. That is simply how the human mind works.
@@ -10503,7 +10502,7 @@ But humility quietly builds respect, love, and lasting relationships.
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 136 | Epic Series - 20 | When “Enough” Still Feels Like “Not Enough | 
+@@ 137 | Epic Series - 20 | When “Enough” Still Feels Like “Not Enough | 
 In many homes around us, life actually looks quite comfortable.
 
 The house is good. There is money in the bank. Children are studying well. From the outside, everything seems fine.
@@ -10568,7 +10567,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: The TFD “Epic Series” draws wisdom from the Ramayana and Mahabharata to reflect on our daily lives.
 
-@@ 135 | Epic Series -19 | When Prayer Does Not Bring Peace | 
+@@ 136 | Epic Series -19 | When Prayer Does Not Bring Peace | 
 Many people around us love God very much.
 
 • They wake up early in the morning.
@@ -10635,7 +10634,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: “Epic series” draw wisdom from our epics, Ramayana & Mahabharata to reflect on our day-to-day life. Ko
 
-@@ 134 | Epic Series - 18 | The Ghost in Your Head | 
+@@ 135 | Epic Series - 18 | The Ghost in Your Head | 
 Have you ever sat down to eat a nice meal… but you could not enjoy the food? Because you were still angry about something someone said yesterday.
 
 Have you ever looked at your child… but you did not really see their smile? Because your mind was worrying about money for next month.
@@ -10698,7 +10697,7 @@ The past is gone. The future is not here yet. This moment is the only place wher
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 133 | Epic Series - 17 | The Powerful Difference Between an Emotion and a Feeling | 
+@@ 134 | Epic Series - 17 | The Powerful Difference Between an Emotion and a Feeling | 
 Let me begin with something very practical that can change how we handle many daily struggles.
 
 Most people use the words emotion and feeling as if they are the same. But they are actually different.
@@ -10797,7 +10796,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 Ps: “Epic series” draws wisdom from Ramayana and Mahabharata to reflect on our day-to-day life.
 
-@@ 132 | Epic series - 16 | The Moment When the Kingdom Was Taken Away | 
+@@ 133 | Epic series - 16 | The Moment When the Kingdom Was Taken Away | 
 Many times in life, everything seems perfect.
 
 Your plans are ready.
@@ -10910,7 +10909,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: The “Epic series”draws simple life lessons from the great epics like the Ramayana and the Mahabharata to reflect on our day-to-day life.
 
-@@ 131 | Inside Us Series-27 | The Message That Changed a Father | 
+@@ 132 | Inside Us Series-27 | The Message That Changed a Father | 
 Many parents say this about their teenage children.
 
 “They have too much attitude.”
@@ -10985,7 +10984,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: The ‘Inside Us’ series draws wisdom from psychology to reflect on our day-to-day lives.
 
-@@ 130 | Inside Us Series -26 | The Place You Dreamed Of… and the Quiet Restlessness After | 
+@@ 131 | Inside Us Series -26 | The Place You Dreamed Of… and the Quiet Restlessness After | 
 Let me begin with something very simple.
 
 Sometimes the place we dream about for years does not give the peace we thought it would. This is not because the place is bad.
@@ -11116,7 +11115,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: The “Inside Us” series draws wisdom from psychology to reflect on our day-to-day life.
 
-@@ 129 | Inside Us Series - 25 | The Tiny Expectations That Quietly Change Our Day | 
+@@ 130 | Inside Us Series - 25 | The Tiny Expectations That Quietly Change Our Day | 
 Many of us believe our mood changes only because of big problems.
 
 But if we observe carefully, most of the time our mood changes because of something very small… so small that we almost miss it.
@@ -11247,7 +11246,7 @@ Very often, that one honest question brings the lost smile back.
 
 Dhanyosmi 🙏
 
-@@ 128 | Inside Us Series - 24 | The Day Coffee Came Late | 
+@@ 129 | Inside Us Series - 24 | The Day Coffee Came Late | 
 Every morning, Meenakshi’s coffee comes at 6:15.
 
 Not 6:20.
@@ -11350,7 +11349,7 @@ Today, allow one small change in your routine. You may discover that when contro
 
 Dhanyosmi 🙏
 
-@@ 127 | Inside Us series – 23 | When the Plate Is Full… but the Heart Is Not | 
+@@ 128 | Inside Us series – 23 | When the Plate Is Full… but the Heart Is Not | 
 Many people today live with numbers.
 
 Sugar level.
@@ -11449,7 +11448,7 @@ And that is true health.
 
 Dhanyosmi 🙏
 
-@@ 126 | Inside us series - 22 | When Carefulness Wears a Mask | 
+@@ 127 | Inside us series - 22 | When Carefulness Wears a Mask | 
 Saving is wisdom. Minimal living is beautiful. But sometimes, fear quietly hides behind the mask of “I am simple.”
 
 Let me tell you a small story.
@@ -11548,7 +11547,7 @@ Dhanyosmi 🙏
 
 Ps: The “inside us” series draws wisdom from Psychology to reflect on our day-to-day life.
 
-@@ 125 | Inside Us Series - 21 | We Worked for Tomorrow… But Missed Each Other Today | 
+@@ 126 | Inside Us Series - 21 | We Worked for Tomorrow… But Missed Each Other Today | 
 Before we begin…
 
 This is not about a wrong husband. This is not about a neglected wife. This is about two good people… who were so busy building life that they forgot to slowly live it.
@@ -11673,7 +11672,7 @@ we truly saw each other.
 
 Dhanyosmi 🙏
 
-@@ 124 | Inside Us Series - 20 | When the Wi-Fi Became the Family Member | 
+@@ 125 | Inside Us Series - 20 | When the Wi-Fi Became the Family Member | 
 Before We Begin…
 
 This is not a story about phones. It is a story about a house where everyone is connected… but nobody is together.
@@ -11756,7 +11755,7 @@ Today, before I connect to Wi-Fi…I will connect to one person in my home.Becau
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 123 | Inside Us Series - 19 | When Being Informed Is Not the Same as Being Included | 
+@@ 124 | Inside Us Series - 19 | When Being Informed Is Not the Same as Being Included | 
 Before We Begin…
 
 This is not a story about a “difficult” mother-in-law. This is a story about a woman who once led everything… And one day quietly felt like a guest in her own son’s life.
@@ -11853,7 +11852,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: The “inside us” series shares simple life lessons to help us understand our daily problems with kindness and wisdom .
 
-@@ 122 | Inside Us Series -18 | When You Stand in the Middle | 
+@@ 123 | Inside Us Series -18 | When You Stand in the Middle | 
 Before We Begin…
 
 This is not a story about generation gap. This is a story about a heart that is getting pulled from two sides. If you are in your late 30s or 40s… you may see yourself here.
@@ -11928,7 +11927,7 @@ If today you feel sandwiched between elders and Gen Z…Do not feel unlucky. You
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 121 | Inside Us Series - 17 | When the Serial Became More Important Than Dinner | 
+@@ 122 | Inside Us Series - 17 | When the Serial Became More Important Than Dinner | 
 Before We Begin…
 
 This is not a story about television. This is a story about a small moment. A folded drawing. A child who waited. And a grandmother who said, “Later.”
@@ -12009,7 +12008,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: The “Inside Us” series shares simple life lessons to help us understand our daily problems with kindness and wisdom.
 
-@@ 120 | Inside Us Series - 16 | When Health Becomes a Full-Time Job | 
+@@ 121 | Inside Us Series - 16 | When Health Becomes a Full-Time Job | 
 Sridhar is 55. His day does not begin with a smile or a small prayer. It begins with numbers.
 
 Fasting sugar.
@@ -12108,7 +12107,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: The “Inside Us” series shares small life lessons from psychology to help us understand our everyday struggles with kindness and wisdom.
 
-@@ 119 | Inside Us Series – 15 | The Unspoken Competition Between Siblings | 
+@@ 120 | Inside Us Series – 15 | The Unspoken Competition Between Siblings | 
 At a wedding reception, two brothers stood next to each other for a photograph. Same parents. Same small bedroom growing up. Same school uniforms. But life had taken them in different directions.
 
 One had built a big house with a grand entrance. One lived in a simple, peaceful home. One’s children were abroad. One’s children worked nearby and visited every weekend. They smiled. They hugged. They meant it. Then the relatives began.
@@ -12175,7 +12174,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 Ps: The “Inside Us” series draws wisdom from psychological sessions. Names and situations are changed for privacy.
 
-@@ 118 | Inside Us Series – 14 | When Retirement Changes Everything | 
+@@ 119 | Inside Us Series – 14 | When Retirement Changes Everything | 
 Mr. and Mrs. Rao retired six months apart.Suddenly, they had too much time together. During working years, small disagreements were absorbed by busy schedules. Now, every small habit , the way he reads the newspaper, the way she arranges the kitchen becomes a source of irritation.
 
 Their adult children notice the tension: “Why are you arguing over little things now?”. But neither feels they can explain ; they don’t want to seem petty, yet the discomfort is real.
@@ -12234,7 +12233,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: The “inside us” series draws wisdom from psychological counselling sessions and names have been changed.
 
-@@ 117 | Inside Us Series – 13 | When the Phone Becomes the Lifeline | 
+@@ 118 | Inside Us Series – 13 | When the Phone Becomes the Lifeline | 
 Raju is 58. Children are settled abroad. Retirement is three years away. The house that once echoed with noise now closes by 9:30 p.m. Every evening at 8:00 p.m., he sits in the same chair. Waiting……Not for dinner…..Not for news…. But For a call !!
 
 When the phone rings and his son’s name flashes, his face lights up like Deepavali lamps. “How are you, Appa?”. For 12 minutes, Raman feels alive. Relevant. Needed. After the call ends, the silence feels louder than before.
@@ -12317,7 +12316,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: The “Inside Us” series draws wisdom from psychology to reflect on our day-to-day life.
 
-@@ 116 | Inside Us Series – 12 | When Every Sensation Feels Like a Warning | 
+@@ 117 | Inside Us Series – 12 | When Every Sensation Feels Like a Warning | 
 Last month, Ravi felt a small pain in his chest. Just a mild tightness. Within seconds, his mind had already travelled far ahead.
 
 “Is this my heart?”
@@ -12402,7 +12401,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: The “Inside Us” series draws wisdom from psychology to reflect on our day-to-day life.
 
-@@ 115 | Inside Us Series -11 | (Today’s reflection comes from a very personal loss of someone close to my… | 
+@@ 116 | Inside Us Series -11 | (Today’s reflection comes from a very personal loss of someone close to my… | 
 (Today’s reflection comes from a very personal loss of someone close to my heart. I share it gently and with respect, knowing many have faced a similar sudden goodbye. If these words bring even a small measure of comfort, they have served their purpose.)
 
 When Goodbye Comes Without Goodbye
@@ -12509,7 +12508,7 @@ Today, I will not postpone love. I will speak kindly. I will express gratitude. 
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 114 | Inside Us Series- 5 | When the Mind Never Switches Off | 
+@@ 115 | Inside Us Series- 5 | When the Mind Never Switches Off | 
 At 2:17 a.m., Priya was awake. The house was silent. Everyone was asleep. But her mind was not.
 
 • “Did I say something wrong in that meeting?”
@@ -12596,7 +12595,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: The “Inside Us” series draws wisdom from psychology to reflect on our day-to-day life.
 
-@@ 113 | Epic Series – 15 | When Caring for Elders Feels Heavy | 
+@@ 114 | Epic Series – 15 | When Caring for Elders Feels Heavy | 
 Smriti principle:
 
 पितृदेवो भव
@@ -12685,7 +12684,7 @@ I honor my elders with love and balance.Care is not compulsion. It is a circle o
 
 Dhanyosmi 🙏
 
-@@ 112 | Epic Series - 14 | When Desire for Comfort Becomes Restless | 
+@@ 113 | Epic Series - 14 | When Desire for Comfort Becomes Restless | 
 Bhagavad Gita says:
 
 कामात्मा सुखसङ्गे दुःखमपि अनुभवति
@@ -12754,7 +12753,7 @@ without letting desire disturb my peace. Contentment is my true luxury.
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 111 |  | Living with Balance and Wholeness | 
+@@ 112 |  | Living with Balance and Wholeness | 
 The Bhagavad Gita says:
 
 संतुलितचित्तः सदा सुखी
@@ -12849,7 +12848,7 @@ I live in balance. I nurture mind, heart, and action. Wholeness not extremes , i
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 110 | Epic Series - 112 | When You Measure Life Against Others | 
+@@ 111 | Epic Series - 112 | When You Measure Life Against Others | 
 Bhagavad Gita principle:
 
 स्वधर्मे निधनं श्रेयः परधर्मो भयावहः
@@ -12904,7 +12903,7 @@ I honor my journey. Comparison does not define my happiness. Contentment grows f
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 109 | Epic Series - 11 | When Pennies Control the Mind | 
+@@ 110 | Epic Series - 11 | When Pennies Control the Mind | 
 Bhagavad Gita says:
 
 सत्यं ब्रह्म तपः शौचं दानं यथाशक्ति
@@ -12983,7 +12982,7 @@ I release fear of lack. I give with sincerity and peace, and abundance grows in 
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 108 | Epic Series-10 | When Fear and Insecurity Take Over | 
+@@ 109 | Epic Series-10 | When Fear and Insecurity Take Over | 
 Bhagavad Gita says:
 
 अध्यात्मविज्ञानं शान्तिं लभते
@@ -13062,7 +13061,7 @@ I focus on what I can strengthen today. Fear of the future cannot control my pea
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 107 | Epic Series - 9 | When We Postpone Health for “Later | 
+@@ 108 | Epic Series - 9 | When We Postpone Health for “Later | 
 Bhagavad Gita says:
 
 शरीरं यथासंख्यम् ध्यानं साधनं योगे
@@ -13151,7 +13150,7 @@ not tomorrow. Discipline and awareness are my true strength.
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 106 | Epic Series - 8 | When the Glass Feels Half Empty | 
+@@ 107 | Epic Series - 8 | When the Glass Feels Half Empty | 
 Bhagavad Gita says:
 
 न कर्मणि मन्यते फलम्
@@ -13246,7 +13245,7 @@ I choose gratitude over criticism. I reflect before I react. I see the good that
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 105 | Epic Series - 7 | When Love Turns into Constant bickering | 
+@@ 106 | Epic Series - 7 | When Love Turns into Constant bickering | 
 सुख-दुःखे सम भाव: प्रेमस्य आधारः
 
 Sukh-duhkhe sama bhavah: premasya adhaarah
@@ -13341,7 +13340,7 @@ After walking together for many years, I choose peace over ego.Small habits will
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 104 | Epic Series -6 | When Planning Becomes a Prison | 
+@@ 105 | Epic Series -6 | When Planning Becomes a Prison | 
 Bhagavad Gita says:
 
 कालं यथा नीच्यते नास्ति तस्यापि फलम्
@@ -13416,7 +13415,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 Ps: The “epic series” draws wisdom from our Itihasa and purana to reflect on and illuminate our everyday lives.
 
-@@ 103 |  | When Pride Blinds You to Reality | 
+@@ 104 |  | When Pride Blinds You to Reality | 
 Bhagwat Gita says:
 
 अहंकारो बलं विनाशकं
@@ -13481,7 +13480,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: The “Epic Series” draws wisdom from our Itihasa and Puranas to reflect on and illuminate our everyday lives.
 
-@@ 102 | Health Series -2 | When Eating Less Felt Like Being Good | 
+@@ 103 | Health Series -2 | When Eating Less Felt Like Being Good | 
 After 60, Saraswathi proudly started eating less. “Why eat so much now?” she would say. “My body doesn’t need it.” Rice became just a small plate, dal turned watery, curd skipped more often. She told friends, “See, I am controlling my food!” She felt disciplined.
 
 But slowly, small things became harder. Climbing stairs left her breathless. Standing for long made her knees ache. Getting up from the floor needed help. One morning, she whispered to herself, “I eat so little… still my strength is slipping away.”
@@ -13548,7 +13547,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: The “Health Series” blends simple wisdom and modern knowledge to encourage awarenes, not replace medical advice.
 
-@@ 101 | Health series -1 | When tiredness quietly became the normal | 
+@@ 102 | Health series -1 | When tiredness quietly became the normal | 
 Meenakshi finishes her morning work. Nothing difficult. Only her regular household routine. By afternoon, she feels tired. She sits down and says softly, “Nowadays, I feel tired very easily.”
 
 Her family replies with concern, “It is age. This happens.” Meenakshi agrees. She rests more. She moves less. She avoids going out because she does not feel energetic.
@@ -13589,7 +13588,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 Ps: The “Health series” reflects simple, widely accepted lifestyle wisdom meant to encourage awareness, not replace medical advice.
 
-@@ 100 | Inside us Series - 9 | Caught in the Middle, When Loyalties Clash at Home | 
+@@ 101 | Inside us Series - 9 | Caught in the Middle, When Loyalties Clash at Home | 
 Vikram lives with his mother and his wife, Anjali. Both women love him deeply, but their expectations often clash:
 
 His mother wants traditional routines followed. His wife wants her own space and decision-making authority. Small disagreements over meals, chores, or visiting relatives escalate quickly
@@ -13634,7 +13633,7 @@ I will honor both my mother and my spouse, facilitate understanding,and maintain
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 99 | Inside Us Series - 8 | Guilt After Losing a Loved One | 
+@@ 100 | Inside Us Series - 8 | Guilt After Losing a Loved One | 
 Last year, Anil lost his father. After the funeral, in the quiet moments, memories came back like little shadows. He remembered the phone calls he never made, the talks he postponed, the small acts of care he thought he could always do “tomorrow.”
 
 • I should have called more often.”
@@ -13683,7 +13682,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 Ps: The “inside us” series draws on human psychology to reflect on our everyday lives.
 
-@@ 98 | Inside us Series -7 | When Peace Feels Uncomfortable | 
+@@ 99 | Inside us Series -7 | When Peace Feels Uncomfortable | 
 Anjali’s life is finally stable.No major conflicts.Supportive partner. Children doing well. Yet she feels restless. When everything is calm, she becomes irritable. She picks small faults. She creates unnecessary arguments.
 
 Later, she feels guilty and confused. “Why can’t I just enjoy when things are good?” she wonders.
@@ -13730,7 +13729,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS:“The ‘Inside Us’ series draws on human psychology to reflect on our everyday lives.
 
-@@ 97 | Inside us Series - 6 | When Parents Begin to Feel Like a Burden | 
+@@ 98 | Inside us Series - 6 | When Parents Begin to Feel Like a Burden | 
 Pushpa used to run the house. Everyone depended on her. Meals were ready. Decisions were hers. The house moved around her rhythm.
 
 Now she moves slowly. Her son tells her, “Amma, sit. I will do it.” He means well. But slowly, no one asks her opinion anymore. Conversations happen over her head. Decisions are taken “for her good.”
@@ -13781,7 +13780,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: The “Inside Us” series draws wisdom from psychology to reflect on our day-to-day life
 
-@@ 96 | Inside us Series -5 | When Love Slowly Turns Into Control | 
+@@ 97 | Inside us Series -5 | When Love Slowly Turns Into Control | 
 Raghavan loves his son deeply. He has struggled all his life, made sacrifices, and wants his son to be “safe.” So he checks often:”Why are you coming home late?”……..”Is this job stable?”……”That friend doesn’t seem right.”………”We know better. We have seen life.”
 
 He believes this is care. His son listens quietly. He doesn’t argue. But he shares less. Decides less. Visits less.
@@ -13834,7 +13833,7 @@ I will express love in ways that strengthen, not suffocate.
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 95 | Epic Series – 4 | When You Are Wronged and No One Speaks Up | 
+@@ 96 | Epic Series – 4 | When You Are Wronged and No One Speaks Up | 
 Mahabharata says:
 
 यत्र नार्यस्तु पूज्यन्ते रमन्ते तत्र देवताः
@@ -13889,7 +13888,7 @@ by others’ courage or silence.
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 94 | Inside us Series -4 | When People Stop Sharing , Not Because They Don’t Care | 
+@@ 95 | Inside us Series -4 | When People Stop Sharing , Not Because They Don’t Care | 
 Meena used to talk a lot.She talked about her day, small worries, things that made her happy. Slowly, people started replying: “You are thinking too much.”……..”This is very small”……….”Just adjust.”……..”Why do you take everything so seriously?”
 
 After some time, Meena spoke less. Now the family says: “She doesn’t share anything.”……”She keeps everything inside.”
@@ -13940,7 +13939,7 @@ I will not hurry to correct feelings. I will first try to understand them.
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 93 | Inside Us Series - 3 | When Small Irritations Become Big Reactions | 
+@@ 94 | Inside Us Series - 3 | When Small Irritations Become Big Reactions | 
 Anand comes home tired. He notices the TV volume is high.
 
 The newspaper is not in its place. Dinner is ten minutes late. Nothing major.
@@ -14011,7 +14010,7 @@ I will not unload my tiredness on those I love. I will name my feelings, not act
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 92 | Samskara Series-2 | Pumsavana / Ayush Homam - Ensuring Child’s Health and Longevity | 
+@@ 93 | Samskara Series-2 | Pumsavana / Ayush Homam - Ensuring Child’s Health and Longevity | 
 Dharmashastra says:
 
 संततिं पुष्टिं चायुष्यम् साधयेत् पूर्वकृतं।
@@ -14092,7 +14091,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS : The samskara series draw wisdom from dharmasastra ; we will cover 16 samskaras (Shodasha Samskaras)
 
-@@ 91 | Inside Us Series-2 | When Expectations Are Silent, But Resentment Is Loud | 
+@@ 92 | Inside Us Series-2 | When Expectations Are Silent, But Resentment Is Loud | 
 Suma prides herself on being “adjusting.” She wakes up early, finishes her work, packs lunch, manages the home, and still reaches office on time. She rarely asks for help. When something bothers her, she tells herself, “It’s okay, I will manage.”
 
 Her husband Mahesh assumes all is well. After all, she never complains. At home, his mother often says, “Earlier we managed everything without help. These days people expect too much.” Suma smiles and says nothing.
@@ -14145,7 +14144,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 Ps: The “Inside Us” series draws wisdom from psychology to reflect on our daily lives.
 
-@@ 90 | Inside us Series – 1 | When Everyone Is Busy, But Everyone Feels Alone | 
+@@ 91 | Inside us Series – 1 | When Everyone Is Busy, But Everyone Feels Alone | 
 Ramesh and Lakshmi have been married for 18 years. Ramesh leaves early for work. Lakshmi manages her job, the house, and the children’s schedules. Evenings are rushed. Dinner happens with phones nearby. Conversations are mostly about bills, school, or “Did you pay that?”. They are not fighting. They are not unhappy either. But they are not connected.
 
 In the same house, Appa and Amma are retired. They don’t complain. They have food, TV, and health.Yet Appa often says, “Everyone is busy these days.” Amma nods quietly.
@@ -14210,7 +14209,7 @@ Dhanyosmi 🙇‍♂️🙏
 
 PS: “Inside us” series draw wisdom from psychology to reflect on our day to day life !
 
-@@ 89 |  | When Doing the Right Thing Still Brings Pain | 
+@@ 90 |  | When Doing the Right Thing Still Brings Pain | 
 Mahabharata says:
 
 धर्मो रक्षति रक्षितः
@@ -14255,7 +14254,7 @@ Even if life tests me, I will not abandon my values.
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 88 |  | When You Give Your Best and Still Feel Unseen | 
+@@ 89 |  | When You Give Your Best and Still Feel Unseen | 
 Ramayana says:
 
 अकर्तव्यं न कर्तव्यं धर्मस्य पन्थानमास्थितः
@@ -14306,7 +14305,7 @@ I do not need applause to stand tall.My integrity is enough.
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 87 |  | Garbhadhana, Preparing for Parenthood | 
+@@ 88 |  | Garbhadhana, Preparing for Parenthood | 
 Dharmashastra says:
 
 यतः सर्गो भवति सन्ततिरेव सृष्टे:।
@@ -14377,7 +14376,7 @@ PS: As mentioned earlier, TFD will now be a blend of
 
 • the “Inside Us” series offering gentle insights into emotions and relationships from psychological wisdom and lived experience. Kindly stay tuned 🙏
 
-@@ 86 |  | When the Mind Collapses Under Pressure | 
+@@ 87 |  | When the Mind Collapses Under Pressure | 
 Bhagavad Gita says:
 
 क्लैब्यं मा स्म गमः पार्थ
@@ -14434,7 +14433,7 @@ When my mind feels weak, I will not abandon myself. I will pause, regain clarity
 
 Dhanyosmi 🙏
 
-@@ 85 |  | Isha Upanishad says | 
+@@ 86 |  | Isha Upanishad says | 
 Isha Upanishad says;
 
 तेन त्यक्तेन भुञ्जीथा
@@ -14489,7 +14488,7 @@ I enjoy life more when I hold it gently.
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 84 |  | Muṇḍaka Upanishad says | 
+@@ 85 |  | Muṇḍaka Upanishad says | 
 Muṇḍaka Upanishad says:
 
 सत्येन लभ्यस्तपसा ह्येष आत्मा
@@ -14540,7 +14539,7 @@ Steady effort will take me forward.
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 83 |  | Taittriya Upanishad says | 
+@@ 84 |  | Taittriya Upanishad says | 
 Taittriya Upanishad says:
 
 सत्यं वद धर्मं चर
@@ -14589,7 +14588,7 @@ I choose alignment over anxiety.
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 82 |  | Brhadaaranyaka Upanishad says | 
+@@ 83 |  | Brhadaaranyaka Upanishad says | 
 Brhadaaranyaka Upanishad says:
 
 नेति नेति
@@ -14644,7 +14643,7 @@ I am more than my roles.
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 81 |  | Kaivalya Upanishad says | 
+@@ 82 |  | Kaivalya Upanishad says | 
 Kaivalya Upanishad says :
 
 न कर्मणा न प्रजया धनेन त्यागेनैके अमृतत्वमानशुः
@@ -14699,7 +14698,7 @@ I choose peace over pressure.
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 80 |  | Kaṭha Upanishad says | 
+@@ 81 |  | Kaṭha Upanishad says | 
 Kaṭha Upanishad says:
 
 उत्तिष्ठत जाग्रत प्राप्य वरान्निबोधत
@@ -14766,7 +14765,7 @@ I will act, not postpone.
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 79 |  | Maandukya Upanishad says | 
+@@ 80 |  | Maandukya Upanishad says | 
 Maandukya Upanishad says:
 
 अयम् आत्मा ब्रह्म
@@ -14831,7 +14830,7 @@ My everyday life is sacred.
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 78 |  | One Life, One Strength, One Awareness, One Connection | 
+@@ 79 |  | One Life, One Strength, One Awareness, One Connection | 
 Over the last four days, we reflected on the four great maha-vaakya of the Upanishads:
 
 • Tat Tvam Asi - You are that; you belong to the whole.
@@ -14930,7 +14929,7 @@ I belong to life, I trust my inner strength, I act with awareness, and I live in
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 77 |  | Chāndogya Upanishad says | 
+@@ 78 |  | Chāndogya Upanishad says | 
 Chāndogya Upanishad says:
 
 सर्वं खल्विदं ब्रह्म
@@ -14983,7 +14982,7 @@ I am connected to life.
 
 Dhanyosmi 👏🙏
 
-@@ 76 |  | Mahavaakya from Aitareya Upanishad says | 
+@@ 77 |  | Mahavaakya from Aitareya Upanishad says | 
 Mahavaakya from Aitareya Upanishad says:
 
 प्रज्ञानं ब्रह्म
@@ -15036,7 +15035,7 @@ When awareness rises, peace follows. Prajnanam Brahma - awareness is my greatest
 
 Dhanyosmi 🙏😊
 
-@@ 75 |  | Bṛhadāraṇyaka Upanishad says | 
+@@ 76 |  | Bṛhadāraṇyaka Upanishad says | 
 Bṛhadāraṇyaka Upanishad says:
 
 अहं ब्रह्मास्मि (Aham brahmasmi)
@@ -15081,7 +15080,7 @@ I am grounded in inner strength and awareness.
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 74 |  | Chandogya upanishad says | 
+@@ 75 |  | Chandogya upanishad says | 
 Chandogya upanishad says:
 
 तत् त्वम् असि (Tat Tvam Asi)
@@ -15128,7 +15127,7 @@ I belong. I make a difference.
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 73 |  | Bhaja Govindam – The Essence of All the Verses | 
+@@ 74 |  | Bhaja Govindam – The Essence of All the Verses | 
 Adi Shankaracharya did not write Bhaja Govindam to scare us. He wrote it to wake us up gently like a loving alarm clock, not a fire siren .
 
 The core reminder of all 31 verses is this:
@@ -15219,7 +15218,7 @@ Old age does not bring wisdom automatically. Awareness does. And awareness can b
 
 Dhanyosmi 🙏😊
 
-@@ 72 | Bhajagovindam – Verse 31 | मूढः कश्चिन् वैयाकरणो | 
+@@ 73 | Bhajagovindam – Verse 31 | मूढः कश्चिन् वैयाकरणो | 
 डुकृङ्करणाध्ययन धुरीणः ।
 
 श्रीमच्छङ्करभगवच्छिष्यैः
@@ -15294,7 +15293,7 @@ Information sharpens the mind. Self-knowledge softens the heart.
 
 Dhanyosmi 😊🙏
 
-@@ 71 | Bhaja Govindam – Verse 30 | तुम्बुरु नारद के गाना में | 
+@@ 72 | Bhaja Govindam – Verse 30 | तुम्बुरु नारद के गाना में | 
 शिव शंकर का स्मरण में ।
 
 भव भय हारक नाम जपो रे
@@ -15357,7 +15356,7 @@ God’s name does not change the storm,it changes the heart that walks through i
 
 Dhanyosmi 😊🙏
 
-@@ 70 | Bhaja Govindam – Verse 29 | गुरुचरणाम्बुज निर्भर भक्तः | 
+@@ 71 | Bhaja Govindam – Verse 29 | गुरुचरणाम्बुज निर्भर भक्तः | 
 संसारादचिराद्भव मुक्तः ।
 
 सेन्द्रियमानस नियमादेवं
@@ -15440,7 +15439,7 @@ The Guru shows the door, discipline opens it, and God is found waiting inside.
 
 Dhanyosmi 🙏😊
 
-@@ 69 | Bhaja Govindam – Verse 28 | प्राणायामं प्रत्याहारं | 
+@@ 70 | Bhaja Govindam – Verse 28 | प्राणायामं प्रत्याहारं | 
 नित्यानित्य विवेक विचारम् ।
 
 जाप्यसमेत समाधिविधानं
@@ -15539,7 +15538,7 @@ Neglect the mind and it breaks you.Train the mind and it carries you.
 
 Dhanyosmi 🙏😊
 
-@@ 68 | Bhaja Govindam - Verse 27 | गेयं गीता नाम सहस्रं | 
+@@ 69 | Bhaja Govindam - Verse 27 | गेयं गीता नाम सहस्रं | 
 ध्येयं श्रीपति रूपमजस्रम् ।
 
 नेयं सज्जनसंगे चित्तं
@@ -15630,7 +15629,7 @@ and let money serve love.
 
 Dhanyosmi 😊🙏
 
-@@ 67 | Bhaja Govindam – Verse 26 | कामं क्रोधं लोभं मोहं | 
+@@ 68 | Bhaja Govindam – Verse 26 | कामं क्रोधं लोभं मोहं | 
 त्यक्त्वात्मानं पश्यति सोऽहम् ।
 
 आत्मज्ञानविहीना मूढाः
@@ -15723,7 +15722,7 @@ Desire, anger, and greed create hell inside. Self-knowledge opens the door and w
 
 Dhanyosmi 🙏😊
 
-@@ 66 | Bhaja Govindam – Verse 25 | शत्रौ मित्रे पुत्रे बन्धौ | 
+@@ 67 | Bhaja Govindam – Verse 25 | शत्रौ मित्रे पुत्रे बन्धौ | 
 मा कुरु यत्नं विग्रह सन्धौ ।
 
 सर्वस्मिन्नपि पश्यात्मानं
@@ -15784,7 +15783,7 @@ Most battles are not with others…they are with our own untrained mind.
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 65 | Bhaja Govindam – Verse 24 | त्वयि मयि सर्वत्रैको विष्णुः | 
+@@ 66 | Bhaja Govindam – Verse 24 | त्वयि मयि सर्वत्रैको विष्णुः | 
 व्यर्थं कुप्यसि मय्यसहिष्णुः ।
 
 भव समचित्तः सर्वत्र
@@ -15841,7 +15840,7 @@ When you fight the world, you fight God in disguise. When you calm your mind, Go
 
 Dhsnyosmi 🙏🙇‍♂️
 
-@@ 64 | Bhaja Govindam - Verse 23 | कस्त्वं कोऽहं कुत आयातः का मे जननी को मे तातः । | 
+@@ 65 | Bhaja Govindam - Verse 23 | कस्त्वं कोऽहं कुत आयातः का मे जननी को मे तातः । | 
 इति परिभावय निज संसारं सर्वं त्यक्त्वा स्वप्न विचारम् ॥
 
 Kas tvam ko’ham kuta ayatah
@@ -15888,7 +15887,7 @@ Life feels solid while dreaming ; wisdom begins when you question the dream.
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 63 | Bhaja Govindam – Verse 22 | रथ्या चर्पट विरचित कन्थः | 
+@@ 64 | Bhaja Govindam – Verse 22 | रथ्या चर्पट विरचित कन्थः | 
 पुण्यापुण्य विवर्जित पन्थः ।
 
 योगी योग नियोजित चित्तः
@@ -15945,7 +15944,7 @@ Walk life’s rough roads like a child at play; chant like a yogi and the heart 
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 62 | Bhaja Govindam – Verse 21 | पुनरपि जननं पुनरपि मरणं | 
+@@ 63 | Bhaja Govindam – Verse 21 | पुनरपि जननं पुनरपि मरणं | 
 पुनरपि जननी जठरॆ शयनम् ।
 
 इह संसारॆ बहु दुस्तारॆ
@@ -16018,7 +16017,7 @@ Life may keep repeating its cycle, but God’s name helps you step out of the sp
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 61 | Bhajagovindham – Verse 20 | भगवद्गीता किञ्चिदधीता | 
+@@ 62 | Bhajagovindham – Verse 20 | भगवद्गीता किञ्चिदधीता | 
 गङ्गा जललव कणिका पीता ।
 
 सकृदपि यॆन मुरारी समर्चा
@@ -16067,7 +16066,7 @@ Reading holy books and sipping Ganga water is nice, but if you forget to call Go
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 60 | Bhajagovindham – Verse 19 | यॊगरतॊ वा भॊगरतॊ वा | 
+@@ 61 | Bhajagovindham – Verse 19 | यॊगरतॊ वा भॊगरतॊ वा | 
 सङ्गरतॊ वा सङ्गविहीनः ।
 
 यस्य ब्रह्मणि रमतॆ चित्तं नन्दति नन्दति नन्दत्यॆव ॥ 19 ॥
@@ -16116,7 +16115,7 @@ Meditating on God or laughing with friends, both are blissful if your heart rest
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 59 | Bhajagovindham – Verse 18 | सुरमन्दिर तरु मूल निवासः | 
+@@ 60 | Bhajagovindham – Verse 18 | सुरमन्दिर तरु मूल निवासः | 
 शय्या भूतलम्-अजिनं वासः ।
 
 सर्व परिग्रह भॊगत्यागः
@@ -16169,7 +16168,7 @@ Sleep on the ground, under a tree, with nothing but a mat and your heart full of
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 58 | Bhajagovindham – Verse 17 | कुरुतॆ गङ्गा सागर गमनं | 
+@@ 59 | Bhajagovindham – Verse 17 | कुरुतॆ गङ्गा सागर गमनं | 
 व्रत परिपालनम्-अथवा दानम् ।
 
 ज्ञान विहीनः सर्वमतॆन भजति न मुक्तिं जन्म शतॆन ॥ 17 ॥
@@ -16216,7 +16215,7 @@ Travel the world, give alms, fast… but if your heart forgets God, you are a to
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 57 | Bhajagovindham – Verse 16 | अग्रॆ वह्निः पृष्ठॆ भानुः | 
+@@ 58 | Bhajagovindham – Verse 16 | अग्रॆ वह्निः पृष्ठॆ भानुः | 
 रात्रौ चुबुक समर्पित जानुः ।
 
 करतल भिक्षस्-तरुतल वासः
@@ -16263,7 +16262,7 @@ Light lamps, give alms, chant prayers… but if your heart is still greedy, you 
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 56 | Bhajagovindham – Verse 15 | अङ्गं गलितं पलितं मुण्डं | 
+@@ 57 | Bhajagovindham – Verse 15 | अङ्गं गलितं पलितं मुण्डं | 
 दशन विहीनं जातं तुण्डम् ।
 
 वृद्धॊ याति गृहीत्वा दण्डं
@@ -16316,7 +16315,7 @@ Teeth fall, hair fades, energy disappears but God’s name in your heart is eter
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 55 | Bhajagovindham – Verse 14 | जटिलॊ मुण्डी लुञ्जित कॆशः | 
+@@ 56 | Bhajagovindham – Verse 14 | जटिलॊ मुण्डी लुञ्जित कॆशः | 
 काषायान्बर बहुकृत वॆषः ।
 
 पश्यन्नपि च न पश्यति मूढः
@@ -16391,7 +16390,7 @@ Holy robes can’t hide a naughty heart. Let God’s name dress your heart truly
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 54 | Bhajagovindham – Verse 13 | का तॆ कान्ता धन गत चिन्ता वातुल किं तव नास्ति नियन्ता । | 
+@@ 55 | Bhajagovindham – Verse 13 | का तॆ कान्ता धन गत चिन्ता वातुल किं तव नास्ति नियन्ता । | 
 त्रिजगति सज्जन सङ्गतिरॆका भवति भवार्णव तरणॆ नौका ॥ 13 ॥
 
 Ka Te Kanta Dhana Gata Chinta Vatula Kim Tava Nasti Niyanta
@@ -16440,7 +16439,7 @@ Life is an ocean; wealth and family are just leaves. Wise friends and God’s na
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 53 | Bhajagovindham – Verse 12 | दिन यामिन्यौ सायं प्रातः | 
+@@ 54 | Bhajagovindham – Verse 12 | दिन यामिन्यौ सायं प्रातः | 
 शिशिर वसन्तौ पुनरायातः ।
 
 कालः क्रीडति गच्छत्यायुः
@@ -16481,7 +16480,7 @@ Time is a playful river ; it flows whether you paddle or nap. Keep God in your b
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 52 | Bhajagovindham – Verse 11 | मा कुरु धनजन यौवन गर्वं | 
+@@ 53 | Bhajagovindham – Verse 11 | मा कुरु धनजन यौवन गर्वं | 
 हरति निमॆषात्-कालः सर्वम् ।
 
 मायामयमिदम्-अखिलं हित्वा
@@ -16538,7 +16537,7 @@ Youth, money, and pride vanish faster than ice cream in the sun. God’s name is
 
 Dhanyosmi 🙏🙇‍♂️
 
-@@ 51 | Bhajagovindham – Verse 10 | वयसि गतॆ कः कामविकारः | 
+@@ 52 | Bhajagovindham – Verse 10 | वयसि गतॆ कः कामविकारः | 
 शुष्के नीरॆ कः कासारः ।
 
 क्षीणॆ वित्तॆ कः परिवारः
@@ -16593,7 +16592,7 @@ Money, family, and desires all dry up like old water. Only God’s name remains 
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 50 | Bhajagovindham – Verse 9 | सत्सङ्गत्वॆ निस्सङ्गत्वं | 
+@@ 51 | Bhajagovindham – Verse 9 | सत्सङ्गत्वॆ निस्सङ्गत्वं | 
 निस्सङ्गत्वॆ निर्मॊहत्वम् ।
 
 निर्मॊहत्वॆ निश्चलतत्त्वं
@@ -16660,7 +16659,54 @@ Climb the ladder of satsanga, drop illusions along the way, stay steady inside, 
 
 Dhanyosmi 🙇‍♂️🙏
 
-@@ 49 | Bhajagovindham – Verse 7 · Verse 8 | बाल स्तावत् क्रीडासक्तः · का तॆ कान्ता कस्तॆ पुत्रः | 
+@@ 50 | Bhajagovindham – Verse 8 | का तॆ कान्ता कस्तॆ पुत्रः | 
+संसारॊஉயमतीव विचित्रः ।
+
+कस्य त्वं वा कुत आयातः
+
+तत्वं चिन्तय तदिह भ्रातः ॥ 8 ॥
+
+Ka Te Kanta Kas Te Putrah Samsaro Uyamateeva Vichitrah
+
+Kasya Tvam Va Kut Ayatah Tattvam Chintaya Tadih Bhratah ||8||
+
+Shankaracharya is gently shaking us awake. He asks: “Who is your wife? Who is your child?” Not to deny love, but to question our blind attachment. This world, he says, is truly strange and confusing when we forget the deeper truth of who we really are.
+
+Instead of getting trapped in labels and relationships, he urges us to pause and reflect: Who am I? Where did I come from? What is the truth behind this life?
+
+Ravi once visited a railway station to receive his close friend. Suddenly, an announcement was made: “All passengers, please identify your luggage carefully.” Ravi looked around ; bags everywhere looked similar. For a moment, he panicked. Then he smiled and said, “Only when I know which bag is mine, I can move forward.”
+
+At that moment, his friend arrived and laughed, “Ravi, in life you are running around carrying everyone’s expectations , but have you identified yourself?”
+
+At home, the same Ravi is pulled in many directions. His mother calls, “Son, help me. His wife asks, “Did you remember the payment?”
+
+His children shout, “Papa, look at me!” His boss messages, “Urgent!”
+
+Ravi feels overwhelmed and wonders silently, “Am I only a son, husband, father, employee… or am I something more?”
+
+Shankaracharya would compassionately say: “Do not get lost in the noise. First know who you are. When the center is clear, all roles fall into place naturally.”
+
+Humorously, life is like acting in many dramas on the same stage but forgetting that you are the actor, not the costume you wear in each scene.
+
+Life becomes heavy when we cling only to names, roles, and relationships. Peace dawns when we recognize our true identity ,the eternal Self beyond body and mind. Relationships are beautiful, but temporary. Self-knowledge alone is lasting.
+
+Namasankeerthanam , chanting God’s name slowly peels away confusion and brings us back to our true center.
+
+Useful Tip
+
+Spend a few quiet minutes daily asking yourself: Who am I beyond my duties and titles?
+
+When life feels overwhelming, pause and chant God’s name ,it brings instant grounding.
+
+Perform your roles with love, but stay rooted in the eternal Self within.
+
+Thought for the Day
+
+When you know who you truly are, life’s confusion loses its power. God’s name is the lamp that helps you recognize your own bag in the crowded station of life.
+
+Dhanyosmi 🙏🙇‍♂️
+
+@@ 49 | Bhajagovindham – Verse 7 | बाल स्तावत् क्रीडासक्तः | 
 तरुण स्तावत् तरुणीसक्तः ।
 
 वृद्ध स्तावत् चिन्तामग्नः
@@ -16708,56 +16754,6 @@ Thought for the Day
 Childhood runs after play, youth runs after pleasure, old age runs after worry; the wise one pauses, remembers God, and walks peacefully.
 
 Dhanyosmi 🙏😊
-
-Bhajagovindham – Verse 8
-
-का तॆ कान्ता कस्तॆ पुत्रः
-
-संसारॊஉயमतीव विचित्रः ।
-
-कस्य त्वं वा कुत आयातः
-
-तत्वं चिन्तय तदिह भ्रातः ॥ 8 ॥
-
-Ka Te Kanta Kas Te Putrah Samsaro Uyamateeva Vichitrah
-
-Kasya Tvam Va Kut Ayatah Tattvam Chintaya Tadih Bhratah ||8||
-
-Shankaracharya is gently shaking us awake. He asks: “Who is your wife? Who is your child?” Not to deny love, but to question our blind attachment. This world, he says, is truly strange and confusing when we forget the deeper truth of who we really are.
-
-Instead of getting trapped in labels and relationships, he urges us to pause and reflect: Who am I? Where did I come from? What is the truth behind this life?
-
-Ravi once visited a railway station to receive his close friend. Suddenly, an announcement was made: “All passengers, please identify your luggage carefully.” Ravi looked around ; bags everywhere looked similar. For a moment, he panicked. Then he smiled and said, “Only when I know which bag is mine, I can move forward.”
-
-At that moment, his friend arrived and laughed, “Ravi, in life you are running around carrying everyone’s expectations , but have you identified yourself?”
-
-At home, the same Ravi is pulled in many directions. His mother calls, “Son, help me. His wife asks, “Did you remember the payment?”
-
-His children shout, “Papa, look at me!” His boss messages, “Urgent!”
-
-Ravi feels overwhelmed and wonders silently, “Am I only a son, husband, father, employee… or am I something more?”
-
-Shankaracharya would compassionately say: “Do not get lost in the noise. First know who you are. When the center is clear, all roles fall into place naturally.”
-
-Humorously, life is like acting in many dramas on the same stage but forgetting that you are the actor, not the costume you wear in each scene.
-
-Life becomes heavy when we cling only to names, roles, and relationships. Peace dawns when we recognize our true identity ,the eternal Self beyond body and mind. Relationships are beautiful, but temporary. Self-knowledge alone is lasting.
-
-Namasankeerthanam , chanting God’s name slowly peels away confusion and brings us back to our true center.
-
-Useful Tip
-
-Spend a few quiet minutes daily asking yourself: Who am I beyond my duties and titles?
-
-When life feels overwhelming, pause and chant God’s name ,it brings instant grounding.
-
-Perform your roles with love, but stay rooted in the eternal Self within.
-
-Thought for the Day
-
-When you know who you truly are, life’s confusion loses its power. God’s name is the lamp that helps you recognize your own bag in the crowded station of life.
-
-Dhanyosmi 🙏🙇‍♂️
 
 @@ 48 | Bhajagovindham – Verse 6 | यावत्-पवनॊ निवसति दॆहॆ | 
 तावत्-पृच्छति कुशलं गॆहॆ ।
