@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.4';
+const WEB_VERSION = '4.5';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -453,7 +453,7 @@ async function showSong(pos, keepTab, keepScroll) {
   $('crumb').textContent = s.number + '  ·  ' + (cur + 1) + ({ en: ' of ', ta: ' / ', kn: ' / ', sa: ' / ' }[prefs.lang] || ' of ') + songs.length;
   $('lyrics').innerHTML = lyrics;
   $('audio-lyrics').innerHTML = lyrics;
-  $('btn-sruti').href = 'sruti.html?book=' + book.id + '&n=' + encodeURIComponent(s.number) + '&title=' + encodeURIComponent((s.number ? s.number + ' · ' : '') + ($('song-title') ? $('song-title').textContent : s.displayTitle));
+  // Record with sruti is on hold: the button stays hidden
   renderLangChips();
   const prev = songs[cur - 1], next = songs[cur + 1];
   $('btn-prev').textContent = prev ? '‹ ' + prev.number + ' ' + short(prev.displayTitle, 14) : '';
@@ -618,7 +618,7 @@ function openSettings() {
   $('install-text').classList.toggle('hidden', standalone);
   const ver = f => fetchText(f).then(t => (t.match(/version=(\d+)/) || [])[1] || '?').catch(() => '?');
   Promise.all([ver('manifest.txt'), ver('ashtapathy/manifest.txt'), ver('prabandham/manifest.txt')]).then(([a, b, c]) => {
-    $('admin-link').classList.toggle('hidden', !ACCESS.url);
+    $('admin-link').classList.remove('hidden');   // the admin page asks admins to sign in
     $('version-info').textContent = 'Web app ' + WEB_VERSION + '  ·  Divyanama content ' + a + '  ·  Ashtapathy content ' + b + '  ·  Prabandham content ' + c;
   });
   showView('v-settings');
@@ -1334,7 +1334,7 @@ async function showLearn() {
       `<button class="hc-t l-open" data-go="${esc(s.hash)}" data-open-tab="0"><b>${esc(s.title)}</b><span class="mut">${esc(s.sub)}</span></button>` +
       `<button class="ibadge" data-go="${esc(s.hash)}" data-open-tab="2" aria-label="Listen to ${esc(s.title)}">${svgI('play')}</button></div>`;
   }).join('') + `</div>`);
-  out.push(`<a class="sruti-btn" href="sruti.html?title=${encodeURIComponent(tr('Learn'))}">${badge('mic')}<span class="hc-t"><b>${tr('Record with sruti')}</b><span class="mut">${tr('Sing with sruti and record yourself')}</span></span></a>`);
+  // Record with sruti: on hold for now (feature kept in sruti.html)
   out.push(`<div class="l-msg"><img src="icons/about-jk.jpg" alt=""><span class="hc-t"><span class="l-msg-l">Message from Janakiraman Ji</span><b>About this week’s songs</b><span class="soon">Audio message · coming soon</span></span></div>`);
   $('learn-box').innerHTML = out.join('');
   $('l-toggle').onclick = () => { store.set('showProgress', !showP); keepScroll('learn', showLearn); };
@@ -1443,8 +1443,7 @@ async function showTfd(number) {
     const s = await dnsSong(t.songNumber);
     if (s) out.push(`<button class="card t-link" data-go="#song/${esc(s.number)}">${badge('music')}<span class="hc-t"><span class="lbl">SING WITH TODAY’S THOUGHT</span><b>${esc(s.displayTitle)}</b><span class="mut">${esc(s.displayRaga ? s.number + ' · ' + s.displayRaga : s.number)}</span></span>${svgI('chevron', 'chev2')}</button>`);
   }
-  const ev = await events();
-  if (ev.length) out.push(`<button class="card t-link" data-go="#diary">${badge('event')}<span class="hc-t"><span class="lbl">NEXT SATSANG</span><b>${esc(ev[0].name)}</b><span class="mut">${esc(ev[0].when + ' · at ' + ev[0].place)}</span></span>${svgI('chevron', 'chev2')}</button>`);
+  // (no Next Satsang here: this page is only for the Thought for the Day)
   out.push(`<div class="t-acts"><button class="btn-acc" id="t-share">${svgI('share')}Share</button><button class="btn-line" data-go="#tfd">Past thoughts</button></div>`);
   $('tfd-box').innerHTML = `<div class="tfd-read">${out.join('')}</div>`;
   if (fresh) $('tfd-scroll').scrollTop = 0;

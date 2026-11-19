@@ -110,7 +110,7 @@ details.rec-g .pn { font-size: 13px; min-width: 30px; }
 .rec-row.done .rec-t { color: var(--muted); }
 .rec-t { font-size: 15.5px; } .rec-t b { color: var(--deep); margin-right: 4px; }
 .rtag { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 10px; margin-left: 4px; vertical-align: 1px; }
-.rtag.up { background: #FFF1D6; color: var(--label); } .rtag.ok { background: #E3F2E8; color: var(--ok); }
+.rtag.up { background: #FFF1D6; color: var(--label); } .rtag.ok { background: #E3F2E8; color: var(--ok); } .rtag.no { background: #FDECEA; color: #B3261E; }
 .rec-row audio { width: 100%; height: 36px; }
 .rec-act { display: flex; gap: 8px; }
 .ra { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; border-radius: 20px; border: 1.5px solid var(--line); background: #fff; color: var(--deep); font-size: 14px; font-weight: 700; }
@@ -491,7 +491,7 @@ const BOOKS = {
 // song names in the same language as the app (SCRUM-74): English, Tamil, Kannada or Sanskrit
 const ADM_LANGS = [['en', 'English'], ['ta', 'தமிழ்'], ['kn', 'ಕನ್ನಡ'], ['sa', 'संस्कृतम्']];
 let admLang = (() => { try { return localStorage.getItem('adm.lang') || 'en'; } catch (e) { return 'en'; } })();
-const langPicker = () => `<div class="lang-row"><span class="hint">Song names in</span>${ADM_LANGS.map(([c, n]) => `<button class="lchip ${c === admLang ? 'on' : ''}" data-al="${c}">${n}</button>`).join('')}</div>`;
+const langPicker = only => `<div class="lang-row"><span class="hint">Song names in</span>${ADM_LANGS.filter(([c]) => !only || only.includes(c)).map(([c, n]) => `<button class="lchip ${c === (only && !only.includes(admLang) ? only[0] : admLang) ? 'on' : ''}" data-al="${c}">${n}</button>`).join('')}</div>`;
 function wireLang(redraw) { on('[data-al]', 'click', e => { admLang = e.currentTarget.dataset.al; try { localStorage.setItem('adm.lang', admLang); } catch (x) {} redraw(); }); }
 function bookTree(text, withDecades) {
   const out = []; let top = null, sub = null;
@@ -535,7 +535,9 @@ async function showLearnEditor(st, tabs, wire, note, live) {
   let picked = learnDraft ? learnDraft.picked : String(st.practice_songs || '').split(/[,\s]+/).filter(r => r && find(r));
   let { bk, chap, dec, dirty } = learnDraft || { bk: 'dns', chap: '', dec: '', dirty: false };
   picked = picked.filter(r => find(r));
+  let first = true;
   const draw = () => {
+    const y = first ? 0 : scrollY; first = false;   // a drop-down change must not jump to the top
     learnDraft = dirty ? { picked, bk, chap, dec, dirty } : null;
     const tree = trees[bk], c = tree.find(x => x.n === chap) || tree[0]; chap = c ? c.n : '';
     const d = c && c.subs.length ? (c.subs.find(x => x.n === dec) || c.subs[0]) : null; dec = d ? d.n : '';
@@ -556,6 +558,7 @@ async function showLearnEditor(st, tabs, wire, note, live) {
         <button class="btn line" id="ad">+ Add to this week’s songs</button></div>
       <button class="btn deep" id="sv">${dirty ? 'Save changes' : 'Save'}</button>` + note);
     wire(); wireLang(() => showContent());
+    if (y) scrollTo(0, y);
     const sg = document.getElementById('sg'); const firstFree = [...sg.options].find(o => !o.disabled); if (firstFree) sg.value = firstFree.value;
     document.getElementById('bk').onchange = e => { bk = e.target.value; chap = ''; dec = ''; draw(); };
     document.getElementById('ch').onchange = e => { chap = e.target.value; dec = ''; draw(); };
@@ -595,7 +598,8 @@ const player = new Audio(); let playingKey = '';
 player.onended = player.onpause = () => { if (player.ended || player.paused) { playingKey = ''; document.querySelectorAll('[data-lis].on').forEach(b => { b.classList.remove('on'); b.innerHTML = ICON.play + 'Listen'; }); } };
 async function showRecordings(tabs, wire, live) {
   const ids = Object.keys(BOOKS);
-  const [trees, audios, recs] = await Promise.all([Promise.all(ids.map(id => loadTree(id, admLang))), Promise.all(ids.map(id => appFile(BOOKS[id].base + 'audio.txt'))), guard(() => api.recordings())]);
+  const recLang = admLang === 'ta' ? 'ta' : 'en';   // Recordings: English or Tamil names only
+  const [trees, audios, recs] = await Promise.all([Promise.all(ids.map(id => loadTree(id, recLang))), Promise.all(ids.map(id => appFile(BOOKS[id].base + 'audio.txt'))), guard(() => api.recordings())]);
   if (!recs || !live()) return;
   const recOf = (b, n) => recs.find(r => r.book === b && r.number === n);
   const appAudio = {}; ids.forEach((id, i) => { const m = new Map(); audios[i].replace(/\r/g, '').split('\n').forEach(l => { const k = l.indexOf('|'); if (k > 0 && !l.startsWith('#')) m.set(l.slice(0, k).trim(), l.slice(k + 1).trim()); }); appAudio[id] = m; });
@@ -607,31 +611,31 @@ async function showRecordings(tabs, wire, live) {
   });
   const listenUrl = (b, n) => { const r = recOf(b.id, n); if (r) return recUrl(r); const p = b.has.get(n); return p ? (/^https?:/.test(p) ? p : APP_BASE + b.base + p.split('/').map(encodeURIComponent).join('/')) : ''; };
   const songRow = (b, x) => {
-    const r = recOf(b.id, x.n), done = b.has.has(x.n) || (r && r.status === 'complete'), url = listenUrl(b, x.n), key = b.id + '|' + x.n;
-    const tag = r && r.status === 'complete' ? '<span class="rtag ok">Complete</span>' : r ? '<span class="rtag up">Uploaded · not checked</span>' : done ? '<span class="rtag ok">In the app</span>' : '';
+    const r = recOf(b.id, x.n), done = r ? r.status === 'complete' : b.has.has(x.n), url = listenUrl(b, x.n), key = b.id + '|' + x.n;
+    const tag = r && r.status === 'complete' ? '<span class="rtag ok">New recording · in the app</span>' : r ? '<span class="rtag up">New recording · not marked complete</span>' : b.has.has(x.n) ? '<span class="rtag ok">Has audio</span>' : '<span class="rtag no">No audio yet</span>';
     return `<div class="rec-row ${done ? 'done' : ''}" id="r-${b.id}-${esc(x.n)}"><div class="rec-t"><b>${esc(x.n)}</b> ${esc(x.title)} ${tag}</div>
       <div class="rec-act">` +
-      (url ? `<button class="ra lis ${playingKey === key ? 'on' : ''}" data-lis="${esc(key)}" data-url="${esc(url)}">${playingKey === key ? ICON.stop + 'Stop' : ICON.play + 'Listen'}</button>` : '') +
-      `<button class="ra rec" data-rec="${esc(key)}">${ICON.mic}Record</button><button class="ra" data-upl="${esc(key)}">${ICON.upload}Upload</button>` +
-      (done ? '' : `<button class="ra ok" data-done="${esc(key)}" ${r ? '' : 'disabled title="Record or upload first"'}>${ICON.check}Complete</button>`) + '</div></div>';
+      (url ? `<button class="ra lis ${playingKey === key ? 'on' : ''}" data-lis="${esc(key)}" data-url="${esc(url)}">${playingKey === key ? ICON.stop + 'Stop' : ICON.play + 'Listen'}</button>`
+           : `<button class="ra lis" disabled title="No audio yet">${ICON.play}Listen</button>`) +
+      `<button class="ra rec" data-rec="${esc(key)}">${ICON.mic}${done ? 'Re-record' : 'Record'}</button><button class="ra" data-upl="${esc(key)}">${ICON.upload}Upload</button>` +
+      (r && r.status !== 'complete' ? `<button class="ra ok" data-done="${esc(key)}">${ICON.check}Complete</button>` : '') + '</div></div>';
   };
   const group = (b, key, label, sub, items, inner) => {
-    const left = items.filter(b.need).length; if (!left && !recShowDone) return '';
+    const left = items.filter(b.need).length;   // every song is listed, so any song can be re-recorded
     return `<details class="rec-g" data-k="${esc(key)}" ${recOpen[key] ? 'open' : ''}><summary><span class="rt"><b>${esc(label)}</b><span>${esc(sub)}</span></span><span class="pn ${left ? '' : 'done'}">${left || '✓'}</span></summary>${recOpen[key] ? inner() : ''}</details>`;
   };
   const body = b => b.tree.map(c => {
-    const show = l => (recShowDone ? l : l.filter(b.need));
+    const show = l => l;
     if (c.subs.length) return group(b, b.id + c.n, c.n + '. ' + c.t, c.songs.length + ' pāsurams · ' + c.subs.length + ' decades', c.songs, () => c.subs.map(d => group(b, b.id + c.n + '/' + d.n, d.n + '  ' + d.t, d.songs[0].n + '–' + d.songs[d.songs.length - 1].n, d.songs, () => show(d.songs).map(x => songRow(b, x)).join(''))).join(''));
     const label = b.id === 'ashta' ? 'Aṣṭapadi ' + c.n : (b.id === 'dns' ? 'Chapter ' : '') + c.n + '. ' + c.t;
     return group(b, b.id + c.n, label, c.songs.length + (b.id === 'ndp' ? ' pāsurams' : ' songs'), c.songs, () => show(c.songs).map(x => songRow(b, x)).join(''));
   }).join('');
   const draw = () => {
-    page('App content', tabs + langPicker() + `<div class="stats">${books.map(b => `<div><b>${b.left}</b><span>${esc(b.short)}<br>to record, of ${b.total}</span></div>`).join('')}</div>
-      <label class="sw"><input type="checkbox" id="sd" ${recShowDone ? 'checked' : ''}> Show completed songs too</label>` +
-      books.map(b => `<details class="card pend rec-book" data-k="${b.id}" ${recOpen[b.id] ? 'open' : ''}><summary><span class="rt"><b>${esc(b.short)} · recordings</b><span>Songs with no audio yet (of ${b.total})</span></span><span class="pn ${b.left ? '' : 'done'}">${b.left || '✓'}</span></summary>${recOpen[b.id] ? body(b) : ''}</details>`).join('') +
-      '<div class="hint">Record on this phone, or upload a file you already have. Tap Listen to check it, then tap Complete: the song leaves this list and plays in the app.</div><input type="file" id="fp" accept="audio/*" class="hidden">');
+    page('App content', tabs + langPicker(['en', 'ta']) + `<div class="stats">${books.map(b => `<div><b>${b.left}</b><span>${esc(b.short)}<br>to record, of ${b.total}</span></div>`).join('')}</div>
+` +
+      books.map(b => `<details class="card pend rec-book" data-k="${b.id}" ${recOpen[b.id] ? 'open' : ''}><summary><span class="rt"><b>${esc(b.short)} · recordings</b><span>All ${b.total} songs · ${b.left} with no audio yet</span></span><span class="pn ${b.left ? '' : 'done'}">${b.left || '✓'}</span></summary>${recOpen[b.id] ? body(b) : ''}</details>`).join('') +
+      '<div class="hint">Every song is here. Tap Listen to hear what the app plays now. Record or upload a new one (it replaces the old one), listen to check it, then tap Complete: from then on the app plays the new recording.</div><input type="file" id="fp" accept="audio/*" class="hidden">');
     wire(); wireLang(() => showContent());
-    document.getElementById('sd').onchange = e => { recShowDone = e.target.checked; redraw(); };
     document.querySelectorAll('details[data-k]').forEach(d => d.addEventListener('toggle', () => { if (!!recOpen[d.dataset.k] === d.open) return; recOpen[d.dataset.k] = d.open; redraw(); }));
     on('[data-lis]', 'click', e => {
       const btn = e.currentTarget, k = btn.dataset.lis;
@@ -644,7 +648,7 @@ async function showRecordings(tabs, wire, live) {
     on('[data-upl]', 'click', e => { const [b, n] = e.currentTarget.dataset.upl.split('|'); replaceOk(b, n).then(ok => { if (!ok) return; const fp = document.getElementById('fp'); fp.onchange = () => fp.files[0] && save(b, n, fp.files[0]); fp.value = ''; fp.click(); }); });
     on('[data-done]', 'click', async e => {
       const [b, n] = e.currentTarget.dataset.done.split('|');
-      if (!(await ask(`Mark ${n} as complete? It leaves the “still to record” list and plays in the app.`, 'Mark complete'))) return;
+      if (!(await ask(`Mark ${n} as complete? From now on the app plays this new recording.`, 'Mark complete'))) return;
       const ok = await guard(async () => { await api.completeRecording(b, n); return true; }); if (!ok) return;
       const r = recOf(b, n); if (r) r.status = 'complete';
       const bk = books.find(x => x.id === b); bk.left = bk.tree.reduce((k, c) => k + c.songs.filter(bk.need).length, 0);
