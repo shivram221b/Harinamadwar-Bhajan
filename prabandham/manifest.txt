@@ -1,4 +1,4 @@
-version=12
+version=13
 file=songs.txt
 file=songs_ta.txt
 file=songs_kn.txt
@@ -9,5 +9,5 @@ size=songs.txt:1130324
 size=songs_ta.txt:2819221
 size=songs_kn.txt:2700574
 size=songs_sa.txt:2819221
-size=meanings_ta.txt:2272601
+size=meanings_ta.txt:2460318
 size=audio.txt:0
