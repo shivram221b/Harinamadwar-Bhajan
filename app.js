@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.6';
+const WEB_VERSION = '4.7';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -1253,11 +1253,14 @@ async function songOfTheDay() {
   } catch (e) { return null; }
 }
 
+// Watch live (opens the YouTube app) and Share, in the app's own colours
+const liveRow = e => `<div class="ev-live"><a class="ev-yt" href="${esc(e.live)}" target="_blank" rel="noopener"><span class="yt-mark">${svgI('play')}</span>Watch live</a>` +
+  `<button class="ev-share" data-live="${esc(e.live)}" data-msg="${esc('🙏 Watch Harinamadwar live – ' + e.name + ', ' + e.when + ', at ' + e.place + '.\nYouTube: ' + e.live)}" aria-label="Share the live link">${svgI('share')}<span>Share</span></button></div>`;
 function eventRows(list, big) {
   return list.map(e => `<div class="ev-row${big ? ' big' : ''}"><div class="ev-date"><span>${esc(e.month)}</span><b class="${e.days.length > 2 ? 'long' : ''}">${esc(e.days)}</b></div>` +
     `<div class="ev-t"><b>${esc(e.name)}</b><span class="ev-where">${svgI('pin')}at ${esc(e.place)}</span>` +
-    (big && e.songs && e.songs.length ? `<button class="ev-pl" data-go="#satsang/${esc(e.last)}">${svgI('music')}<span><b>${e.songs.length} songs</b> to be sung · see the list</span>${svgI('chevron', 'chev2')}</button>` : '') +
-    (big && e.live ? `<div class="ev-live"><a class="ev-yt" href="${esc(e.live)}" target="_blank" rel="noopener">${svgI('video')}Watch on YouTube</a><button class="ev-share" data-live="${esc(e.live)}" data-name="${esc(e.name)}" aria-label="Share the live link">${svgI('share')}</button></div>` : '') + `</div></div>`).join('');
+    (big && e.songs && e.songs.length ? `<button class="ev-pl" data-go="#satsang/${esc(e.last)}">${svgI('music')}<span class="ev-pl-t"><b>${e.songs.length} songs to be sung</b><span>See the list</span></span>${svgI('chevron', 'chev2')}</button>` : '') +
+    (big && e.live ? liveRow(e) : '') + `</div></div>`).join('');
 }
 
 // ---------- home ----------
@@ -1307,9 +1310,9 @@ document.addEventListener('click', e => {
   if (b) { openTab = b.dataset.openTab ? +b.dataset.openTab : null; go(b.dataset.go); return; }
   const sh = e.target.closest('[data-live]');   // share a satsang's YouTube live link
   if (sh) {
-    const text = sh.dataset.name + ' · live on YouTube 🙏';
-    if (navigator.share) navigator.share({ title: sh.dataset.name, text, url: sh.dataset.live }).catch(() => {});
-    else if (navigator.clipboard) navigator.clipboard.writeText(text + '\n' + sh.dataset.live).then(() => toast('Link copied. You can paste it in WhatsApp.'));
+    const text = sh.dataset.msg;   // "🙏 Watch Harinamadwar live – Radha Kalyanam, Nov 28 and 29, at RP3 Bangalore. YouTube: …"
+    if (navigator.share) navigator.share({ title: 'Harinamadwar', text }).catch(() => {});
+    else if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => toast('Copied. You can paste it in WhatsApp.'));
   }
 });
 
@@ -1521,7 +1524,7 @@ async function showTfd(number) {
   if (fresh) $('tfd-scroll').scrollTop = 0;
   if (ACCESS.url) loadReactions(+t.number);
   $('t-share').onclick = () => {
-    const text = 'Thought for the Day (TFD ' + t.number + '): ' + t.title + '\n\n' + t.paras.join('\n\n') + '\n\nRead the full thought and listen to the bhajans in the Harinamadwar app 🙏\n' + location.origin + location.pathname;
+    const text = 'Harinamadwar · Thought for the Day (TFD ' + t.number + ')\n' + t.title + '\n\n' + t.paras.join('\n\n') + '\n\nRead more thoughts and sing the bhajans in the Harinamadwar app 🙏\n' + location.origin + location.pathname;
     if (navigator.share) navigator.share({ title: t.title, text }).catch(() => {});
     else if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => toast('Copied. You can paste it in WhatsApp.'));
   };
@@ -1542,7 +1545,7 @@ async function showShare(number) {
   $('sh-img').src = c.toDataURL('image/png');
   c.toBlob(b => { shareBlob = b; }, 'image/png');
   $('sh-go').onclick = async () => {
-    const text = 'Today I sang ' + title + ' with Harinamadwar 🙏 youtube.com/@HariNamadwar';
+    const text = 'Harinamadwar 🙏 Today I sang ' + title + '\nyoutube.com/@HariNamadwar';
     try {
       const file = shareBlob && new File([shareBlob], 'harinamadwar.png', { type: 'image/png' });
       if (file && navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], text });

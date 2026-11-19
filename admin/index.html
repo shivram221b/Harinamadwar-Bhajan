@@ -552,7 +552,7 @@ async function showLearnEditor(st, tabs, wire, note, live) {
   picked = picked.filter(r => find(r));
   let first = true;
   const draw = () => {
-    const y = first ? 0 : scrollY; first = false;   // a drop-down change must not jump to the top
+    const y = first ? admKeepY : scrollY; first = false; admKeepY = 0;   // a drop-down change must not jump to the top
     learnDraft = dirty ? { picked, bk, chap, dec, dirty } : null;
     const tree = trees[bk], c = tree.find(x => x.n === chap) || tree[0]; chap = c ? c.n : '';
     const d = c && c.subs.length ? (c.subs.find(x => x.n === dec) || c.subs[0]) : null; dec = d ? d.n : '';
@@ -572,7 +572,7 @@ async function showLearnEditor(st, tabs, wire, note, live) {
         <label class="f">Song<select id="sg">${pool.map(x => { const has = picked.includes(refOf(bk, x.n)); return `<option value="${esc(x.n)}" ${has ? 'disabled' : ''}>${esc(x.n)} · ${esc(x.title)}${has ? '  (added)' : ''}</option>`; }).join('')}</select></label>
         <button class="btn line" id="ad">+ Add to this week’s songs</button></div>
       <button class="btn deep" id="sv">${dirty ? 'Save changes' : 'Save'}</button>` + note);
-    wire(); wireLang(() => showContent());
+    wire(); wireLang(() => { admKeepY = scrollY; showContent(); });
     if (y) scrollTo(0, y);
     const sg = document.getElementById('sg'); const firstFree = [...sg.options].find(o => !o.disabled); if (firstFree) sg.value = firstFree.value;
     document.getElementById('bk').onchange = e => { bk = e.target.value; chap = ''; dec = ''; draw(); };
@@ -650,7 +650,8 @@ async function showRecordings(tabs, wire, live) {
 ` +
       books.map(b => `<details class="card pend rec-book" data-k="${b.id}" ${recOpen[b.id] ? 'open' : ''}><summary><span class="rt"><b>${esc(b.short)} · recordings</b><span>All ${b.total} songs · ${b.left} with no audio yet</span></span><span class="pn ${b.left ? '' : 'done'}">${b.left || '✓'}</span></summary>${recOpen[b.id] ? body(b) : ''}</details>`).join('') +
       '<div class="hint">Every song is here. Tap Listen to hear what the app plays now. Record or upload a new one (it replaces the old one), listen to check it, then tap Complete: from then on the app plays the new recording.</div><input type="file" id="fp" accept="audio/*" class="hidden">');
-    wire(); wireLang(() => showContent());
+    wire(); wireLang(() => { admKeepY = scrollY; showContent(); });
+    if (admKeepY) { scrollTo(0, admKeepY); admKeepY = 0; }
     document.querySelectorAll('details[data-k]').forEach(d => d.addEventListener('toggle', () => { if (!!recOpen[d.dataset.k] === d.open) return; recOpen[d.dataset.k] = d.open; redraw(); }));
     on('[data-lis]', 'click', e => {
       const btn = e.currentTarget, k = btn.dataset.lis;
@@ -743,6 +744,7 @@ function recordSheet(book, number, save) {
 
 // ---------------------------------------------------------------- E · app content
 let ctab = 'satsangs';
+let admKeepY = 0;   // a language switch keeps the page where it was
 async function showContent() {
   const live = ticket();
   const tabs = `<div class="tabs">${[['satsangs', 'Satsangs'], ['learn', 'Learn'], ['recordings', 'Recordings'], ['thoughts', 'Thoughts']].map(([k, t]) => `<button class="tab ${ctab === k ? 'on' : ''}" data-ct="${k}">${t}</button>`).join('')}</div>`;
@@ -775,16 +777,17 @@ async function showContent() {
   }
 }
 
-async function showEvent(e) {
+async function showEvent(e, keepState) {
   ticket();
   const MON = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
   const trees = {}; for (const id of Object.keys(BOOKS)) trees[id] = await loadTree(id, admLang);
   const find = r => { const { id, n } = parseRef(r); for (const c of trees[id]) { const x = c.songs.find(s => s.n === n); if (x) return { ...x, id, chap: (id === 'dns' ? c.n + '. ' : '') + c.t, book: BOOKS[id].short }; } return null; };
   let f = { nm: e ? e.name : '', pl: e ? e.place : '', d1: e ? (e.first_day || e.last_day) : '', d2: e ? e.last_day : '', wt: e ? e.when_text : '', yt: e ? (e.live_url || '') : '' };
   let picked = String((e && e.songs) || '').split(/[,\s]+/).filter(r => r && find(r)), bk = 'dns', chap = '', dec = '', first = true;
+  if (keepState) { f = keepState.f; picked = keepState.picked; bk = keepState.bk; chap = keepState.chap; dec = keepState.dec; }   // after a language switch
   const keep = () => { for (const k of ['nm', 'pl', 'd1', 'd2', 'wt', 'yt']) { const el = document.getElementById(k); if (el) f[k] = el.value; } };
   const draw = () => {
-    const y = first ? 0 : scrollY; first = false;
+    const y = first ? (keepState ? keepState.y : 0) : scrollY; first = false;
     const tree = trees[bk], c = tree.find(x => x.n === chap) || tree[0]; chap = c ? c.n : '';
     const d = c && c.subs.length ? (c.subs.find(x => x.n === dec) || c.subs[0]) : null; dec = d ? d.n : '';
     const pool = d ? d.songs : c ? c.songs : [];
@@ -814,7 +817,7 @@ async function showEvent(e) {
     <div class="err" id="er"></div>
     <button class="btn deep" id="sv">Save</button>${e ? '<button class="btn bad" id="dl">Delete</button>' : ''}`, { back: showContent });
     if (y) scrollTo(0, y);
-    wireLang(() => { keep(); showEvent(Object.assign({}, e, { songs: picked.join(',') })); });
+    wireLang(() => { keep(); showEvent(e, { f, picked, bk, chap, dec, y: scrollY }); });   // stays where it was, keeps unsaved changes
     const d1 = document.getElementById('d1'), d2 = document.getElementById('d2'), wt = document.getElementById('wt');
     const auto = () => {
       if (!d1.value) return; if (!d2.value || d2.value < d1.value) d2.value = d1.value;
