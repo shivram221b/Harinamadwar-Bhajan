@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.7';
+const WEB_VERSION = '4.8';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -499,7 +499,8 @@ async function showSong(pos, keepTab, keepScroll) {
     a.removeAttribute('src');
     $('seek').disabled = true; $('seek').value = 0;
     $('pos').textContent = '0:00'; $('len').textContent = '0:00';
-    $('audio-status').textContent = url ? 'Tap ▶ to listen' : 'A recording of this song will be added soon.';
+    $('audio-status').textContent = url ? '' : 'A recording of this song will be added soon.';
+    setSeekFill(0); cpState(url ? 'Tap to play' : '');
   }
   $('tab-audio').textContent = url ? 'Audio ♪' : 'Audio';
   $('btn-play').disabled = !url;
@@ -569,6 +570,8 @@ function setScale(v) {
 
 // ---------- audio ----------
 const fmt = s => { s = Math.floor(s || 0); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+function cpState(t) { $('cp-state').textContent = t; }
+function setSeekFill(v) { $('seek').style.setProperty('--p', (v / 10) + '%'); }
 function setPlayIcon(playing) {
   document.querySelector('.i-play').classList.toggle('hidden', playing);
   document.querySelector('.i-pause').classList.toggle('hidden', !playing);
@@ -587,18 +590,18 @@ function togglePlay() {
 (function audioEvents() {
   const a = $('audio'), seek = $('seek');
   let seeking = false;
-  a.addEventListener('play', () => setPlayIcon(true));
-  a.addEventListener('pause', () => setPlayIcon(false));
+  a.addEventListener('play', () => { setPlayIcon(true); cpState('Playing'); });
+  a.addEventListener('pause', () => { setPlayIcon(false); if (a.getAttribute('src')) cpState('Paused'); });
   a.addEventListener('playing', () => { $('audio-status').textContent = ''; });
   a.addEventListener('loadedmetadata', () => { $('len').textContent = fmt(a.duration); seek.disabled = false; });
   a.addEventListener('timeupdate', () => {
     if (seeking || !a.duration) return;
-    seek.value = Math.round(1000 * a.currentTime / a.duration);
+    seek.value = Math.round(1000 * a.currentTime / a.duration); setSeekFill(seek.value);
     $('pos').textContent = fmt(a.currentTime);
   });
-  a.addEventListener('ended', () => { setPlayIcon(false); seek.value = 0; });
+  a.addEventListener('ended', () => { setPlayIcon(false); seek.value = 0; setSeekFill(0); cpState('Tap to play'); });
   a.addEventListener('error', () => { if (a.getAttribute('src')) { setPlayIcon(false); $('audio-status').textContent = 'Could not play. Please check the internet connection and try again.'; } });
-  seek.addEventListener('input', () => { seeking = true; if (a.duration) $('pos').textContent = fmt(a.duration * seek.value / 1000); });
+  seek.addEventListener('input', () => { seeking = true; setSeekFill(seek.value); if (a.duration) $('pos').textContent = fmt(a.duration * seek.value / 1000); });
   seek.addEventListener('change', () => { if (a.duration) a.currentTime = a.duration * seek.value / 1000; seeking = false; });
   const jump = d => { if (a.getAttribute('src') && a.duration) a.currentTime = Math.max(0, Math.min(a.duration - 0.5, a.currentTime + d)); };
   $('btn-back10').onclick = () => jump(-10);
@@ -613,7 +616,7 @@ function togglePlay() {
   $('btn-speed').onclick = () => {
     sp = (sp + 1) % SPEEDS.length;
     a.playbackRate = a.defaultPlaybackRate = SPEEDS[sp];
-    $('btn-speed').textContent = tr('Speed') + ' ' + SPEEDS[sp] + '×';
+    $('btn-speed').textContent = SPEEDS[sp] + '×';
     $('btn-speed').classList.toggle('on', SPEEDS[sp] !== 1);
   };
   a.addEventListener('loadedmetadata', () => { a.playbackRate = SPEEDS[sp]; });
@@ -1007,6 +1010,9 @@ const I18N = {
   'Search: pāsuram no. or words': ['தேடல்: பாசுர எண் அல்லது சொற்கள்', 'ಹುಡುಕಿ: ಪಾಶುರ ಸಂಖ್ಯೆ ಅಥವಾ ಪದಗಳು', 'अन्विष्यत: पाशुरसङ्ख्या शब्दाः वा'],
   'Loading…': ['ஏற்றுகிறது…', 'ಲೋಡ್ ಆಗುತ್ತಿದೆ…', 'आनीयते…'],
   'Repeat song': ['பாடலை மீண்டும் இசை', 'ಹಾಡನ್ನು ಪುನರಾವರ್ತಿಸಿ', 'गीतं पुनः'],
+  'Tap to play': ['இசைக்கத் தொடவும்', 'ಕೇಳಲು ಒತ್ತಿ', 'श्रोतुं स्पृशतु'],
+  'Playing': ['இசைக்கிறது', 'ಕೇಳಿಸುತ್ತಿದೆ', 'श्राव्यते'],
+  'Paused': ['நிறுத்தப்பட்டது', 'ನಿಲ್ಲಿಸಲಾಗಿದೆ', 'विरामः'],
   'Speed': ['வேகம்', 'ವೇಗ', 'वेगः'],
   'About the book': ['நூலைப் பற்றி', 'ಪುಸ್ತಕದ ಬಗ್ಗೆ', 'ग्रन्थविषये'],
   'Text size': ['எழுத்தின் அளவு', 'ಅಕ್ಷರದ ಗಾತ್ರ', 'अक्षरमानम्'],
@@ -1075,6 +1081,9 @@ const I18N = {
   'No satsangs announced yet. Please check again soon.': ['இன்னும் சத்சங்கங்கள் அறிவிக்கப்படவில்லை. விரைவில் மீண்டும் பாருங்கள்.', 'ಇನ್ನೂ ಸತ್ಸಂಗಗಳನ್ನು ಪ್ರಕಟಿಸಿಲ್ಲ. ಶೀಘ್ರದಲ್ಲೇ ಮತ್ತೆ ನೋಡಿ.', 'अद्यापि सत्सङ्गाः न घोषिताः। शीघ्रं पुनः पश्यत।'],
   'Watch clips from past satsangs': ['முந்தைய சத்சங்கக் காணொளிகளைப் பாருங்கள்', 'ಹಿಂದಿನ ಸತ್ಸಂಗಗಳ ಕ್ಲಿಪ್‌ಗಳನ್ನು ನೋಡಿ', 'पूर्वसत्सङ्गानां चलचित्राणि पश्यत'],
   'Satsangs': ['சத்சங்கங்கள்', 'ಸತ್ಸಂಗಗಳು', 'सत्सङ्गाः'],
+  'Newer': ['புதியது', 'ಹೊಸದು', 'नूतनम्'],
+  'Older': ['முந்தையது', 'ಹಿಂದಿನದು', 'पूर्वतनम्'],
+  'All thoughts': ['எல்லா சிந்தனைகளும்', 'ಎಲ್ಲ ಚಿಂತನೆಗಳು', 'सर्वचिन्तनानि'],
   'Past thoughts': ['முந்தைய சிந்தனைகள்', 'ಹಿಂದಿನ ಚಿಂತನೆಗಳು', 'पूर्वचिन्तनानि'],
   'How did this thought touch you?': ['இந்தச் சிந்தனை உங்களை எப்படித் தொட்டது?', 'ಈ ಚಿಂತನೆ ನಿಮ್ಮನ್ನು ಹೇಗೆ ತಟ್ಟಿತು?', 'इदं चिन्तनं भवतः हृदयं कथं स्पृष्टवत्?'],
   'SING WITH TODAY’S THOUGHT': ['இன்றைய சிந்தனையுடன் பாடுங்கள்', 'ಇಂದಿನ ಚಿಂತನೆಯೊಂದಿಗೆ ಹಾಡಿ', 'अद्यतनचिन्तनेन सह गायत'],
@@ -1456,9 +1465,15 @@ async function showTfdList() {
   $('tfd-box').innerHTML = `<p class="mut">Shri Janakiraman’s reflections on everyday life, newest first.</p>` + all.map(t =>
     `<button class="card t-item" data-go="#tfd/${esc(t.number)}"><span class="lbl">TFD ${esc(t.number)}${t.series ? ' · ' + esc(t.series.toUpperCase()) : ''}</span><b>${esc(t.title)}</b><span class="teaser mut">${esc(t.paras[0] || '')}</span></button>`).join('') +
     `<p class="mut center small">New thoughts will appear here as they are shared.</p>`;
-  $('tfd-scroll').scrollTop = 0;
+  const sc = $('tfd-scroll');
+  if (tfdFocus) {   // SCRUM-83: back from "All thoughts" – show the thought just read, briefly outlined
+    const el = $('tfd-box').querySelector(`[data-go="#tfd/${CSS.escape(tfdFocus)}"]`);
+    sc.scrollTop = el ? Math.max(0, el.offsetTop - 140) : tfdListY;
+    if (el) { el.classList.add('was'); setTimeout(() => el.classList.remove('was'), 1600); }
+  } else sc.scrollTop = tfdBack ? tfdListY : 0;
+  tfdFocus = null; tfdBack = false;
 }
-let tfdNow = null;
+let tfdNow = null, tfdListY = 0, tfdFocus = null, tfdBack = false;
 // ---------- reactions on a Thought for the Day (SCRUM-50): one per phone; tap again to take it back ----------
 const REACTIONS = ['🙏', '❤️', '🌸', '😊', '👍'];
 let reactNow = { tfd: 0, counts: {}, mine: null };
@@ -1489,8 +1504,10 @@ async function react(e) {
 
 async function showTfd(number) {
   showView('v-tfd');
-  const all = await tfds(), t = all.find(x => x.number === number);
+  if ($('tfd-box').querySelector('.t-item')) { tfdListY = $('tfd-scroll').scrollTop; tfdBack = true; }   // leaving the list: remember the place
+  const all = await tfds(), i = all.findIndex(x => x.number === number), t = all[i];
   if (!t) { replaceHash('#tfd'); return showTfdList(); }
+  const newer = all[i - 1], older = all[i + 1];   // the list is newest first
   const fresh = tfdNow !== number; tfdNow = number;
   $('tfd-title').textContent = 'Thought for the Day';
   $('tfd-smaller').classList.remove('hidden'); $('tfd-bigger').classList.remove('hidden');
@@ -1519,10 +1536,19 @@ async function showTfd(number) {
     if (s) out.push(`<button class="card t-link" data-go="#song/${esc(s.number)}">${badge('music')}<span class="hc-t"><span class="lbl">SING WITH TODAY’S THOUGHT</span><b>${esc(s.displayTitle)}</b><span class="mut">${esc(s.displayRaga ? s.number + ' · ' + s.displayRaga : s.number)}</span></span>${svgI('chevron', 'chev2')}</button>`);
   }
   // (no Next Satsang here: this page is only for the Thought for the Day)
-  out.push(`<div class="t-acts"><button class="btn-acc" id="t-share">${svgI('share')}Share</button><button class="btn-line" data-go="#tfd">Past thoughts</button></div>`);
+  // SCRUM-83: read on without going back to the list
+  const nb = (x, cls, lab) => x ? `<button class="t-nb${cls}" data-tfd="${esc(x.number)}">${lab}<span class="t-nb-t">TFD ${esc(x.number)} · ${esc(x.title)}</span></button>` : '<span class="t-nb ghost"></span>';
+  out.push(`<div class="t-nav">${nb(newer, '', '<small>‹ <span>Newer</span></small>')}${nb(older, ' r', '<small><span>Older</span> ›</small>')}</div>`);
+  out.push(`<div class="t-acts"><button class="btn-acc" id="t-share">${svgI('share')}Share</button><button class="btn-line" id="t-all">All thoughts</button></div>`);
   $('tfd-box').innerHTML = `<div class="tfd-read">${out.join('')}</div>`;
   if (fresh) $('tfd-scroll').scrollTop = 0;
   if (ACCESS.url) loadReactions(+t.number);
+  $('tfd-box').querySelectorAll('[data-tfd]').forEach(b => { b.onclick = () => { replaceHash('#tfd/' + b.dataset.tfd); showTfd(b.dataset.tfd); }; });   // Back still goes where you came from
+  $('t-all').onclick = () => {
+    tfdFocus = t.number;
+    if (navStack[navStack.length - 2] === '#tfd') history.back();   // the list is underneath: go back to it, not a new copy
+    else { replaceHash('#tfd'); showTfdList(); }
+  };
   $('t-share').onclick = () => {
     const text = 'Harinamadwar · Thought for the Day (TFD ' + t.number + ')\n' + t.title + '\n\n' + t.paras.join('\n\n') + '\n\nRead more thoughts and sing the bhajans in the Harinamadwar app 🙏\n' + location.origin + location.pathname;
     if (navigator.share) navigator.share({ title: t.title, text }).catch(() => {});

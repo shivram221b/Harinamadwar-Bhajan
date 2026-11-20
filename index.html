@@ -241,21 +241,19 @@
       <div class="scroll page-scroll" id="s-lyrics"><div class="page"><div class="text" id="lyrics" data-notr></div></div></div>
       <div class="scroll page-scroll hidden" id="s-meaning"><div class="page"><div class="text meaning" id="meaning" data-notr></div></div></div>
       <div class="scroll page-scroll hidden" id="s-audio"><div class="page">
-        <div class="player">
-          <div class="pl-row">
-            <button class="skip" id="btn-back10" aria-label="Back 10 seconds">−10</button>
+        <div class="player cp">
+          <div class="cp-row">
             <button class="play" id="btn-play" aria-label="Play">
               <svg class="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
               <svg class="i-pause hidden" viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
             </button>
-            <button class="skip" id="btn-fwd10" aria-label="Forward 10 seconds">+10</button>
+            <span class="cp-state" id="cp-state">Tap to play</span>
+            <button class="skip" id="btn-back10" aria-label="Back 10 seconds"><svg viewBox="0 0 24 24"><path class="ln" d="M5.2 13.5A7.3 7.3 0 1 0 7 7"/><path class="ln" d="M6.6 3.4 6.8 7.4l4-.3"/><text x="12.6" y="15.6">10</text></svg></button>
+            <button class="skip" id="btn-fwd10" aria-label="Forward 10 seconds"><svg viewBox="0 0 24 24"><path class="ln" d="M18.8 13.5A7.3 7.3 0 1 1 17 7"/><path class="ln" d="M17.4 3.4 17.2 7.4l-4-.3"/><text x="11.4" y="15.6">10</text></svg></button>
+            <button class="cp-rep" id="btn-repeat" aria-pressed="false" aria-label="Repeat song"><svg viewBox="0 0 24 24"><path class="ln" d="M17 2.5l3 3-3 3M4 11.5v-1a5 5 0 0 1 5-5h11M7 21.5l-3-3 3-3M20 12.5v1a5 5 0 0 1-5 5H4"/></svg></button>
+            <button class="cp-speed" id="btn-speed" aria-label="Speed">1×</button>
           </div>
-          <input type="range" id="seek" min="0" max="1000" value="0" disabled>
-          <div class="times"><span id="pos">0:00</span><span id="len">0:00</span></div>
-          <div class="pl-opts">
-            <button class="opt" id="btn-repeat" aria-pressed="false">Repeat song</button>
-            <button class="opt" id="btn-speed">Speed 1×</button>
-          </div>
+          <div class="cp-prog"><span id="pos">0:00</span><input type="range" id="seek" min="0" max="1000" value="0" disabled><span id="len">0:00</span></div>
           <p class="audio-status" id="audio-status"></p>
         </div>
         <a class="sruti-btn hidden" id="btn-sruti" href="sruti.html"><span class="ibadge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span><span class="hc-t"><b>Record with sruti</b><span class="mut">Sing with sruti and record yourself</span></span></a>
