@@ -149,6 +149,18 @@ details.rec-g .pn { font-size: 13px; min-width: 30px; }
 .q-btn { width: 30px; height: 34px; border-radius: 50%; display: grid; place-items: center; color: var(--deep); flex-shrink: 0; }
 .q-btn svg { width: 20px; height: 20px; } .q-btn:disabled { opacity: .25; } .q-btn.x { color: var(--bad); }
 .add-box { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.pk-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pk-bar .pk-n { margin-left: auto; font-size: 14px; color: var(--muted); font-weight: 700; }
+.pk-list { max-height: 420px; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; background: #fff; overscroll-behavior: contain; }
+.pk-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-bottom: 1px solid var(--soft); cursor: pointer; min-height: 52px; }
+.pk-row:last-child { border-bottom: 0; }
+.pk-row input { width: 22px; height: 22px; flex-shrink: 0; accent-color: var(--deep); }
+.pk-row .pk-no { flex-shrink: 0; min-width: 44px; font-weight: 800; color: var(--deep); font-size: 14px; }
+.pk-row .pk-t { flex: 1; font-size: 16px; line-height: 1.3; }
+.pk-row.has { cursor: default; color: var(--muted); } .pk-row.has .pk-no { color: var(--muted); }
+.pk-tag { font-size: 12px; font-weight: 700; color: var(--ok); background: #E3F2E8; border-radius: 10px; padding: 2px 8px; flex-shrink: 0; }
+.pk-ch { background: var(--soft); position: sticky; top: 0; z-index: 1; font-weight: 800; color: var(--deep); }
+.pk-ch .pk-t { font-size: 15px; } .pk-ch .pk-c { font-size: 13px; font-weight: 700; color: var(--muted); flex-shrink: 0; }
 
 .lang-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .lang-row .hint { margin-right: 4px; }
@@ -540,6 +552,72 @@ async function loadTree(id, lang) {
 const refOf = (id, n) => id === 'dns' ? n : id + ':' + n;
 const parseRef = r => { const i = r.indexOf(':'); return i > 0 && BOOKS[r.slice(0, i)] ? { id: r.slice(0, i), n: r.slice(i + 1) } : { id: 'dns', n: r }; };
 
+// ---------------------------------------------------------------- the song picker (Satsangs and Learn): book → whole book / chapter / work / decade → tick many songs
+// ps = { bk, chap, dec, sel, ly }: chap or dec '*' = everything; sel = ticked but not yet added (kept while moving between chapters and books)
+const newPick = () => ({ bk: 'dns', chap: '*', dec: '*', sel: new Set(), ly: 0 });
+function pickerGroups(trees, ps) {
+  const tree = trees[ps.bk];
+  if (ps.chap !== '*' && !tree.find(x => x.n === ps.chap)) ps.chap = '*';
+  const c = ps.chap === '*' ? null : tree.find(x => x.n === ps.chap);
+  if (c && c.subs.length && ps.dec !== '*' && !c.subs.find(x => x.n === ps.dec)) ps.dec = '*';
+  const d = c && c.subs.length && ps.dec !== '*' ? c.subs.find(x => x.n === ps.dec) : null;
+  const lab = x => (ps.bk === 'ashta' ? BOOKS.ashta.unit + ' ' + x.n + ' · ' : x.n + '. ') + x.t;
+  const groups = ps.chap === '*' ? tree.map(x => ({ key: x.n, label: lab(x), songs: x.songs }))
+    : d ? [{ key: '', label: '', songs: d.songs }]
+    : c && c.subs.length ? c.subs.map(x => ({ key: x.n, label: x.n + ' · ' + x.t, songs: x.songs }))
+    : [{ key: '', label: '', songs: c ? c.songs : [] }];
+  return { tree, c, groups };
+}
+function pickerHtml(trees, ps, picked, title, addLabel) {
+  const { tree, c, groups } = pickerGroups(trees, ps), bk = ps.bk, unit = BOOKS[bk].unit;
+  const all = bk === 'ashta' ? 'aṣṭapadis' : bk === 'ndp' ? 'works' : 'chapters';
+  const count = bk === 'ndp' ? tree.reduce((k, x) => k + x.songs.length, 0) + ' pāsurams' : 'whole book';
+  const songRow = x => { const r = refOf(bk, x.n), has = picked.includes(r);
+    return `<label class="pk-row ${has ? 'has' : ''}"><input type="checkbox" data-pk="${esc(r)}" ${has ? 'checked disabled' : ps.sel.has(r) ? 'checked' : ''}><span class="pk-no">${esc(x.n)}</span><span class="pk-t">${esc(x.title)}</span>${has ? '<span class="pk-tag">In list</span>' : ''}</label>`; };
+  return `<div class="card add-box" data-add="${esc(addLabel)}"><div class="lbl" style="margin:0">${title}</div>
+    <label class="f">Book<select id="bk">${Object.entries(BOOKS).map(([id, b]) => `<option value="${id}" ${id === bk ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}</select></label>
+    <label class="f">${unit}<select id="ch"><option value="*" ${ps.chap === '*' ? 'selected' : ''}>All ${all} (${count})</option>${tree.map(x => `<option value="${esc(x.n)}" ${x.n === ps.chap ? 'selected' : ''}>${esc(x.n)}. ${esc(x.t)}</option>`).join('')}</select></label>
+    ${c && c.subs.length ? `<label class="f">Decade<select id="dc"><option value="*" ${ps.dec === '*' ? 'selected' : ''}>All decades (${c.songs.length} pāsurams)</option>${c.subs.map(x => `<option value="${esc(x.n)}" ${x.n === ps.dec ? 'selected' : ''}>${esc(x.n)} · ${esc(x.t)}</option>`).join('')}</select></label>` : ''}
+    <div class="pk-bar"><button class="btn line small" id="pa">Select all</button><button class="btn line small" id="pn">Clear</button><span class="pk-n" id="pc"></span></div>
+    <div class="pk-list" id="pk">${groups.map(g => g.label
+      ? `<label class="pk-row pk-ch"><input type="checkbox" data-grp="${esc(g.key)}"><span class="pk-t">${esc(g.label)}</span><span class="pk-c">${g.songs.length}</span></label>${g.songs.map(songRow).join('')}`
+      : g.songs.map(songRow).join('')).join('') || '<div class="empty">No songs here.</div>'}</div>
+    <div class="hint">Tick a ${groups.some(g => g.label) ? 'heading to take all its songs' : 'song'}, or use Select all, then untick the ones you don’t want. Ticks are kept when you change the ${unit.toLowerCase()} or the book.</div>
+    <button class="btn deep" id="ad"></button></div>`;
+}
+/** Ticking never redraws the page (no jump, no flicker). add(refs) gets the ticked songs in book order; redraw() is called after a book/chapter change. */
+function wirePicker(trees, ps, picked, add, redraw) {
+  const { groups } = pickerGroups(trees, ps), bk = ps.bk, pk = document.getElementById('pk');
+  const label = document.querySelector('[data-add]').dataset.add;
+  if (ps.ly) pk.scrollTop = ps.ly;
+  pk.addEventListener('scroll', () => { ps.ly = pk.scrollTop; }, { passive: true });
+  const shown = groups.flatMap(g => g.songs.map(x => refOf(bk, x.n)));
+  const sync = () => {
+    pk.querySelectorAll('[data-grp]').forEach(b => { const g = groups.find(x => x.key === b.dataset.grp), free = g.songs.map(x => refOf(bk, x.n)).filter(r => !picked.includes(r)), n = free.filter(r => ps.sel.has(r)).length;
+      b.checked = free.length > 0 && n === free.length; b.indeterminate = n > 0 && n < free.length; b.disabled = !free.length; });
+    const here = shown.filter(r => ps.sel.has(r)).length, all = ps.sel.size;
+    document.getElementById('pc').textContent = all ? here + ' ticked here' + (all > here ? ' · ' + all + ' in all' : '') : '';
+    const ad = document.getElementById('ad'); ad.disabled = !all; ad.textContent = all ? `+ Add ${all} song${all > 1 ? 's' : ''} ${label}` : '+ Add ' + label;
+  };
+  pk.addEventListener('change', ev => { const b = ev.target;
+    if (b.dataset.pk) { b.checked ? ps.sel.add(b.dataset.pk) : ps.sel.delete(b.dataset.pk); }
+    else if (b.dataset.grp !== undefined) { const g = groups.find(x => x.key === b.dataset.grp); g.songs.forEach(x => { const r = refOf(bk, x.n); if (picked.includes(r)) return; b.checked ? ps.sel.add(r) : ps.sel.delete(r); const el = pk.querySelector(`[data-pk="${CSS.escape(r)}"]`); if (el) el.checked = b.checked; }); }
+    sync(); });
+  document.getElementById('pa').onclick = () => { shown.forEach(r => { if (!picked.includes(r)) ps.sel.add(r); }); pk.querySelectorAll('[data-pk]:not(:disabled)').forEach(b => { b.checked = true; }); sync(); };
+  document.getElementById('pn').onclick = () => { shown.forEach(r => ps.sel.delete(r)); pk.querySelectorAll('[data-pk]:not(:disabled)').forEach(b => { b.checked = false; }); sync(); };
+  sync();
+  const fresh = () => { ps.ly = 0; };
+  document.getElementById('bk').onchange = ev => { ps.bk = ev.target.value; ps.chap = '*'; ps.dec = '*'; fresh(); redraw(); };
+  document.getElementById('ch').onchange = ev => { ps.chap = ev.target.value; ps.dec = '*'; fresh(); redraw(); };
+  const dc = document.getElementById('dc'); if (dc) dc.onchange = ev => { ps.dec = ev.target.value; fresh(); redraw(); };
+  const ids = Object.keys(BOOKS);
+  const order = r => { const { id, n } = parseRef(r); let k = 0; for (const c of trees[id]) for (const x of c.songs) { if (x.n === n) return ids.indexOf(id) * 1e6 + k; k++; } return 9e9; };
+  document.getElementById('ad').onclick = () => { const refs = [...ps.sel].filter(r => !picked.includes(r)).sort((a, b) => order(a) - order(b));
+    if (!refs.length) return; ps.sel = new Set(); add(refs); toast(refs.length + (refs.length > 1 ? ' songs' : ' song') + ' added to the list'); };
+}
+/** "3 ticked songs are not added yet – save anyway?" */
+async function tickedNotAdded(ps) { const n = ps.sel.size; return !n || await ask(`${n} ticked song${n > 1 ? 's are' : ' is'} not added to the list yet. Save without ${n > 1 ? 'them' : 'it'}?`, 'Save anyway'); }
+
 // ---------------------------------------------------------------- Learn: this week's songs from any book, chosen from drop-downs and put in order
 let learnDraft = null;
 async function showLearnEditor(st, tabs, wire, note, live) {
@@ -548,44 +626,34 @@ async function showLearnEditor(st, tabs, wire, note, live) {
   const find = r => { const { id, n } = parseRef(r); for (const c of trees[id]) { const x = c.songs.find(s => s.n === n); if (x) return { ...x, id, chap: (id === 'dns' ? c.n + '. ' : '') + c.t, book: BOOKS[id].short }; } return null; };
   // unsaved changes survive a switch of language
   let picked = learnDraft ? learnDraft.picked : String(st.practice_songs || '').split(/[,\s]+/).filter(r => r && find(r));
-  let { bk, chap, dec, dirty } = learnDraft || { bk: 'dns', chap: '', dec: '', dirty: false };
+  let { ps, dirty } = learnDraft || { ps: newPick(), dirty: false };
   picked = picked.filter(r => find(r));
   let first = true;
   const draw = () => {
     const y = first ? admKeepY : scrollY; first = false; admKeepY = 0;   // a drop-down change must not jump to the top
-    learnDraft = dirty ? { picked, bk, chap, dec, dirty } : null;
-    const tree = trees[bk], c = tree.find(x => x.n === chap) || tree[0]; chap = c ? c.n : '';
-    const d = c && c.subs.length ? (c.subs.find(x => x.n === dec) || c.subs[0]) : null; dec = d ? d.n : '';
-    const pool = d ? d.songs : c ? c.songs : [];
+    learnDraft = dirty || ps.sel.size ? { picked, ps, dirty } : null;
     page('App content', tabs + langPicker() + `<label class="f">Google Meet link for the daily session<input id="mu" value="${esc(st.meet_url || '')}"></label>
-      <div class="lbl">THIS WEEK’S SONGS · ${picked.length}</div>
+      ${pickerHtml(trees, ps, picked, '1 · CHOOSE THIS WEEK’S SONGS', 'to this week’s songs')}
+      <div class="lbl">2 · THIS WEEK’S SONGS · ${picked.length}</div>
       <div class="card q-list" id="ql">${picked.length ? picked.map((r, i) => { const x = find(r); return `<div class="q-row" data-i="${i}">
           <span class="q-grip" title="Drag to move" aria-label="Drag to move">${ICON.grip}</span>
           <span class="q-no">${esc(x.n)}</span><span class="rt"><b>${esc(x.title)}</b><span>${esc(x.book + ' · ' + x.chap)}</span></span>
           <button class="q-btn" data-up="${i}" aria-label="Move up" ${i ? '' : 'disabled'}>${ICON.up}</button><button class="q-btn" data-dn="${i}" aria-label="Move down" ${i < picked.length - 1 ? '' : 'disabled'}>${ICON.down}</button>
           <button class="q-btn x" data-rm="${i}" aria-label="Remove">${ICON.x}</button></div>`; }).join('')
-        : '<div class="empty">No songs chosen yet. Add them below.</div>'}</div>
-      <div class="card add-box"><div class="lbl" style="margin:0">ADD A SONG</div>
-        <label class="f">Choose book<select id="bk">${Object.entries(BOOKS).map(([id, b]) => `<option value="${id}" ${id === bk ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}</select></label>
-        <label class="f">${bk === 'ndp' ? 'Work' : bk === 'ashta' ? 'Aṣṭapadi' : 'Chapter'}<select id="ch">${tree.map(x => `<option value="${esc(x.n)}" ${x.n === chap ? 'selected' : ''}>${esc(x.n)}. ${esc(x.t)}</option>`).join('')}</select></label>
-        ${c && c.subs.length ? `<label class="f">Decade<select id="dc">${c.subs.map(x => `<option value="${esc(x.n)}" ${x.n === dec ? 'selected' : ''}>${esc(x.n)} · ${esc(x.t)}</option>`).join('')}</select></label>` : ''}
-        <label class="f">Song<select id="sg">${pool.map(x => { const has = picked.includes(refOf(bk, x.n)); return `<option value="${esc(x.n)}" ${has ? 'disabled' : ''}>${esc(x.n)} · ${esc(x.title)}${has ? '  (added)' : ''}</option>`; }).join('')}</select></label>
-        <button class="btn line" id="ad">+ Add to this week’s songs</button></div>
+        : '<div class="empty">No songs chosen yet. Choose them above; they are added in book order and you can then move them.</div>'}</div>
+      <div class="hint">Drag ☰ or use the arrows to change the order.</div>
       <button class="btn deep" id="sv">${dirty ? 'Save changes' : 'Save'}</button>` + note);
-    wire(); wireLang(() => { admKeepY = scrollY; showContent(); });
+    wire(); wireLang(() => { admKeepY = scrollY; learnDraft = { picked, ps, dirty }; showContent(); });
     if (y) scrollTo(0, y);
-    const sg = document.getElementById('sg'); const firstFree = [...sg.options].find(o => !o.disabled); if (firstFree) sg.value = firstFree.value;
-    document.getElementById('bk').onchange = e => { bk = e.target.value; chap = ''; dec = ''; draw(); };
-    document.getElementById('ch').onchange = e => { chap = e.target.value; dec = ''; draw(); };
-    const dc = document.getElementById('dc'); if (dc) dc.onchange = e => { dec = e.target.value; draw(); };
-    document.getElementById('ad').onclick = () => { const r = sg.value && refOf(bk, sg.value); if (!r || picked.includes(r)) return toast('Already in the list.'); picked.push(r); dirty = true; draw(); toast(sg.value + ' added'); };
+    wirePicker(trees, ps, picked, refs => { picked.push(...refs); dirty = true; draw(); }, draw);
     on('[data-up]', 'click', e => { const i = +e.currentTarget.dataset.up; [picked[i - 1], picked[i]] = [picked[i], picked[i - 1]]; dirty = true; draw(); });
     on('[data-dn]', 'click', e => { const i = +e.currentTarget.dataset.dn; [picked[i + 1], picked[i]] = [picked[i], picked[i + 1]]; dirty = true; draw(); });
     on('[data-rm]', 'click', e => { picked.splice(+e.currentTarget.dataset.rm, 1); dirty = true; draw(); });
     dragToReorder(document.getElementById('ql'), (from, to) => { const [m] = picked.splice(from, 1); picked.splice(to, 0, m); dirty = true; draw(); });
     document.getElementById('sv').onclick = async () => {
+      if (!(await tickedNotAdded(ps))) return;
       const ok = await guard(async () => { await api.setSetting('meet_url', document.getElementById('mu').value.trim()); await api.setSetting('practice_songs', picked.join(',')); return true; });
-      if (ok) { dirty = false; toast('Saved · the app shows them in this order'); draw(); }
+      if (ok) { dirty = false; ps.sel = new Set(); toast('Saved · the app shows them in this order'); draw(); }
     };
   };
   draw();
@@ -783,14 +851,12 @@ async function showEvent(e, keepState) {
   const trees = {}; for (const id of Object.keys(BOOKS)) trees[id] = await loadTree(id, admLang);
   const find = r => { const { id, n } = parseRef(r); for (const c of trees[id]) { const x = c.songs.find(s => s.n === n); if (x) return { ...x, id, chap: (id === 'dns' ? c.n + '. ' : '') + c.t, book: BOOKS[id].short }; } return null; };
   let f = { nm: e ? e.name : '', pl: e ? e.place : '', d1: e ? (e.first_day || e.last_day) : '', d2: e ? e.last_day : '', wt: e ? e.when_text : '', yt: e ? (e.live_url || '') : '' };
-  let picked = String((e && e.songs) || '').split(/[,\s]+/).filter(r => r && find(r)), bk = 'dns', chap = '', dec = '', first = true;
-  if (keepState) { f = keepState.f; picked = keepState.picked; bk = keepState.bk; chap = keepState.chap; dec = keepState.dec; }   // after a language switch
+  // chap/dec '*' = the whole book / the whole work. sel = songs ticked but not yet added (kept while moving between chapters and books)
+  let picked = String((e && e.songs) || '').split(/[,\s]+/).filter(r => r && find(r)), ps = newPick(), first = true;
+  if (keepState) { f = keepState.f; picked = keepState.picked; ps = keepState.ps; }   // after a language switch
   const keep = () => { for (const k of ['nm', 'pl', 'd1', 'd2', 'wt', 'yt']) { const el = document.getElementById(k); if (el) f[k] = el.value; } };
   const draw = () => {
     const y = first ? (keepState ? keepState.y : 0) : scrollY; first = false;
-    const tree = trees[bk], c = tree.find(x => x.n === chap) || tree[0]; chap = c ? c.n : '';
-    const d = c && c.subs.length ? (c.subs.find(x => x.n === dec) || c.subs[0]) : null; dec = d ? d.n : '';
-    const pool = d ? d.songs : c ? c.songs : [];
     page(e ? 'Edit satsang' : 'Add satsang', `
     <label class="f">Name of the satsang<input id="nm" value="${esc(f.nm)}" placeholder="Radha Kalyanam"></label>
     <label class="f">Place<input id="pl" value="${esc(f.pl)}" placeholder="RP3 Bangalore"></label>
@@ -800,24 +866,20 @@ async function showEvent(e, keepState) {
     <label class="f">YouTube live link (optional)<input id="yt" type="url" inputmode="url" value="${esc(f.yt)}" placeholder="https://youtube.com/live/…"></label>
     <div class="hint">Paste the link of the live stream. Devotees get a “Watch live on YouTube” button, which opens the YouTube app, and a Share button.</div>
     ${langPicker(['en', 'ta'])}
-    <div class="lbl">SONGS TO BE SUNG · ${picked.length}</div>
+    ${pickerHtml(trees, ps, picked, '1 · CHOOSE SONGS', 'to the list')}
+    <div class="lbl">2 · SONGS TO BE SUNG · ${picked.length}</div>
     <div class="card q-list" id="ql">${picked.length ? picked.map((r, i) => { const x = find(r); return `<div class="q-row" data-i="${i}">
         <span class="q-grip" title="Drag to move" aria-label="Drag to move">${ICON.grip}</span>
         <span class="q-pos">${i + 1}</span><span class="rt"><b>${esc(x.title)}</b><span>${esc(x.n + ' · ' + x.book + ' · ' + x.chap)}</span></span>
         <button class="q-btn" data-up="${i}" aria-label="Move up" ${i ? '' : 'disabled'}>${ICON.up}</button><button class="q-btn" data-dn="${i}" aria-label="Move down" ${i < picked.length - 1 ? '' : 'disabled'}>${ICON.down}</button>
         <button class="q-btn x" data-rm="${i}" aria-label="Remove">${ICON.x}</button></div>`; }).join('')
-      : '<div class="empty">No songs yet. Add them below in the order they will be sung.</div>'}</div>
-    <div class="card add-box"><div class="lbl" style="margin:0">ADD A SONG</div>
-      <label class="f">Choose book<select id="bk">${Object.entries(BOOKS).map(([id, b]) => `<option value="${id}" ${id === bk ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}</select></label>
-      <label class="f">${bk === 'ndp' ? 'Work' : bk === 'ashta' ? 'Aṣṭapadi' : 'Chapter'}<select id="ch">${tree.map(x => `<option value="${esc(x.n)}" ${x.n === chap ? 'selected' : ''}>${esc(x.n)}. ${esc(x.t)}</option>`).join('')}</select></label>
-      ${c && c.subs.length ? `<label class="f">Decade<select id="dc">${c.subs.map(x => `<option value="${esc(x.n)}" ${x.n === dec ? 'selected' : ''}>${esc(x.n)} · ${esc(x.t)}</option>`).join('')}</select></label>` : ''}
-      <label class="f">Song<select id="sg">${pool.map(x => { const has = picked.includes(refOf(bk, x.n)); return `<option value="${esc(x.n)}" ${has ? 'disabled' : ''}>${esc(x.n)} · ${esc(x.title)}${has ? '  (added)' : ''}</option>`; }).join('')}</select></label>
-      <button class="btn line" id="ad">+ Add to the list</button></div>
-    <div class="hint">Devotees see this list under Upcoming Satsangs, in this order, with the words and recordings of each song.</div>
+      : '<div class="empty">No songs yet. Choose them above; they are added in book order and you can then move them.</div>'}</div>
+    <div class="hint">Drag ☰ or use the arrows to change the order. Devotees see this list under Upcoming Satsangs, in this order, with the words and recordings of each song.</div>
     <div class="err" id="er"></div>
     <button class="btn deep" id="sv">Save</button>${e ? '<button class="btn bad" id="dl">Delete</button>' : ''}`, { back: showContent });
     if (y) scrollTo(0, y);
-    wireLang(() => { keep(); showEvent(e, { f, picked, bk, chap, dec, y: scrollY }); });   // stays where it was, keeps unsaved changes
+    wireLang(() => { keep(); showEvent(e, { f, picked, ps, y: scrollY }); });   // stays where it was, keeps unsaved changes and ticks
+    wirePicker(trees, ps, picked, refs => { keep(); picked.push(...refs); draw(); }, () => { keep(); draw(); });
     const d1 = document.getElementById('d1'), d2 = document.getElementById('d2'), wt = document.getElementById('wt');
     const auto = () => {
       if (!d1.value) return; if (!d2.value || d2.value < d1.value) d2.value = d1.value;
@@ -825,11 +887,6 @@ async function showEvent(e, keepState) {
       if (!wt.dataset.typed) wt.value = +a === +b ? a.toLocaleString('en-IN', { month: 'long' }) + ' ' + a.getDate() : a.getMonth() === b.getMonth() ? `${M} ${a.getDate()} and ${b.getDate()}` : `${M} ${a.getDate()} – ${b.toLocaleString('en-IN', { month: 'short' })} ${b.getDate()}`;
     };
     d1.onchange = auto; d2.onchange = auto; wt.oninput = () => { wt.dataset.typed = 1; };
-    const sg = document.getElementById('sg'); const free = [...sg.options].find(o => !o.disabled); if (free) sg.value = free.value;
-    document.getElementById('bk').onchange = ev => { keep(); bk = ev.target.value; chap = ''; dec = ''; draw(); };
-    document.getElementById('ch').onchange = ev => { keep(); chap = ev.target.value; dec = ''; draw(); };
-    const dc = document.getElementById('dc'); if (dc) dc.onchange = ev => { keep(); dec = ev.target.value; draw(); };
-    document.getElementById('ad').onclick = () => { const r = sg.value && refOf(bk, sg.value); if (!r || picked.includes(r)) return toast('Already in the list.'); keep(); picked.push(r); draw(); toast(sg.value + ' added'); };
     on('[data-up]', 'click', ev => { keep(); const i = +ev.currentTarget.dataset.up; [picked[i - 1], picked[i]] = [picked[i], picked[i - 1]]; draw(); });
     on('[data-dn]', 'click', ev => { keep(); const i = +ev.currentTarget.dataset.dn; [picked[i + 1], picked[i]] = [picked[i], picked[i + 1]]; draw(); });
     on('[data-rm]', 'click', ev => { keep(); picked.splice(+ev.currentTarget.dataset.rm, 1); draw(); });
@@ -839,6 +896,7 @@ async function showEvent(e, keepState) {
       if (!nm || !pl || !d1.value) return (document.getElementById('er').textContent = 'Please fill in the name, place and first day.');
       const yt = document.getElementById('yt').value.trim();
       if (yt && !/^https:\/\/(www\.|m\.)?(youtube\.com|youtu\.be)\/\S+$/.test(yt)) return (document.getElementById('er').textContent = 'Please paste a YouTube link (https://youtube.com/… or https://youtu.be/…).');
+      if (!(await tickedNotAdded(ps))) return;
       auto();
       const a = new Date(d1.value + 'T12:00'), b = new Date(d2.value + 'T12:00');
       const ok = await guard(async () => { await api.saveEvent({ id: e && e.id, first_day: d1.value, last_day: d2.value, when_text: wt.value.trim(), month: MON[a.getMonth()],
