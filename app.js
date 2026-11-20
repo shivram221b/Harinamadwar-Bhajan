@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.9';
+const WEB_VERSION = '4.10';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -204,6 +204,23 @@ function showView(id) {
 
 // ---------- index ----------
 let indexScroll = 0;
+const IX_UI = {
+  ch: { en: 'chapters', ta: 'அத்தியாயங்கள்', kn: 'ಅಧ್ಯಾಯಗಳು', sa: 'अध्यायाः' },
+  songs: { en: 'songs', ta: 'பாடல்கள்', kn: 'ಹಾಡುಗಳು', sa: 'गीतानि' },
+  song1: { en: 'song', ta: 'பாடல்', kn: 'ಹಾಡು', sa: 'गीतम्' },
+  rec: { en: 'with recordings', ta: 'பதிவுகளுடன்', kn: 'ಧ್ವನಿಮುದ್ರಣಗಳೊಂದಿಗೆ', sa: 'ध्वनिमुद्रणयुक्तानि' },
+  recs: { en: 'recordings', ta: 'பதிவுகள்', kn: 'ಧ್ವನಿಮುದ್ರಣಗಳು', sa: 'ध्वनिमुद्रणानि' },
+  go: { en: 'GO STRAIGHT TO', ta: 'நேராகச் செல்ல', kn: 'ನೇರವಾಗಿ ಹೋಗಿ', sa: 'साक्षात् गम्यताम्' },
+  ashta: { en: 'Aṣṭapadi', ta: 'அஷ்டபதி', kn: 'ಅಷ್ಟಪದಿ', sa: 'अष्टपदी' },
+  ashtaOf: { en: 'Aṣṭapadis of Śrī Jayadeva', ta: 'ஸ்ரீ ஜயதேவரின் அஷ்டபதிகள்', kn: 'ಶ್ರೀ ಜಯದೇವರ ಅಷ್ಟಪದಿಗಳು', sa: 'श्रीजयदेवस्य अष्टपद्यः' },
+  slokam: { en: 'Ślokam', ta: 'ஶ்லோகம்', kn: 'ಶ್ಲೋಕ', sa: 'श्लोकः' },
+  listen: { en: 'Recording', ta: 'பதிவு', kn: 'ಧ್ವನಿ', sa: 'ध्वनिः' },
+  ndpOf: { en: 'pāsurams of the Āzhvārs', ta: 'ஆழ்வார்களின் பாசுரங்கள்', kn: 'ಆಳ್ವಾರರ ಪಾಶುರಗಳು', sa: 'आळ्वाराणां पाशुराः' },
+};
+const ixT = k => IX_UI[k][prefs.lang] || IX_UI[k].en;
+const isSlokam = s => /^(ślokam|shlōkam|slokam|shlokam|dhyāna ślokam)$/i.test((s.displayTitle || s.title || '').trim()) || /^shl?Okam$/i.test(s.title || '');
+const recIcon = () => `<span class="ix-au" aria-label="Has a recording">${svgI('music')}</span>`;
+const chev = () => svgI('chevron', 'ix-chev');
 async function renderIndex(filter) {
   const lang = prefs.lang;
   const t = lang === 'en' ? null : await loadText(lyricsFile(lang));
@@ -212,27 +229,80 @@ async function renderIndex(filter) {
   const ul = $('song-list');
   if (indexBook === 'ndp' && !q) { renderNdpTree(t, am); return; }
   const heads = lang === 'en' ? null : await loadHeads(lyricsFile(lang));
-  const out = [];
-  let pendingChap = null, shown = 0;
+  const titleOf = s => { const x = t && t.get(s.number); return x && x.title ? x.title : s.displayTitle; };
+  const subOf = s => { const x = t && t.get(s.number); return lang === 'en' ? s.displayRaga : (x && x.raga && !/^\S+\s+[\d-]+$/.test(x.raga) ? x.raga : ''); };
+  const chapName = it => {
+    const n = heads && it.num !== undefined ? heads.get(it.key.startsWith('### ') ? it.key : '## ' + it.num) : '';
+    if (n) return n;
+    return it.key.startsWith('### ') ? it.heading.replace(/^\S+\s+/, '') : it.heading.replace(/^\d+\.\s+/, '');
+  };
+  // groups: one per chapter, songs in order (sub-chapters become a small heading inside the card)
+  const groups = [];
+  let g = null;
   for (const it of indexItems) {
-    if (it.type === 'chap') { pendingChap = it; if (!q) out.push(`<li class="chap">${esc(chapHeading(it, heads))}</li>`); continue; }
-    const s = it.song;
-    const tr = t && t.get(s.number);
-    const title = tr && tr.title ? tr.title : s.displayTitle;
-    if (q) {
-      const hay = norm([s.number, s.title, s.displayTitle, tr ? tr.title : '', s.chapter].join(' '));
-      if (!(s.number.startsWith(q) || hay.includes(q))) continue;
-      if (pendingChap) { out.push(`<li class="chap">${esc(chapHeading(pendingChap, heads))}</li>`); pendingChap = null; }
+    if (it.type === 'chap') {
+      if (it.key.startsWith('### ')) { if (g) g.items.push({ sub: it }); continue; }
+      g = { it, items: [] }; groups.push(g); continue;
     }
-    const sub = lang === 'en' ? s.displayRaga : (tr && tr.raga && !/^\S+\s+[\d-]+$/.test(tr.raga) ? tr.raga : '');
-    out.push(`<li class="row" data-pos="${s.pos}"><span class="badge">${esc(s.number)}</span>` +
-      `<div class="row-text"><div class="row-title">${esc(title)}</div>${sub ? `<div class="row-sub">${esc(sub)}</div>` : ''}</div>` +
-      (am.has(s.number) ? '<span class="has-audio" aria-label="Audio available">♪</span>' : '') + '</li>');
-    shown++;
+    if (!g) { g = { it: { key: '## 0', num: '0', heading: '' }, items: [] }; groups.push(g); }
+    const s = it.song;
+    if (q) {
+      const tr2 = t && t.get(s.number);
+      const hay = norm([s.number, s.title, s.displayTitle, tr2 ? tr2.title : '', s.chapter].join(' '));
+      if (!(s.number.startsWith(q) || hay.includes(q))) continue;
+    }
+    g.items.push({ s });
+  }
+  const shownGroups = groups.filter(x => x.items.some(i => i.s));
+  const nSongs = groups.reduce((n, x) => n + x.items.filter(i => i.s).length, 0);
+  const out = [];
+  const ashta = indexBook === 'ashta';
+  if (!q) {
+    const nCh = groups.filter(x => x.it.num !== '0').length;
+    const meta = ashta ? `${nCh} ${ixT('ashtaOf')}${am.size ? ` · ${am.size} ${ixT('recs')}` : ''}` : `${nCh} ${ixT('ch')} · ${nSongs} ${ixT('songs')}${am.size ? ` · ${am.size} ${ixT('rec')}` : ''}`;
+    out.push(`<li class="ix-meta">${esc(meta)}</li>`);
+    const chips = shownGroups.map(x => {
+      const label = ashta ? (x.it.num === '0' ? chapName(x.it) : ixT('ashta') + ' ' + x.it.num) : (x.it.num === '0' ? chapName(x.it) : x.it.num + ' · ' + short(chapName(x.it).split(' by ')[0], 26));
+      return `<button class="ix-chip" data-ix-jump="${esc(x.it.num)}">${esc(label)}</button>`;
+    }).join('');
+    out.push(`<li class="ix-go"><span class="ix-go-l">${ixT('go')}</span><div class="ix-chips">${chips}</div></li>`);
+  }
+  for (const x of shownGroups) {
+    const songsIn = x.items.filter(i => i.s).map(i => i.s);
+    if (ashta && x.it.num !== '0') {
+      // one card per Aṣṭapadi: the song, its ślokams as small chips, and a Recording chip
+      const main = songsIn.find(s => !isSlokam(s)) || songsIn[0];
+      const sl = songsIn.filter(s => s !== main);
+      out.push(`<li class="row ix-acard" id="ixc-${esc(x.it.num)}" data-pos="${main.pos}"><span class="ix-med">${esc(x.it.num)}</span><div class="ix-at">` +
+        `<span class="ix-alab">${ixT('ashta')} ${esc(x.it.num)}</span><b>${esc(titleOf(main))}</b>${subOf(main) ? `<span class="ix-asub">${esc(subOf(main))}</span>` : ''}` +
+        `<span class="ix-achips">${sl.map(s => `<span class="row ix-schip" data-pos="${s.pos}">${ixT('slokam')} ${esc(s.number)}</span>`).join('')}` +
+        (am.has(main.number) ? `<span class="ix-rchip">${svgI('music')}${ixT('listen')}</span>` : '') + `</span></div>${chev()}</li>`);
+      continue;
+    }
+    if (x.it.num !== '0' || !ashta) {
+      const nm = chapName(x.it), by = nm.split(' by ');
+      out.push(`<li class="ix-chap" id="ixc-${esc(x.it.num)}"><span class="ix-med">${x.it.num === '0' ? '✦' : esc(x.it.num)}</span>` +
+        `<span class="ix-ct"><b>${esc(by[0])}</b>${by[1] ? `<span>by ${esc(by[1])}</span>` : ''}</span><span class="ix-cnt">${songsIn.length} ${songsIn.length === 1 ? ixT('song1') : ixT('songs')}</span></li>`);
+    }
+    const rows = x.items.map(i => {
+      if (i.sub) return `<li class="ix-sub">${esc(chapName(i.sub))}</li>`;
+      const s = i.s, sub = subOf(s);
+      return `<li class="row ix-row" data-pos="${s.pos}"><span class="ix-no">${esc(s.number)}</span>` +
+        `<div class="row-text"><div class="row-title">${esc(titleOf(s))}</div>${sub ? `<div class="row-sub">${esc(sub)}</div>` : ''}</div>` +
+        (am.has(s.number) ? recIcon() : '<span class="ix-au none"></span>') + chev() + '</li>';
+    }).join('');
+    out.push(`<li class="ix-card${ashta ? ' ix-dhy' : ''}"><ul>${rows}</ul></li>`);
   }
   ul.innerHTML = out.join('');
-  $('empty').classList.toggle('hidden', shown > 0);
+  $('empty').classList.toggle('hidden', nSongs > 0);
 }
+document.addEventListener('click', e => {
+  const c = e.target.closest('[data-ix-jump]');
+  if (!c) return;
+  const el = document.getElementById('ixc-' + c.dataset.ixJump);
+  if (el) $('index-scroll').scrollTo({ top: el.offsetTop - 8, behavior: 'smooth' });
+  document.querySelectorAll('.ix-chip').forEach(b => b.classList.toggle('on', b === c));
+});
 
 
 // ---------- Prabandham index: Āyiram › work › decade › pāsurams, as drop-downs ----------
@@ -291,10 +361,16 @@ function renderNdpTree(t, am) {
     return { title: local || title, poet: pl || '' };
   };
   const out = [];
-  for (const ay of tree) {
-    const all = ay.works.flatMap(w => w.songs);
+  const total = tree.reduce((n, ay) => n + ay.works.reduce((m, w) => m + w.songs.length, 0), 0);
+  out.push(`<li class="ix-meta">${total} ${ixT('ndpOf')}${am.size ? ` · ${am.size} ${ixT('recs')}` : ''}</li>`);
+  // 4.10: the Āyirams as tabs; one Āyiram's works at a time
+  let ai = store.get('nxAy', 0); if (ai >= tree.length) ai = 0;
+  out.push(`<li class="nx-tabs" role="tablist">` + tree.map((ay, k) => {
     const an = (AYIRAM_NAMES[ay.name] || {})[lang] || (AYIRAM_NAMES[ay.name] || {}).en || ay.name;
-    out.push(`<li class="nx-ay"><span>${esc(an)}</span><span class="nx-ay-n">${esc(nxRange(all))}</span></li>`);
+    const [main, sub] = an.split(' · ');
+    return `<button role="tab" class="nx-tab${k === ai ? ' on' : ''}" data-nx-ay="${k}" aria-selected="${k === ai}"><b>${esc(main)}</b>${sub ? `<span>${esc(sub)}</span>` : ''}</button>`;
+  }).join('') + `</li>`);
+  for (const ay of [tree[ai]]) {
     for (const w of ay.works) {
       const open = nxOpen.work === w.no, wn = workName(w);
       out.push(`<li class="nx-work ${open ? 'open' : ''}"><button class="nx-head" data-nx-work="${esc(w.no)}" aria-expanded="${open}">` +
@@ -324,6 +400,8 @@ function renderNdpTree(t, am) {
   $('empty').classList.add('hidden');
 }
 document.addEventListener('click', e => {
+  const tb = e.target.closest('[data-nx-ay]');
+  if (tb) { store.set('nxAy', +tb.dataset.nxAy); renderIndex('').then(() => { $('index-scroll').scrollTop = 0; }); return; }
   const w = e.target.closest('[data-nx-work]'), d = e.target.closest('[data-nx-dec]');
   if (!w && !d) return;
   if (w) nxOpen = { work: nxOpen.work === w.dataset.nxWork ? '' : w.dataset.nxWork, dec: '' };
@@ -360,13 +438,10 @@ function chapHeading(it, heads) {
   return it.key.startsWith('### ') ? it.num + '   ' + n : it.num === '0' ? n : it.num + '.  ' + n;
 }
 
-function openSearch() {
-  $('title-row').classList.add('hidden'); $('search-row').classList.remove('hidden');
-  $('search-input').focus();
-}
+function openSearch() { $('search-input').focus(); }
 function closeSearch() {
   $('search-input').value = '';
-  $('search-row').classList.add('hidden'); $('title-row').classList.remove('hidden');
+  $('btn-close-search').classList.add('hidden');
   renderIndex('');
 }
 
@@ -650,10 +725,7 @@ function langButtons(container, onPick) {
 
 // ---------- settings ----------
 function openSettings() {
-  const grid = $('lang-grid');
-  const pick = code => { prefs.lang = code; langButtons(grid, pick); };
-  langButtons(grid, pick);
-  $('size-range').value = Math.round(prefs.scale * 100);
+  paintLangBars();
   $('sw-screen').checked = prefs.screenOn;
   $('sw-night').checked = prefs.night;
   const standalone = window.navigator.standalone || matchMedia('(display-mode: standalone)').matches;
@@ -670,15 +742,13 @@ function closeSettings() {
   prefs.setupDone = true;
   back('');
 }
-$('size-range').addEventListener('input', e => setScale(e.target.value / 100));
 $('sw-screen').addEventListener('change', e => { prefs.screenOn = e.target.checked; });
 $('sw-night').addEventListener('change', e => { prefs.night = e.target.checked; applyLook(); });
 
 // ---------- wiring ----------
 $('btn-search').onclick = openSearch;
 $('btn-close-search').onclick = closeSearch;
-$('search-input').addEventListener('input', e => renderIndex(e.target.value));
-$('btn-home-settings').onclick = () => go('#settings');
+$('search-input').addEventListener('input', e => { $('btn-close-search').classList.toggle('hidden', !e.target.value); renderIndex(e.target.value); });
 $('btn-books').onclick = () => back('');   // home button (SCRUM-53)
 $('btn-settings-back').onclick = closeSettings;
 $('btn-done').onclick = closeSettings;
@@ -719,7 +789,7 @@ async function showIndex(id, fromSong) {
   $('empty').textContent = tr('No ' + BOOKS[id].unit + ' found');
   if (fresh) {
     $('search-input').value = '';
-    $('search-row').classList.add('hidden'); $('title-row').classList.remove('hidden');
+    $('btn-close-search').classList.add('hidden');
     $('song-list').innerHTML = '';
     $('loading').textContent = 'Loading…';
     $('loading').classList.remove('hidden');
@@ -952,6 +1022,86 @@ ICONS.mic = '<rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="
 ICONS.speaker = '<path d="M4,9h4l5,-4v14l-5,-4H4z M16.5,8.5a5,5 0,0 1,0 7 M19.5,5.5a9,9 0,0 1,0 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
 ICONS.stop = '<path d="M7,7h10v10H7z" fill="currentColor"/>';
 const svgI = (name, cls) => `<svg class="ic ${cls || ''}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ''}</svg>`;
+// 4.10: icons that match each book, and the About lamp
+ICONS.cymbals = '<path d="M7.5,7.6 C9,4.6 15,4.6 16.5,7.6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="7.5" cy="14" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="16.5" cy="14" r="5.6" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="7.5" cy="14" r="2" fill="currentColor"/><circle cx="16.5" cy="14" r="2" fill="currentColor"/><path d="M7.5,8.4 V12 M16.5,8.4 V12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>';
+ICONS.flute = '<path d="M3,19 L19,11" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/><circle cx="8.4" cy="16.3" r="0.8" fill="#F7D47E"/><circle cx="11.2" cy="14.9" r="0.8" fill="#F7D47E"/><circle cx="14" cy="13.5" r="0.8" fill="#F7D47E"/><path d="M14.5,10.5 C15.5,8 17,6.5 19.2,5.6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M19.8,1.8 C23,3 23,7.2 20,8.6 C17.4,8 16.8,4 19.8,1.8 Z" fill="none" stroke="currentColor" stroke-width="1.4"/><ellipse cx="20.1" cy="5.3" rx="1.3" ry="1.8" fill="currentColor"/>';
+ICONS.palmleaf = '<rect x="2.5" y="6" width="19" height="3.4" rx="1.7" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="2.5" y="10.3" width="19" height="3.4" rx="1.7" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="2.5" y="14.6" width="19" height="3.4" rx="1.7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12,4.5 V19.5 M12,19.5 C11,21 9.5,21.2 8.8,20.6 M12,19.5 C13,21 14.5,21.2 15.2,20.6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>';
+ICONS.lamp = '<path d="M12,3.2 C13.8,5.4 14,7.2 12,8.8 C10,7.2 10.2,5.4 12,3.2 Z" fill="currentColor"/><path d="M4.5,11 C6,15 18,15 19.5,11 Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12,14.6 V18 M8,20.5 H16 M9.5,18 H14.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>';
+ICONS.globe = '<path d="M12,3a9,9 0,1 0,0 18a9,9 0,1 0,0 -18z M3,12h18 M12,3c2.5,2.5 3.8,5.6 3.8,9s-1.3,6.5 -3.8,9 M12,3c-2.5,2.5 -3.8,5.6 -3.8,9s1.3,6.5 3.8,9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>';
+ICONS.gear = '<path d="M12,9a3,3 0,1 0,0 6a3,3 0,1 0,0 -6z M19.4,15a1.6,1.6 0,0 0,.3 1.8l.1.1a2,2 0,1 1,-2.8 2.8l-.1-.1a1.6,1.6 0,0 0,-2.7 1.1V21a2,2 0,1 1,-4 0v-.1a1.6,1.6 0,0 0,-2.7 -1.1l-.1.1a2,2 0,1 1,-2.8 -2.8l.1-.1A1.6,1.6 0,0 0,3.6 15H3.5a2,2 0,1 1,0 -4h.1a1.6,1.6 0,0 0,1.1 -2.7l-.1-.1a2,2 0,1 1,2.8 -2.8l.1.1A1.6,1.6 0,0 0,10 4.6V4.5a2,2 0,1 1,4 0v.1a1.6,1.6 0,0 0,2.7 1.1l.1-.1a2,2 0,1 1,2.8 2.8l-.1.1A1.6,1.6 0,0 0,20.4 10h.1a2,2 0,1 1,0 4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>';
+const goldBadge = (name, cls) => `<span class="gbadge ${cls || ''}">${svgI(name)}</span>`;
+
+/** The Harinamadwar gold plaque (logo). `id` keeps the gradient names unique on the page. */
+function plaqueSVG(id, shadow) {
+  const c = (i, r) => `M${6 + i + r},${6 + i} H${794 - i - r} A${r},${r} 0 0 0 ${794 - i},${6 + i + r} V${194 - i - r} A${r},${r} 0 0 0 ${794 - i - r},${194 - i} H${6 + i + r} A${r},${r} 0 0 0 ${6 + i},${194 - i - r} V${6 + i + r} A${r},${r} 0 0 0 ${6 + i + r},${6 + i} Z`;
+  return `<svg class="plaque" role="img" aria-label="Harinamadwar" viewBox="0 -4 800 212"><defs>` +
+    `<filter id="${id}b" x="-5%" y="-20%" width="110%" height="140%"><feGaussianBlur stdDeviation="5"/></filter>` +
+    `<linearGradient id="${id}r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C08A22"/><stop offset="1" stop-color="#8C5A0C"/></linearGradient>` +
+    `<linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF0C2"/><stop offset=".45" stop-color="#F7D47E"/><stop offset="1" stop-color="#E4AE48"/></linearGradient>` +
+    `<linearGradient id="${id}i" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22409C"/><stop offset="1" stop-color="#132A6B"/></linearGradient></defs>` +
+    (shadow ? `<path d="${c(0, 36)}" transform="translate(0 5)" fill="#000" opacity=".22" filter="url(#${id}b)"/>` : '') +
+    `<path d="${c(0, 36)}" fill="url(#${id}r)"/><path d="${c(6, 32)}" fill="url(#${id}g)"/>` +
+    `<path d="${c(14, 26)}" fill="none" stroke="#9A6512" stroke-width="1.6" opacity=".55"/><path d="${c(18, 23)}" fill="none" stroke="#FFF6DA" stroke-width="1" opacity=".7"/>` +
+    `<g transform="translate(400 50) scale(1.2)"><path d="M0,-24 C9,-14 9,-2 0,8 C-9,-2 -9,-14 0,-24 Z" fill="url(#${id}i)"/><path d="M0,8 C2,-5 12,-15 24,-16 C22,-3 12,6 0,8 Z" fill="url(#${id}i)"/><path d="M0,8 C-2,-5 -12,-15 -24,-16 C-22,-3 -12,6 0,8 Z" fill="url(#${id}i)"/><path d="M0,8 C9,0 22,-3 33,0 C26,8 13,11 0,8 Z" fill="#2B4AA8"/><path d="M0,8 C-9,0 -22,-3 -33,0 C-26,8 -13,11 0,8 Z" fill="#2B4AA8"/><path d="M-26,13 Q0,19 26,13" fill="none" stroke="#132A6B" stroke-width="2.2" stroke-linecap="round"/></g>` +
+    `<text x="400" y="138" text-anchor="middle" font-family="Mukta, 'Segoe UI', sans-serif" font-weight="700" font-size="80" letter-spacing="1" fill="url(#${id}i)" stroke="#FFF4D2" stroke-width="2.2" paint-order="stroke" stroke-linejoin="round">Harinamadwar</text>` +
+    `<g fill="none" stroke="#132A6B" stroke-linecap="round"><path d="M248,166 C300,163 340,163 378,166" stroke-width="1.6"/><path d="M552,166 C500,163 460,163 422,166" stroke-width="1.6"/><path d="M300,166 C320,170 350,170 372,167" stroke-width="1" opacity=".6"/><path d="M500,166 C480,170 450,170 428,167" stroke-width="1" opacity=".6"/></g>` +
+    `<circle cx="244" cy="166" r="2.4" fill="#132A6B"/><circle cx="556" cy="166" r="2.4" fill="#132A6B"/><path d="M400,157 L408,166 L400,175 L392,166 Z" fill="url(#${id}i)"/><circle cx="385" cy="166" r="2" fill="#132A6B"/><circle cx="415" cy="166" r="2" fill="#132A6B"/></svg>`;
+}
+
+// ---------- the language bar under the blue band (home, books, About, Satsangs, Learn, Favourites, Settings) ----------
+const UI_LANGS = [['en', 'English'], ['ta', 'Tamil'], ['kn', 'Kannada'], ['sa', 'Sanskrit']];
+function langBarHTML() {
+  return `<div class="lb-row" data-notr><div class="lb" role="group" aria-label="Language">${svgI('globe', 'lb-globe')}` +
+    UI_LANGS.map(([c, n]) => `<button class="lb-b${c === prefs.lang ? ' on' : ''}" data-ui-lang="${c}" aria-pressed="${c === prefs.lang}">${n}</button>`).join('') +
+    `</div><button class="lb-gear" data-go="#settings" aria-label="Settings">${svgI('gear')}</button></div>`;
+}
+function paintLangBars() { document.querySelectorAll('[data-langbar]').forEach(el => { el.innerHTML = langBarHTML(); }); }
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-ui-lang]');
+  if (!b) return;
+  e.stopPropagation();
+  if (b.dataset.uiLang === prefs.lang) return;
+  prefs.lang = b.dataset.uiLang;
+  paintLangBars();
+  if (!$('v-index').classList.contains('hidden') && indexBook) {
+    const y = $('index-scroll').scrollTop;
+    $('book-title').textContent = bookTitle(indexBook);
+    $('search-input').placeholder = tr(BOOKS[indexBook].search);
+    renderIndex($('search-input').value).then(() => { $('index-scroll').scrollTop = y; });
+  } else route();
+}, true);
+
+/** Inner pages: Back and the small logo on top, the page title on its own line below (4.10). */
+function brandBars() {
+  const ids = ['v-welcome', 'v-diary', 'v-playlist', 'v-learn', 'v-favs', 'v-tfd', 'v-share', 'v-about', 'v-settings'];
+  ids.forEach((id, k) => {
+    const head = document.querySelector('#' + id + ' > header.bar');
+    const row = head && head.querySelector('.bar-row');
+    if (!row || row.classList.contains('b2-top')) return;
+    const backBtn = row.querySelector('button');
+    const title = row.querySelector('.bar-mid [id]') || row.querySelector('.bar-mid b') || row.querySelector('.bar-mid');
+    const right = row.querySelector('.bar-right');
+    row.classList.add('b2-top');
+    row.innerHTML = '';
+    if (backBtn) { backBtn.classList.add('b2-back'); row.appendChild(backBtn); }
+    const mid = document.createElement('div'); mid.className = 'b2-logo'; mid.innerHTML = plaqueSVG('pq' + k, false); row.appendChild(mid);
+    if (right) { right.classList.add('b2-right'); row.appendChild(right); } else { const sp = document.createElement('span'); sp.className = 'b2-right'; row.appendChild(sp); }
+    const tl = document.createElement('div'); tl.className = 'b2-title';
+    const h = document.createElement('h1');
+    if (title) { h.id = title.id || ''; h.textContent = title.textContent; if (title.id) title.removeAttribute('id'); }
+    tl.appendChild(h);
+    row.after(tl);
+  });
+  // the language bar under the blue band
+  for (const id of ['v-home', 'v-index', 'v-about', 'v-diary', 'v-learn', 'v-favs', 'v-settings']) {
+    const head = document.querySelector('#' + id + ' > header.bar');
+    if (!head || head.nextElementSibling && head.nextElementSibling.hasAttribute('data-langbar')) continue;
+    const d = document.createElement('div'); d.setAttribute('data-langbar', ''); d.className = 'lb-wrap';
+    head.after(d);
+  }
+  paintLangBars();
+}
+
 // The third book: its name and line follow the chosen language
 const NDP_BOOK = {
   en: ['Naalaayira Divya Prabandham', '4000 pāsurams of the Āzhvārs'],
@@ -1017,6 +1167,7 @@ const I18N = {
   'Repeat song': ['பாடலை மீண்டும் இசை', 'ಹಾಡನ್ನು ಪುನರಾವರ್ತಿಸಿ', 'गीतं पुनः'],
   'Play': ['இயக்கு', 'ಪ್ಲೇ', 'वादयतु'],
   'Pause': ['இடைநிறுத்து', 'ವಿರಾಮ', 'विरमतु'],
+  'For Harinamadwar admins': ['ஹரிநாமத்வார் நிர்வாகிகளுக்கு', 'ಹರಿನಾಮದ್ವಾರ ನಿರ್ವಾಹಕರಿಗೆ', 'हरिनामद्वार-प्रबन्धकेभ्यः'],
   'Tap to play': ['இசைக்கத் தொடவும்', 'ಕೇಳಲು ಒತ್ತಿ', 'श्रोतुं स्पृशतु'],
   'Playing': ['இசைக்கிறது', 'ಕೇಳಿಸುತ್ತಿದೆ', 'श्राव्यते'],
   'Paused': ['நிறுத்தப்பட்டது', 'ನಿಲ್ಲಿಸಲಾಗಿದೆ', 'विरामः'],
@@ -1301,37 +1452,28 @@ async function showHome() {
   document.body.dataset.lang = prefs.lang;   // Indian scripts: no letter-spacing in labels
   const my = ++homeBusy;
   const who = store.get('name', '').trim();
-  $('home-hello').innerHTML = who ? `<span>${T('hello')},</span><b>${esc(who)}</b>` : `<b>${T('hello')}</b><span>${T('tagline')}</span>`;
-  const [ev, sod, tf, prac, meet] = await Promise.all([events(), interest('listen') ? songOfTheDay() : null, tfdsIn(tfdLang), practice(), learnValue('meet')]);
+  $('home-hello').innerHTML = `<span>${T('hello')}${who ? ',' : ''}</span>${who ? ` <b>${esc(who)}</b>` : ''}`;
+  paintLangBars();
+  const [tf, prac, meet] = await Promise.all([tfdsIn(tfdLang), practice(), learnValue('meet')]);
   if (my !== homeBusy) return;
   const out = [];
-  // home order: books · continue · upcoming satsangs/learn/favourites · thought for the day · song of the day · about (Coming Up removed; it lives in Upcoming Satsangs)
-  out.push(`<span class="lbl sect">${T('choose')}</span><div class="books">` +
-    `<button class="arch-card" data-go="#book/dns">${badge('book', 'big')}<b>${T('dns')[0]}</b><span>${T('dns')[1]}</span></button>` +
-    `<button class="arch-card" data-go="#book/ashta">${badge('feather', 'big')}<b>${T('ashta')[0]}</b><span>${T('ashta')[1]}</span></button>` +
-    `<button class="arch-card wide" data-go="#book/ndp">${badge('scroll', 'big')}<span class="hc-soon"><b>${NDP_BOOK[ndpLang()][0]}</b><span>${NDP_BOOK[ndpLang()][1]}</span></span></button></div>`);
-  const l = store.get('last', null);   // after the books, above the tiles
-  if (l && BOOKS[l.book]) {
-    out.push(`<button class="h-cont" data-go="${BOOKS[l.book].hash}${esc(l.number)}">${badge('history', 'plain')}<span class="hc-t"><span class="mut">${T('cont')}</span>` +
-      `<b>${esc((l.book === 'ashta' ? T('ashtapadi') : l.book === 'ndp' ? T('pasuram') : '') + l.number)}&nbsp; ${esc(l.title)}</b></span>${svgI('chevron', 'chev2')}</button>`);
+  // 4.10 home: Choose a Book · Thought for the Day · Satsangs / Learn / Favourites · About (everything on one screen)
+  const band = (icon, label, right) => `<div class="h3-band">${svgI(icon, 'h3-bi')}<b>${label}</b>${right || ''}</div>`;
+  out.push(`<section class="h3-sec">${band('book', T('choose'))}<div class="h3-body"><div class="h3-books">` +
+    `<button class="h3-arch" data-go="#book/dns">${goldBadge('cymbals', 'big')}<b>${T('dns')[0]}</b><span>${T('dns')[1].replace('<br>', ' ')}</span></button>` +
+    `<button class="h3-arch" data-go="#book/ashta">${goldBadge('flute', 'big')}<b>${T('ashta')[0]}</b><span>${T('ashta')[1].replace('<br>', ' ')}</span></button></div>` +
+    `<button class="h3-wide" data-go="#book/ndp">${goldBadge('palmleaf')}<span class="h3-t"><b>${NDP_BOOK[ndpLang()][0]}</b><span>${NDP_BOOK[ndpLang()][1]}</span></span></button></div></section>`);
+  if (tf.length) {
+    const t = tf[0];
+    out.push(`<section class="h3-sec">${band('lotus', T('tfd'), `<span class="h3-num">TFD ${esc(t.number)}</span>`)}<div class="h3-body">` +
+      `<button class="h3-card" data-go="#tfd/${esc(t.number)}">${goldBadge('lotus')}<span class="h3-t"><b class="clamp2">${esc(t.title)}</b>` +
+      `<span class="one">${esc(t.paras[0] || '')}</span><span class="h3-read">${T('read')}</span></span></button></div></section>`);
   }
   const tiles = [`<button class="tile" data-go="#diary">${badge('calendar')}<b>${T('diary')}</b></button>`];
   if (interest('learn') && (prac.length || meet)) tiles.push(`<button class="tile" data-go="#learn">${badge('class')}<b>${T('learn')}</b></button>`);
   tiles.push(`<button class="tile" data-go="#favs">${badge('heart')}<b>${T('favs')}</b></button>`);
   out.push(`<div class="tiles">${tiles.join('')}</div>`);
-  if (tf.length) {
-    const t = tf[0];
-    out.push(`<button class="h-tfd" data-go="#tfd/${esc(t.number)}"><span class="h-tfd-top">${svgI('lotus')}<span class="lbl">${T('tfd')} · TFD ${esc(t.number)}</span></span>` +
-      `<b>${esc(t.title)}</b><span class="teaser">${esc(t.paras[0] || '')}</span><span class="more">${T('read')}</span></button>`);
-  }
-  if (sod) {
-    const sl = prefs.lang === 'en' ? null : (texts[lyricsFile(prefs.lang)] || (texts[lyricsFile(prefs.lang)] = parseBlocks(await fetchText(lyricsFile(prefs.lang)).catch(() => '')))).get(sod.number);
-    const sodTitle = sl && sl.title ? sl.title : sod.displayTitle, sodRaga = sl && sl.raga ? sl.raga : (sod.displayRaga || sod.chapter);
-    out.push(`<div class="card h-sod"><div class="sod-tile">${svgI('music')}</div><div class="sod-t"><span class="lbl">${T('sod')}</span>` +
-      `<b>${esc(sodTitle)}</b><span class="mut">${esc(sodRaga)}</span>` +
-      `<div class="sod-btns"><button class="btn-acc" data-go="#song/${esc(sod.number)}" data-open-tab="2">▶&nbsp; ${T('listen')}</button><button class="btn-line" data-go="#share/${esc(sod.number)}">${svgI('share')}${T('share')}</button></div></div></div>`);
-  }
-  out.push(`<button class="h-about" data-go="#about">${badge('lotus', 'white')}<span class="hc-t"><b>${T('about')[0]}</b><span class="mut">${T('about')[1]}</span></span>${svgI('chevron', 'chev2')}</button>`);
+  out.push(`<section class="h3-sec">${band('lamp', T('about')[0])}<div class="h3-body"><button class="h3-card" data-go="#about">${goldBadge('lamp')}<span class="h3-t h3-about">${T('about')[1]}</span>${svgI('chevron', 'chev2')}</button></div></section>`);
   out.push(`<button class="h-change" data-go="#welcome">${T('change')}</button>`);
   $('home-box').innerHTML = out.join('');
   $('home-scroll').scrollTop = homeScroll;   // come back to the same place, not the top (SCRUM-51)
@@ -1603,10 +1745,7 @@ async function showTfd(number) {
   close();
   if (ACCESS.url) out.push('<div class="t-react" id="t-react" aria-label="Reactions"></div>');   // SCRUM-50
   out.push('<div class="t-sep"></div>');
-  if (t.songNumber && t.songBook === 'dns') {
-    const s = await dnsSong(t.songNumber);
-    if (s) out.push(`<button class="card t-link" data-go="#song/${esc(s.number)}">${badge('music')}<span class="hc-t"><span class="lbl">SING WITH TODAY’S THOUGHT</span><b>${esc(s.displayTitle)}</b><span class="mut">${esc(s.displayRaga ? s.number + ' · ' + s.displayRaga : s.number)}</span></span>${svgI('chevron', 'chev2')}</button>`);
-  }
+  // (4.10: no 'Sing with today’s thought' – the thought stands on its own)
   // (no Next Satsang here: this page is only for the Thought for the Day)
   // SCRUM-83: read on without going back to the list – Newer / Older side by side, the blue All thoughts button below
   const nb = (x, cls, lab) => x ? `<button class="t-nb${cls}" data-tfd="${esc(x.number)}">${lab}<span class="t-nb-t">TFD ${esc(x.number)} · ${esc(x.title)}</span></button>` : '<span class="t-nb ghost"></span>';
@@ -1708,6 +1847,9 @@ function splash() {
   s.onclick = () => { clearTimeout(t1); clearTimeout(t2); s.classList.add('go'); setTimeout(() => s.classList.add('hidden'), 1300); };
 }
 
+$('home-plaque').innerHTML = plaqueSVG('pqh', true);
+$('index-plaque').innerHTML = plaqueSVG('pqi', false);
+brandBars();
 start();
 
 applyLang();   // SCRUM-74: the whole app in the chosen language

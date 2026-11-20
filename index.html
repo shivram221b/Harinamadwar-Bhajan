@@ -21,13 +21,12 @@
   <!-- ===== Home ===== -->
   <section id="v-home" class="view">
     <header class="bar">
-      <div class="bar-row hb-row">
-        <img class="hb-logo" src="icons/logo.jpg" alt="">
-        <div class="hb-t" id="home-hello"></div>
-        <button class="icon-btn hb-gear" id="btn-home-settings" aria-label="Settings"><svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 000-2l2.1-1.6-2-3.5-2.5 1a7.5 7.5 0 00-1.7-1L15 3h-4l-.4 2.9a7.5 7.5 0 00-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 000 2l-2.1 1.6 2 3.5 2.5-1a7.5 7.5 0 001.7 1L11 21h4l.4-2.9a7.5 7.5 0 001.7-1l2.5 1 2-3.5L19.4 13zM13 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z"/></svg></button>
+      <div class="hb3">
+        <p class="hb3-hi" id="home-hello"></p>
+        <div class="hb3-logo" id="home-plaque"></div>
       </div>
     </header>
-    <div class="scroll" id="home-scroll"><div class="home2" id="home-box"></div></div>
+    <div class="scroll" id="home-scroll"><div class="home3" id="home-box"></div></div>
   </section>
 
   <section id="v-welcome" class="view hidden">
@@ -196,26 +195,17 @@
   <!-- ===== Index ===== -->
   <section id="v-index" class="view hidden">
     <header class="bar">
-      <div class="bar-row" id="title-row">
-        <button class="icon-btn" id="btn-books" aria-label="Home">
-          <svg class="st" viewBox="0 0 24 24"><path d="M3,11l9,-8l9,8 M5,9.5V20h5v-6h4v6h5V9.5"/></svg>
-        </button>
-        <div class="bar-titles">
-          <h1 id="book-title">Divya Nama Sankeertanam</h1>
-          <p>Harinamadwar</p>
-        </div>
-        <button class="icon-btn" id="btn-voice" aria-label="Voice search">
-          <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3zm5-3a5 5 0 01-10 0H5a7 7 0 006 6.9V21h2v-3.1A7 7 0 0019 11h-2z"/></svg>
-        </button>
-        <button class="icon-btn" id="btn-search" aria-label="Search">
-          <svg viewBox="0 0 24 24"><path d="M10 3a7 7 0 015.6 11.2l4.6 4.6-1.4 1.4-4.6-4.6A7 7 0 1110 3zm0 2a5 5 0 100 10 5 5 0 000-10z"/></svg>
-        </button>
+      <div class="bar-row b2-top" id="title-row">
+        <button class="text-btn b2-back" id="btn-books">‹ Back</button>
+        <div class="b2-logo" id="index-plaque"></div>
+        <span class="b2-right"><button class="hidden" id="btn-search" aria-hidden="true" tabindex="-1"></button></span>
       </div>
-      <div class="bar-row hidden" id="search-row">
+      <div class="b2-title"><h1 id="book-title">Divya Nama Sankeertanam</h1></div>
+      <div class="ix-search" id="search-row">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3a7 7 0 015.6 11.2l4.6 4.6-1.4 1.4-4.6-4.6A7 7 0 1110 3zm0 2a5 5 0 100 10 5 5 0 000-10z"/></svg>
         <input id="search-input" type="search" placeholder="Search: section no. or song title" autocomplete="off" autocorrect="off" spellcheck="false">
-        <button class="icon-btn" id="btn-close-search" aria-label="Close search">
-          <svg viewBox="0 0 24 24"><path d="M6.4 5L12 10.6 17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4L12 13.4 6.4 19 5 17.6 10.6 12 5 6.4z"/></svg>
-        </button>
+        <button class="ix-x hidden" id="btn-close-search" aria-label="Clear search"><svg viewBox="0 0 24 24"><path d="M6.4 5L12 10.6 17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4L12 13.4 6.4 19 5 17.6 10.6 12 5 6.4z"/></svg></button>
+        <button class="ix-mic" id="btn-voice" aria-label="Voice search"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
       </div>
     </header>
     <div class="scroll" id="index-scroll">
@@ -302,22 +292,14 @@
     </header>
     <div class="scroll">
       <div class="settings">
-        <h3>Language</h3>
-        <div class="lang-grid" id="lang-grid"></div>
-
-        <h3>Text size</h3>
-        <input type="range" id="size-range" min="80" max="240" step="5">
-        <p class="hint">Drag to make the lyrics bigger or smaller. You can also use A− / A+ on any song.</p>
-        <div class="sample" id="sample">rAma rAma rAma · ராம ராம · ರಾಮ ರಾಮ · राम राम</div>
-
         <label class="switch"><span>Keep screen on while a song is open</span><input type="checkbox" id="sw-screen"></label>
         <label class="switch"><span>Night mode (light text on dark page)</span><input type="checkbox" id="sw-night"></label>
 
         <h3 id="install-h">Put this app on your iPhone home screen</h3>
         <p class="hint" id="install-text" data-notr>In <b>Safari</b>, tap the <b>Share</b> button (the square with an arrow pointing up), then tap <b>Add to Home Screen</b>, then <b>Add</b>. The app then opens full screen from its own icon and works without internet after the first visit (audio needs internet).</p>
 
-        <h3>About the English spellings</h3>
-        <p class="hint pre">The English lyrics follow the book's spelling code:
+        <h3 class="sp-h">About the English spellings</h3>
+        <p class="hint pre spell">The English lyrics follow the book's spelling code:
 
 • Capital vowels are long: A = ā (rAma = Rāma), I = ī, U = ū, E = ē, O = ō
 • Capital T, Th, D, Dh, N = hard sounds ṭ, ṭh, ḍ, ḍh, ṇ (as in maNi)
@@ -325,9 +307,9 @@
 • c = च (as in church),  ch = छ,  gn = ज्ञ
 • r between two consonants = ṛ (krSNa = Kṛṣṇa, krpA = Kṛpā)
 
-In the index, titles are shown with these marks (Shrī Rāma) so they read naturally. The lyrics are exactly as printed in the book.</p>
+In the index, titles are shown with these marks (Shrī Rāma) so they read naturally.</p>
 
-        <a class="admin-link" id="admin-link" href="admin/">Admin  ›&nbsp; <span>(for Harinamadwar admins)</span></a>
+        <a class="admin-btn" id="admin-link" href="admin/"><span class="ab-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12,9a3,3 0,1 0,0 6a3,3 0,1 0,0 -6z M19.4,15a1.6,1.6 0,0 0,.3 1.8l.1.1a2,2 0,1 1,-2.8 2.8l-.1-.1a1.6,1.6 0,0 0,-2.7 1.1V21a2,2 0,1 1,-4 0v-.1a1.6,1.6 0,0 0,-2.7 -1.1l-.1.1a2,2 0,1 1,-2.8 -2.8l.1-.1A1.6,1.6 0,0 0,3.6 15H3.5a2,2 0,1 1,0 -4h.1a1.6,1.6 0,0 0,1.1 -2.7l-.1-.1a2,2 0,1 1,2.8 -2.8l.1.1A1.6,1.6 0,0 0,10 4.6V4.5a2,2 0,1 1,4 0v.1a1.6,1.6 0,0 0,2.7 1.1l.1-.1a2,2 0,1 1,2.8 2.8l-.1.1A1.6,1.6 0,0 0,20.4 10h.1a2,2 0,1 1,0 4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="ab-t"><b>Admin</b><span>For Harinamadwar admins</span></span><span class="ab-chev">›</span></a>
         <p class="hint version" id="version-info"></p>
         <button class="done" id="btn-done">Done</button>
       </div>
