@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.12';
+const WEB_VERSION = '4.13';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -263,19 +263,20 @@ async function renderIndex(filter) {
     const nCh = groups.filter(x => x.it.num !== '0').length;
     const meta = ashta ? `${nCh} ${ixT('ashtaOf')}${am.size ? ` · ${am.size} ${ixT('recs')}` : ''}` : `${nCh} ${ixT('ch')} · ${nSongs} ${ixT('songs')}${am.size ? ` · ${am.size} ${ixT('rec')}` : ''}`;
     out.push(`<li class="ix-meta">${esc(meta)}</li>`);
-    const chips = shownGroups.map(x => {
+    const chips = shownGroups.map((x, gi) => {
       const label = ashta ? (x.it.num === '0' ? chapName(x.it) : ixT('ashta') + ' ' + x.it.num) : (x.it.num === '0' ? chapName(x.it) : x.it.num + ' · ' + short(chapName(x.it).split(' by ')[0], 26));
-      return `<button class="ix-chip" data-ix-jump="${esc(x.it.num)}">${esc(label)}</button>`;
+      return `<button class="ix-chip" data-ix-jump="${gi}">${esc(label)}</button>`;
     }).join('');
     out.push(`<li class="ix-go"><span class="ix-go-l">${ixT('go')}</span><div class="ix-chips">${chips}</div></li>`);
   }
-  for (const x of shownGroups) {
+  for (const [gi, x] of shownGroups.entries()) {
+    const sec = q ? '' : ` data-ixsec="${gi}"`;   // 4.13: the section each Go-straight-to chip stands for
     const songsIn = x.items.filter(i => i.s).map(i => i.s);
     if (ashta && x.it.num !== '0') {
       // one card per Aṣṭapadi: the song, its ślokams as small chips, and a Recording chip
       const main = songsIn.find(s => !isSlokam(s)) || songsIn[0];
       const sl = songsIn.filter(s => s !== main);
-      out.push(`<li class="row ix-acard" id="ixc-${esc(x.it.num)}" data-pos="${main.pos}"><span class="ix-med">${esc(x.it.num)}</span><div class="ix-at">` +
+      out.push(`<li class="row ix-acard"${sec} data-pos="${main.pos}"><span class="ix-med">${esc(x.it.num)}</span><div class="ix-at">` +
         `<span class="ix-alab">${ixT('ashta')} ${esc(x.it.num)}</span><b>${esc(titleOf(main))}</b>${subOf(main) ? `<span class="ix-asub">${esc(subOf(main))}</span>` : ''}` +
         `<span class="ix-achips">${sl.map(s => `<span class="row ix-schip" data-pos="${s.pos}">${ixT('slokam')} ${esc(s.number)}</span>`).join('')}` +
         (am.has(main.number) ? `<span class="ix-rchip">${svgI('music')}${ixT('listen')}</span>` : '') + `</span></div>${chev()}</li>`);
@@ -283,7 +284,7 @@ async function renderIndex(filter) {
     }
     if (x.it.num !== '0' || !ashta) {
       const nm = chapName(x.it), by = nm.split(' by ');
-      out.push(`<li class="ix-chap" id="ixc-${esc(x.it.num)}"><span class="ix-med">${x.it.num === '0' ? '✦' : esc(x.it.num)}</span>` +
+      out.push(`<li class="ix-chap"${sec}><span class="ix-med">${x.it.num === '0' ? '✦' : esc(x.it.num)}</span>` +
         `<span class="ix-ct"><b>${esc(by[0])}</b>${by[1] ? `<span>by ${esc(by[1])}</span>` : ''}</span><span class="ix-cnt">${songsIn.length} ${songsIn.length === 1 ? ixT('song1') : ixT('songs')}</span></li>`);
     }
     const rows = x.items.map(i => {
@@ -293,17 +294,64 @@ async function renderIndex(filter) {
         `<div class="row-text"><div class="row-title">${esc(titleOf(s))}</div>${sub ? `<div class="row-sub">${esc(sub)}</div>` : ''}</div>` +
         (am.has(s.number) ? recIcon() : '<span class="ix-au none"></span>') + chev() + '</li>';
     }).join('');
-    out.push(`<li class="ix-card${ashta ? ' ix-dhy' : ''}"><ul>${rows}</ul></li>`);
+    out.push(`<li class="ix-card${ashta ? ' ix-dhy' : ''}"${ashta ? sec : ''}><ul>${rows}</ul></li>`);
   }
   ul.innerHTML = out.join('');
   $('empty').classList.toggle('hidden', nSongs > 0);
+  ixActive = null;
+  ixSpy(true);
 }
+
+// ---------- 4.13: Go-straight-to chips stay pinned; the chip of the section on screen is highlighted ----------
+let ixActive = null, ixLockUntil = 0, ixTick = false;
+/** Slides a row of chips/tabs so `el` is in the middle (smoothly, unless `now`). */
+function centerInRow(row, el, now) {
+  if (!row || !el) return;
+  const left = el.offsetLeft - (row.clientWidth - el.offsetWidth) / 2;
+  row.scrollTo({ left: Math.max(0, left), behavior: now ? 'auto' : 'smooth' });
+}
+function ixSetActive(key, now) {
+  if (key === ixActive) return;
+  ixActive = key;
+  const row = document.querySelector('#song-list .ix-chips');
+  if (!row) return;
+  let on = null;
+  row.querySelectorAll('.ix-chip').forEach(b => { const a = b.dataset.ixJump === key; b.classList.toggle('on', a); if (a) on = b; });
+  centerInRow(row, on, now);
+}
+/** Which section is at the top of the list, just under the pinned chips. */
+function ixSpy(now) {
+  const sc = $('index-scroll'), go = document.querySelector('#song-list .ix-go');
+  if (!sc || !go || $('v-index').classList.contains('hidden')) return;
+  if (!now && Date.now() < ixLockUntil) return;   // a chip was tapped: keep its highlight while the list glides there
+  const line = go.getBoundingClientRect().bottom + 6;
+  let key = null;
+  for (const el of document.querySelectorAll('#song-list [data-ixsec]')) {
+    if (el.getBoundingClientRect().top <= line) key = el.dataset.ixsec; else break;
+  }
+  ixSetActive(key || '0', now);
+}
+document.addEventListener('DOMContentLoaded', () => {});
+(function () {
+  const sc = document.getElementById('index-scroll');
+  if (sc) sc.addEventListener('scroll', () => {
+    if (ixTick) return;
+    ixTick = true;
+    requestAnimationFrame(() => { ixTick = false; ixSpy(false); });
+  }, { passive: true });
+})();
 document.addEventListener('click', e => {
   const c = e.target.closest('[data-ix-jump]');
   if (!c) return;
-  const el = document.getElementById('ixc-' + c.dataset.ixJump);
-  if (el) $('index-scroll').scrollTo({ top: el.offsetTop - 8, behavior: 'smooth' });
-  document.querySelectorAll('.ix-chip').forEach(b => b.classList.toggle('on', b === c));
+  const sc = $('index-scroll'), go = document.querySelector('#song-list .ix-go');
+  const el = document.querySelector(`#song-list [data-ixsec="${c.dataset.ixJump}"]`);
+  ixSetActive(c.dataset.ixJump, false);
+  if (el && sc) {
+    // straight there (a long glide over many chapters feels slow): the header lands just under the pinned chips
+    const top = el.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - (go ? go.offsetHeight : 0) - 4;
+    ixLockUntil = Date.now() + 120;
+    sc.scrollTo({ top: Math.max(0, Math.round(top)), behavior: 'auto' });
+  }
 });
 
 
@@ -400,7 +448,15 @@ function renderNdpTree(t, am) {
   }
   $('song-list').innerHTML = out.join('');
   $('empty').classList.add('hidden');
+  // 4.13: the Āyiram tabs keep their sideways place and slide the chosen one into view (e.g. Appendix)
+  const tabs = document.querySelector('#song-list .nx-tabs');
+  if (tabs) {
+    tabs.scrollLeft = nxTabsX;
+    tabs.addEventListener('scroll', () => { nxTabsX = tabs.scrollLeft; }, { passive: true });
+    centerInRow(tabs, tabs.querySelector('.nx-tab.on'), false);
+  }
 }
+let nxTabsX = 0;
 document.addEventListener('click', e => {
   const tb = e.target.closest('[data-nx-ay]');
   if (tb) { store.set('nxAy', +tb.dataset.nxAy); renderIndex('').then(() => { $('index-scroll').scrollTop = 0; }); return; }

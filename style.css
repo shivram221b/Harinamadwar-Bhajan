@@ -806,3 +806,10 @@ body.night .ix-no, body.night .nx-rng { background: #2C3A50; color: #DCE8F8; }
 html:not([lang="en"]) .ix-search input { font-size: 14px; }
 .b2-top .b2-back { white-space: nowrap; }
 html:not([lang="en"]) .b2-top .b2-back { font-size: 14px; }
+
+/* 4.13: Go straight to stays pinned at the top of the index; the section on screen is highlighted */
+#song-list > .ix-go { position: sticky; top: 0; z-index: 4; background: var(--page); padding: 8px 0 8px; margin-bottom: 2px; box-shadow: 0 6px 8px -8px rgba(22,62,126,.35); }
+.ix-chips { scroll-behavior: auto; -webkit-overflow-scrolling: touch; }
+.ix-chip { transition: background-color .18s ease, color .18s ease, border-color .18s ease; }
+.nx-head, .nx-dhead { scroll-margin-top: 66px; }
+.nx-tab { transition: background-color .18s ease, color .18s ease; }
