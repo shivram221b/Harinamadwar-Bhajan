@@ -796,3 +796,13 @@ body:not([data-lang="en"]) .ix-alab { letter-spacing: .2px; }
 .nx-rng { padding: 3px 8px; border-radius: 10px; background: #EEF3FB; color: #163E7E; font-size: 12px; font-weight: 700; flex-shrink: 0; }
 body.night .ix-card, body.night .ix-acard { background: #18202E; border-color: #2C3A50 !important; }
 body.night .ix-no, body.night .nx-rng { background: #2C3A50; color: #DCE8F8; }
+
+/* 4.11: Tamil / Kannada / Sanskrit – Āyiram tabs scroll sideways instead of squashing; search hint ends with … */
+.nx-tabs { overflow-x: auto; scrollbar-width: none; gap: 4px; }
+.nx-tabs::-webkit-scrollbar { display: none; }
+.nx-tab { flex: 0 0 auto; min-width: 0; padding: 4px 12px; white-space: nowrap; }
+.ix-search input { text-overflow: ellipsis; }
+.ix-search input::placeholder { text-overflow: ellipsis; }
+html:not([lang="en"]) .ix-search input { font-size: 14px; }
+.b2-top .b2-back { white-space: nowrap; }
+html:not([lang="en"]) .b2-top .b2-back { font-size: 14px; }

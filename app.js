@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.10';
+const WEB_VERSION = '4.11';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -193,6 +193,8 @@ const VIEWS = ['v-home', 'v-about', 'v-index', 'v-song', 'v-settings', 'v-welcom
 let homeScroll = 0;
 const scrollMem = {}; let prevView = '';
 function showView(id) {
+  // the language bar always shows the language in use (it can also be changed on a song page)
+  if (typeof paintLangBars === 'function') { const lb = $(id) && $(id).querySelector('[data-langbar] .lb-b.on'); if (!lb || lb.dataset.uiLang !== prefs.lang) paintLangBars(); }
   const curV = VIEWS.find(v => !$(v).classList.contains('hidden'));
   if (curV && curV !== id) { const sc = $(curV).querySelector('.scroll'); if (sc) scrollMem[curV] = sc.scrollTop; }
   prevView = curV || '';
