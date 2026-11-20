@@ -90,7 +90,15 @@
       <div class="bar-row">
         <button class="text-btn back-btn" data-back>‹ Back</button>
         <span class="bar-mid"><b id="tfd-title">Thought for the Day</b></span>
-        <span class="bar-right"><button class="text-btn small" id="tfd-smaller" aria-label="Smaller text">A−</button><button class="text-btn big" id="tfd-bigger" aria-label="Bigger text">A+</button></span>
+        <span class="bar-right"><button class="text-btn small" id="tfd-smaller" aria-label="Smaller text">A−</button><button class="text-btn big" id="tfd-bigger" aria-label="Bigger text">A+</button><button class="icon-btn hidden" id="tfd-btn-search" aria-label="Search">
+          <svg viewBox="0 0 24 24"><path d="M10 3a7 7 0 015.6 11.2l4.6 4.6-1.4 1.4-4.6-4.6A7 7 0 1110 3zm0 2a5 5 0 100 10 5 5 0 000-10z"/></svg>
+        </button></span>
+      </div>
+      <div class="bar-row hidden" id="tfd-search-row">
+        <input id="tfd-search" type="search" placeholder="Search: TFD no. or words" autocomplete="off" autocorrect="off" spellcheck="false">
+        <button class="icon-btn" id="tfd-close-search" aria-label="Close search">
+          <svg viewBox="0 0 24 24"><path d="M6.4 5L12 10.6 17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4L12 13.4 6.4 19 5 17.6 10.6 12 5 6.4z"/></svg>
+        </button>
       </div>
     </header>
     <div class="scroll" id="tfd-scroll"><div class="pbox" id="tfd-box"></div></div>

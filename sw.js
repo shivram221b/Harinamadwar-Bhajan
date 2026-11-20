@@ -1,7 +1,7 @@
 /* Offline support: the app itself is kept on the phone; song and meaning files are
  * always fetched fresh when there is internet, and the last copy is used when there isn't.
  * Audio is streamed and not stored. */
-const SHELL = 'hg-shell-v18s';
+const SHELL = 'hg-shell-v19s';
 const DATA = 'hg-data';
 const SHELL_FILES = ['./', 'index.html', 'style.css', 'app.js', 'access.js', 'sruti.html', 'manifest.webmanifest',
   'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png',
@@ -13,7 +13,7 @@ const DATA_FILES = ['songs.txt', 'songs_ta.txt', 'songs_kn.txt', 'songs_sa.txt',
   'ashtapathy/songs.txt', 'ashtapathy/songs_ta.txt', 'ashtapathy/songs_kn.txt', 'ashtapathy/songs_sa.txt',
   'ashtapathy/meanings_ta.txt', 'ashtapathy/meanings_en.txt', 'ashtapathy/meanings_kn.txt',
   'ashtapathy/audio.txt', 'ashtapathy/manifest.txt',
-  'community/events.txt', 'community/learn.txt', 'community/tfd.txt', 'community/manifest.txt'];
+  'community/events.txt', 'community/learn.txt', 'community/tfd.txt', 'community/tfd_ta.txt', 'community/tfd_kn.txt', 'community/manifest.txt'];
 
 self.addEventListener('install', e => {
   e.waitUntil(Promise.all([

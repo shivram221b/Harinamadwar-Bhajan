@@ -1,7 +1,11 @@
-version=3
+version=4
 file=tfd.txt
 file=events.txt
 file=learn.txt
+file=tfd_ta.txt
+file=tfd_kn.txt
 size=tfd.txt:813662
 size=events.txt:343
 size=learn.txt:141
+size=tfd_ta.txt:887209
+size=tfd_kn.txt:733814

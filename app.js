@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.8';
+const WEB_VERSION = '4.9';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -43,6 +43,8 @@ const files = {};
 const bf = name => book.base + name; // file of the open book
 function fetchText(name) {
   if (!files[name]) {
+    // Tamil / Kannada thoughts are plain files here in the app's folder (not on the admin page)
+    if (/^community\/tfd_(ta|kn)\.txt$/.test(name)) return (files[name] = fetch(name, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(name + ' ' + r.status); return r.text(); }).catch(e => { delete files[name]; throw e; }));
     // signed-in mode: satsangs/learn/thoughts come from the admin page; songs from the private store (phase 2)
     if (accessOn() && name.startsWith('community/')) return (files[name] = communityFile(name.slice(10)).catch(e => { delete files[name]; throw e; }));
     // without sign-in: satsangs, Learn and thoughts also come from the admin page (the online file is the fallback, e.g. offline)
@@ -575,6 +577,7 @@ function setSeekFill(v) { $('seek').style.setProperty('--p', (v / 10) + '%'); }
 function setPlayIcon(playing) {
   document.querySelector('.i-play').classList.toggle('hidden', playing);
   document.querySelector('.i-pause').classList.toggle('hidden', !playing);
+  $('btn-play').setAttribute('aria-label', tr(playing ? 'Pause' : 'Play'));   // screen readers say what the button will do
 }
 function stopAudio() {
   const a = $('audio');
@@ -946,6 +949,8 @@ const ICONS = {"scroll": "<path d=\"M7,4h11a2,2 0,0 1,2 2v1h-3 M7,4a2,2 0,0 0,-2
 // v4.0 – same home and screens as the Android app v13.1
 // =====================================================================
 ICONS.mic = '<rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
+ICONS.speaker = '<path d="M4,9h4l5,-4v14l-5,-4H4z M16.5,8.5a5,5 0,0 1,0 7 M19.5,5.5a9,9 0,0 1,0 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+ICONS.stop = '<path d="M7,7h10v10H7z" fill="currentColor"/>';
 const svgI = (name, cls) => `<svg class="ic ${cls || ''}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ''}</svg>`;
 // The third book: its name and line follow the chosen language
 const NDP_BOOK = {
@@ -1010,6 +1015,8 @@ const I18N = {
   'Search: pāsuram no. or words': ['தேடல்: பாசுர எண் அல்லது சொற்கள்', 'ಹುಡುಕಿ: ಪಾಶುರ ಸಂಖ್ಯೆ ಅಥವಾ ಪದಗಳು', 'अन्विष्यत: पाशुरसङ्ख्या शब्दाः वा'],
   'Loading…': ['ஏற்றுகிறது…', 'ಲೋಡ್ ಆಗುತ್ತಿದೆ…', 'आनीयते…'],
   'Repeat song': ['பாடலை மீண்டும் இசை', 'ಹಾಡನ್ನು ಪುನರಾವರ್ತಿಸಿ', 'गीतं पुनः'],
+  'Play': ['இயக்கு', 'ಪ್ಲೇ', 'वादयतु'],
+  'Pause': ['இடைநிறுத்து', 'ವಿರಾಮ', 'विरमतु'],
   'Tap to play': ['இசைக்கத் தொடவும்', 'ಕೇಳಲು ಒತ್ತಿ', 'श्रोतुं स्पृशतु'],
   'Playing': ['இசைக்கிறது', 'ಕೇಳಿಸುತ್ತಿದೆ', 'श्राव्यते'],
   'Paused': ['நிறுத்தப்பட்டது', 'ನಿಲ್ಲಿಸಲಾಗಿದೆ', 'विरामः'],
@@ -1202,9 +1209,24 @@ async function pracSong(r) {
 }
 
 // Thought for the Day: @@ number | series | title | book:song, then paragraphs separated by blank lines
-async function tfds() {
+// Tamil and Kannada translations: community/tfd_ta.txt, tfd_kn.txt (same numbers); a thought not yet translated shows in English
+const TFD_LANGS = [['en', 'English'], ['ta', 'தமிழ்'], ['kn', 'ಕನ್ನಡ']];
+let tfdLang = store.get('tfdLang', ['ta', 'kn'].includes(store.get('lang', 'en')) ? store.get('lang', 'en') : 'en');
+async function tfdsIn(lang) {
+  const en = await tfds();
+  if (lang === 'en') return en;
+  const tr = new Map((await tfds(lang)).map(t => [t.number, t]));
+  return en.map(t => tr.get(t.number) ? Object.assign({}, tr.get(t.number), { lang }) : Object.assign({}, t, { untranslated: true }));
+}
+const tfdSeg = () => `<div class="tfd-seg" role="group" aria-label="Language of the thoughts" data-notr>` + TFD_LANGS.map(([c, n]) =>
+  `<button class="${c === tfdLang ? 'on' : ''}" data-tl="${c}" aria-pressed="${c === tfdLang}" lang="${c}">${n}</button>`).join('') + '</div>';
+function wireTfdSeg(redraw) {
+  document.querySelectorAll('[data-tl]').forEach(b => b.onclick = () => { if (tfdLang === b.dataset.tl) return; tfdLang = b.dataset.tl; store.set('tfdLang', tfdLang); redraw(); });
+}
+const TFD_SOON = { ta: 'இந்தச் சிந்தனையின் தமிழ் மொழிபெயர்ப்பு விரைவில் வரும். இப்போது ஆங்கிலத்தில்:', kn: 'ಈ ಚಿಂತನೆಯ ಕನ್ನಡ ಅನುವಾದ ಶೀಘ್ರದಲ್ಲೇ ಬರಲಿದೆ. ಈಗ ಇಂಗ್ಲಿಷ್‌ನಲ್ಲಿ:' };
+async function tfds(lang) {
   let t = '';
-  try { t = await fetchText('community/tfd.txt'); } catch (e) { }
+  try { t = await fetchText(lang && lang !== 'en' ? 'community/tfd_' + lang + '.txt' : 'community/tfd.txt'); } catch (e) { }
   const out = []; let cur = null, para = [];
   const flush = () => { if (cur && para.length) cur.paras.push(para.join('\n')); para = []; };
   for (const line of t.replace(/\r/g, '').split('\n')) {
@@ -1280,7 +1302,7 @@ async function showHome() {
   const my = ++homeBusy;
   const who = store.get('name', '').trim();
   $('home-hello').innerHTML = who ? `<span>${T('hello')},</span><b>${esc(who)}</b>` : `<b>${T('hello')}</b><span>${T('tagline')}</span>`;
-  const [ev, sod, tf, prac, meet] = await Promise.all([events(), interest('listen') ? songOfTheDay() : null, tfds(), practice(), learnValue('meet')]);
+  const [ev, sod, tf, prac, meet] = await Promise.all([events(), interest('listen') ? songOfTheDay() : null, tfdsIn(tfdLang), practice(), learnValue('meet')]);
   if (my !== homeBusy) return;
   const out = [];
   // home order: books · continue · upcoming satsangs/learn/favourites · thought for the day · song of the day · about (Coming Up removed; it lives in Upcoming Satsangs)
@@ -1457,23 +1479,70 @@ $('btn-fav').onclick = () => {
 };
 
 // ---------- thought for the day ----------
+let tfdQuery = '';
+const tfdNorm = x => String(x || '').toLowerCase().normalize('NFC');
 async function showTfdList() {
   showView('v-tfd');
+  ttsStop();
   $('tfd-title').textContent = 'Thoughts for the Day';
-  $('tfd-smaller').classList.add('hidden'); $('tfd-bigger').classList.add('hidden');
-  const all = await tfds();
-  $('tfd-box').innerHTML = `<p class="mut">Shri Janakiraman’s reflections on everyday life, newest first.</p>` + all.map(t =>
+  $('tfd-smaller').classList.add('hidden'); $('tfd-bigger').classList.add('hidden'); $('tfd-btn-search').classList.remove('hidden');
+  $('tfd-search-row').classList.toggle('hidden', !tfdQuery);
+  const all = await tfdsIn(tfdLang), q = tfdNorm(tfdQuery.trim());
+  // a number finds that TFD; words search the title, series and text (in the language shown, and the English)
+  const en = q && tfdLang !== 'en' ? new Map((await tfds()).map(t => [t.number, t])) : null;
+  const hay = t => tfdNorm([t.title, t.series, t.paras.join(' ')].join(' ') + (en && en.get(t.number) ? ' ' + [en.get(t.number).title, en.get(t.number).paras.join(' ')].join(' ') : ''));
+  const shown = !q ? all : /^\d+$/.test(q) ? all.filter(t => t.number === q || t.number.startsWith(q)) : all.filter(t => q.split(/\s+/).every(w => hay(t).includes(w)));
+  $('tfd-box').innerHTML = tfdSeg() + (q ? `<p class="mut">${shown.length ? shown.length + (shown.length === 1 ? ' thought' : ' thoughts') + ' found' : 'No thoughts found'}</p>` : `<p class="mut">Shri Janakiraman’s reflections on everyday life, newest first.</p>`) + shown.map(t =>
     `<button class="card t-item" data-go="#tfd/${esc(t.number)}"><span class="lbl">TFD ${esc(t.number)}${t.series ? ' · ' + esc(t.series.toUpperCase()) : ''}</span><b>${esc(t.title)}</b><span class="teaser mut">${esc(t.paras[0] || '')}</span></button>`).join('') +
-    `<p class="mut center small">New thoughts will appear here as they are shared.</p>`;
+    (q ? '' : `<p class="mut center small">New thoughts will appear here as they are shared.</p>`);
   const sc = $('tfd-scroll');
   if (tfdFocus) {   // SCRUM-83: back from "All thoughts" – show the thought just read, briefly outlined
     const el = $('tfd-box').querySelector(`[data-go="#tfd/${CSS.escape(tfdFocus)}"]`);
     sc.scrollTop = el ? Math.max(0, el.offsetTop - 140) : tfdListY;
     if (el) { el.classList.add('was'); setTimeout(() => el.classList.remove('was'), 1600); }
-  } else sc.scrollTop = tfdBack ? tfdListY : 0;
+  } else if (!q) sc.scrollTop = tfdBack ? tfdListY : 0;
   tfdFocus = null; tfdBack = false;
+  wireTfdSeg(showTfdList);
 }
 let tfdNow = null, tfdListY = 0, tfdFocus = null, tfdBack = false;
+$('tfd-btn-search').onclick = () => { $('tfd-search-row').classList.remove('hidden'); $('tfd-search').focus(); };
+$('tfd-close-search').onclick = () => { tfdQuery = ''; $('tfd-search').value = ''; $('tfd-search-row').classList.add('hidden'); showTfdList(); };
+let tfdTimer = null;
+$('tfd-search').oninput = () => { clearTimeout(tfdTimer); tfdTimer = setTimeout(() => { tfdQuery = $('tfd-search').value; showTfdList(); }, 200); };
+
+// ---------- read today's thought aloud (the phone's own voice; a man's voice where the phone has one) ----------
+const TTS_LANG = { en: 'en-IN', ta: 'ta-IN', kn: 'kn-IN' };
+const MALE = /male|man\b|rishi|ravi|hemant|prabhat|valluvar|kumar|aaron|daniel|arthur|fred|gordon|rocko|reed|eddy|grandpa/i, FEMALE = /female|woman|veena|lekha|vani|heera|kalpana|samantha|karen|moira|tessa|kate|serena|fiona|zira|swara|pallavi/i;
+function ttsVoice(lang) {
+  if (!('speechSynthesis' in window)) return null;
+  const want = TTS_LANG[lang], vs = speechSynthesis.getVoices();
+  const same = vs.filter(v => v.lang.replace('_', '-').toLowerCase() === want.toLowerCase());
+  const near = same.length ? same : vs.filter(v => v.lang.toLowerCase().startsWith(lang));
+  if (!near.length) return null;
+  return near.find(v => MALE.test(v.name) && !FEMALE.test(v.name)) || near.find(v => !FEMALE.test(v.name)) || near[0];
+}
+let tts = { on: false, queue: [], i: 0 };
+function ttsStop() { tts.on = false; try { speechSynthesis.cancel(); } catch (e) { } paintListen(); }
+function paintListen() {
+  const b = $('t-listen'); if (!b) return;
+  b.classList.toggle('on', tts.on);
+  b.innerHTML = tts.on ? `${svgI('stop')}<span>${{ en: 'Stop', ta: 'நிறுத்து', kn: 'ನಿಲ್ಲಿಸಿ' }[tfdLang]}</span>` : `${svgI('speaker')}<span>${{ en: 'Listen', ta: 'கேளுங்கள்', kn: 'ಕೇಳಿ' }[tfdLang]}</span>`;
+}
+function ttsSpeak(parts, lang) {
+  const v = ttsVoice(lang);
+  if (!v) { toast({ en: 'This phone has no voice for English reading.', ta: 'இந்த ஃபோனில் தமிழ் குரல் இல்லை. Settings › Text-to-speech இல் சேர்க்கலாம்.', kn: 'ಈ ಫೋನ್‌ನಲ್ಲಿ ಕನ್ನಡ ಧ್ವನಿ ಇಲ್ಲ. Settings › Text-to-speech ನಲ್ಲಿ ಸೇರಿಸಬಹುದು.' }[lang]); return; }
+  speechSynthesis.cancel();
+  tts = { on: true, queue: parts, i: 0 }; paintListen();
+  const next = () => {
+    if (!tts.on || tts.i >= tts.queue.length) { tts.on = false; paintListen(); return; }
+    const u = new SpeechSynthesisUtterance(tts.queue[tts.i++]);
+    u.voice = v; u.lang = v.lang; u.rate = 0.92; u.pitch = 0.95;
+    u.onend = next; u.onerror = () => { tts.on = false; paintListen(); };
+    speechSynthesis.speak(u);
+  };
+  next();   // one paragraph at a time: long texts are cut off by some phones
+}
+if ('speechSynthesis' in window) { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => {}; }
 // ---------- reactions on a Thought for the Day (SCRUM-50): one per phone; tap again to take it back ----------
 const REACTIONS = ['🙏', '❤️', '🌸', '😊', '👍'];
 let reactNow = { tfd: 0, counts: {}, mine: null };
@@ -1505,13 +1574,16 @@ async function react(e) {
 async function showTfd(number) {
   showView('v-tfd');
   if ($('tfd-box').querySelector('.t-item')) { tfdListY = $('tfd-scroll').scrollTop; tfdBack = true; }   // leaving the list: remember the place
-  const all = await tfds(), i = all.findIndex(x => x.number === number), t = all[i];
+  const all = await tfdsIn(tfdLang), i = all.findIndex(x => x.number === number), t = all[i];
   if (!t) { replaceHash('#tfd'); return showTfdList(); }
   const newer = all[i - 1], older = all[i + 1];   // the list is newest first
   const fresh = tfdNow !== number; tfdNow = number;
   $('tfd-title').textContent = 'Thought for the Day';
-  $('tfd-smaller').classList.remove('hidden'); $('tfd-bigger').classList.remove('hidden');
-  const out = [`<span class="lbl">THOUGHT FOR THE DAY · TFD ${esc(t.number)}</span>`];
+  $('tfd-smaller').classList.remove('hidden'); $('tfd-bigger').classList.remove('hidden'); $('tfd-btn-search').classList.add('hidden'); $('tfd-search-row').classList.add('hidden');
+  ttsStop();
+  const today = all.length && all[0].number === t.number;   // read aloud only for the latest thought
+  const out = [tfdSeg(), `<div class="t-head"><span class="lbl">THOUGHT FOR THE DAY · TFD ${esc(t.number)}</span>` + (today && 'speechSynthesis' in window ? `<button class="t-listen" id="t-listen" aria-label="Read aloud"></button>` : '') + '</div>'];
+  if (t.untranslated) out.push(`<p class="t-soon" lang="${tfdLang}">${esc(TFD_SOON[tfdLang])}</p>`);
   if (t.series) out.push(`<span class="mut">${esc(t.series)}</span>`);
   out.push(`<h2 class="t-title">${esc(t.title)}</h2><div class="t-by"><img src="icons/about-jk.jpg" alt=""><b>Shri Janakiraman</b></div><div class="t-rule"></div>`);
   let quote = false, open = null;
@@ -1536,11 +1608,21 @@ async function showTfd(number) {
     if (s) out.push(`<button class="card t-link" data-go="#song/${esc(s.number)}">${badge('music')}<span class="hc-t"><span class="lbl">SING WITH TODAY’S THOUGHT</span><b>${esc(s.displayTitle)}</b><span class="mut">${esc(s.displayRaga ? s.number + ' · ' + s.displayRaga : s.number)}</span></span>${svgI('chevron', 'chev2')}</button>`);
   }
   // (no Next Satsang here: this page is only for the Thought for the Day)
-  // SCRUM-83: read on without going back to the list
+  // SCRUM-83: read on without going back to the list – Newer / Older side by side, the blue All thoughts button below
   const nb = (x, cls, lab) => x ? `<button class="t-nb${cls}" data-tfd="${esc(x.number)}">${lab}<span class="t-nb-t">TFD ${esc(x.number)} · ${esc(x.title)}</span></button>` : '<span class="t-nb ghost"></span>';
+  out.push(`<div class="t-acts one"><button class="btn-acc" id="t-share">${svgI('share')}Share</button></div>`);
   out.push(`<div class="t-nav">${nb(newer, '', '<small>‹ <span>Newer</span></small>')}${nb(older, ' r', '<small><span>Older</span> ›</small>')}</div>`);
-  out.push(`<div class="t-acts"><button class="btn-acc" id="t-share">${svgI('share')}Share</button><button class="btn-line" id="t-all">All thoughts</button></div>`);
-  $('tfd-box').innerHTML = `<div class="tfd-read">${out.join('')}</div>`;
+  out.push(`<button class="btn-blue t-all" id="t-all">All thoughts</button>`);
+  $('tfd-box').innerHTML = `<div class="tfd-read" lang="${t.lang || 'en'}">${out.join('')}</div>`;
+  wireTfdSeg(() => showTfd(number));
+  if ($('t-listen')) {
+    paintListen();
+    $('t-listen').onclick = () => {
+      if (tts.on) return ttsStop();
+      const lang = t.untranslated ? 'en' : tfdLang;
+      ttsSpeak([t.title].concat(t.paras.filter(p => !/^[\u0900-\u097F\s।॥0-9.,]+$/.test(p))), lang);   // Devanagari verses are skipped
+    };
+  }
   if (fresh) $('tfd-scroll').scrollTop = 0;
   if (ACCESS.url) loadReactions(+t.number);
   $('tfd-box').querySelectorAll('[data-tfd]').forEach(b => { b.onclick = () => { replaceHash('#tfd/' + b.dataset.tfd); showTfd(b.dataset.tfd); }; });   // Back still goes where you came from
