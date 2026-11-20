@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.11';
+const WEB_VERSION = '4.12';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -1070,7 +1070,13 @@ document.addEventListener('click', e => {
     $('book-title').textContent = bookTitle(indexBook);
     $('search-input').placeholder = tr(BOOKS[indexBook].search);
     renderIndex($('search-input').value).then(() => { $('index-scroll').scrollTop = y; });
-  } else route();
+  } else {
+    // every page stays exactly where the user was (never jump to the top on a language change)
+    const v = VIEWS.find(x => !$(x).classList.contains('hidden')), sc = v && $(v).querySelector('.scroll'), y = sc ? sc.scrollTop : 0;
+    const keep = () => { if (sc) sc.scrollTop = y; };
+    Promise.resolve(route()).then(() => { keep(); requestAnimationFrame(keep); });
+    keep();
+  }
 }, true);
 
 /** Inner pages: Back and the small logo on top, the page title on its own line below (4.10). */
