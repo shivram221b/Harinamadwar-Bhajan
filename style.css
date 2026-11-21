@@ -813,3 +813,20 @@ html:not([lang="en"]) .b2-top .b2-back { font-size: 14px; }
 .ix-chip { transition: background-color .18s ease, color .18s ease, border-color .18s ease; }
 .nx-head, .nx-dhead { scroll-margin-top: 66px; }
 .nx-tab { transition: background-color .18s ease, color .18s ease; }
+
+/* 4.14 (SCRUM-93): night mode for the 4.10 new look – the index and home colours were fixed light-mode values */
+body.night .ix-meta, body.night .ix-cnt, body.night .ix-ct span, body.night .ix-row .row-sub, body.night .ix-asub,
+body.night .h3-arch > span:last-child, body.night .h3-t > span { color: var(--muted); }
+body.night .ix-go-l, body.night .ix-sub, body.night .ix-alab, body.night .h3-read,
+body.night .nx-head .nx-t > span:not(.nx-meta) { color: var(--label) !important; }
+body.night .ix-sub { background: var(--card); border-top-color: var(--divider); }
+body.night .ix-card, body.night .ix-acard, body.night .nx-work { border-color: var(--divider) !important; }
+body.night .ix-row + .ix-row, body.night .ix-sub + .ix-row { border-top-color: var(--divider) !important; }
+body.night .ix-no, body.night .nx-rng { background: #2C3A50; color: #8FB4EE; }
+body.night .ix-schip { background: #22324C; border-color: #2C3A50 !important; color: #CFE0FF; }
+body.night .ix-rchip { background: #3A3120; border-color: #5A4A2A; color: #E8B865; }
+body.night .ix-au { background: #3A3120; color: #E8B865; }
+body.night .ix-chev { color: #6F7F99; }
+body.night .h3-about { color: var(--text); }
+body.night .ix-chip { border-color: var(--divider); }
+body.night .nx-tabs { border-color: var(--divider); }
