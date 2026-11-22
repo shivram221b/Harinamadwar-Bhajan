@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.16';
+const WEB_VERSION = '4.17';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -28,7 +28,7 @@ const store = {
   set(k, v) { try { localStorage.setItem('hg.' + k, JSON.stringify(v)); } catch (e) {} },
 };
 const prefs = {
-  get lang() { return store.get('lang', 'en'); }, set lang(v) { store.set('lang', v); if (typeof applyLang === 'function') applyLang(); },
+  get lang() { return store.get('lang', 'en'); }, set lang(v) { store.set('lang', v); if (typeof syncTfdLang === 'function') syncTfdLang(v); if (typeof applyLang === 'function') applyLang(); },
   get scale() { return store.get('scale', 1); }, set scale(v) { store.set('scale', Math.max(MIN_SCALE, Math.min(MAX_SCALE, v))); },
   get night() { return store.get('night', false); }, set night(v) { store.set('night', v); },
   get screenOn() { return store.get('screenOn', true); }, set screenOn(v) { store.set('screenOn', v); },
@@ -1450,6 +1450,8 @@ async function pracSong(r) {
 // Tamil and Kannada translations: community/tfd_ta.txt, tfd_kn.txt (same numbers); a thought not yet translated shows in English
 const TFD_LANGS = [['en', 'English'], ['ta', 'தமிழ்'], ['kn', 'ಕನ್ನಡ']];
 let tfdLang = store.get('tfdLang', ['ta', 'kn'].includes(store.get('lang', 'en')) ? store.get('lang', 'en') : 'en');
+// 4.17: a new app language also becomes the language of the thoughts (Tamil/Kannada; English otherwise). The TFD page's own picker still works.
+function syncTfdLang(v) { tfdLang = ['ta', 'kn'].includes(v) ? v : 'en'; store.set('tfdLang', tfdLang); }
 async function tfdsIn(lang) {
   const en = await tfds();
   if (lang === 'en') return en;
@@ -1686,9 +1688,13 @@ function restoreScroll(id) { if (prevView === 'v-song' && scrollMem[id] != null)
 async function keepScroll(id, fn) { const y = $(id + '-scroll').scrollTop; await fn(); $(id + '-scroll').scrollTop = y; }
 
 // ---------- my favourites ----------
-function showFavs() {
+let favsBusy = 0;
+async function showFavs() {
   showView('v-favs');
-  const l = favList();
+  const my = ++favsBusy;
+  // 4.17: titles in the language in use now (the saved title is the English one from when the heart was tapped)
+  const l = await Promise.all(favList().map(async f => { const ps = await pracSong(f.book + ':' + f.number); return Object.assign({}, f, ps && ps.title ? { title: ps.title } : {}); }));
+  if (my !== favsBusy) return;
   $('favs-box').innerHTML = !l.length
     ? `<div class="f-empty">${badge('heart', 'big')}<b>No favourites yet</b><p class="mut">Open any song and tap the ♡ at the top. It will appear here, so you can come back to listen and learn.</p></div>`
     : `<span class="lbl">${l.length === 1 ? '1 SONG' : l.length + ' SONGS'}</span><div class="card list">` + l.map(f =>
