@@ -760,9 +760,10 @@ async function showRecordings(tabs, wire, live) {
     return ask(`⚠️ ${n} already has ${what}. The new recording will replace it. Do you want to continue?`, 'Yes, replace it', true);
   }
   async function save(b, n, blob) {
-    toast('Uploading…'); const ok = await guard(async () => { await api.saveRecording(b, n, blob); return true; }); if (!ok) return;
+    toast('Uploading…'); const ok = await guard(async () => { await api.saveRecording(b, n, blob); return true; }); if (!ok) return false;
     const fresh = await guard(() => api.recordings()); if (fresh) { recs.length = 0; recs.push(...fresh); }
     toast('Saved. Tap Listen to check it, then Complete.'); redraw();
+    return true;
   }
   draw();
 }
@@ -819,7 +820,9 @@ function recordSheet(book, number, save) {
       tick = setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); $('rt').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }, 250);
     } catch (e) { toast('Please allow the microphone for this page.'); }
   };
-  $('rs').onclick = () => { d.remove(); save(book, number, blob); };
+  // the sheet (and the recording) stays until the upload has worked, so a failed upload can be tried again without singing again
+  $('rs').onclick = async () => { const b = $('rs'); b.disabled = true; const ok = await save(book, number, blob); b.disabled = false;
+    if (ok) d.remove(); else $('rh').textContent = 'Not uploaded – your recording is still here. Check the internet and tap Save again.'; };
 }
 
 // ---------------------------------------------------------------- E · app content
