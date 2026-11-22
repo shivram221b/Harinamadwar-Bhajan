@@ -193,6 +193,6 @@ function privateFile(path) {
 }
 
 // no copying out of lyrics, meanings and thoughts
-const inLocked = n => { const el = n && (n.nodeType === 1 ? n : n.parentElement); return !!(el && el.closest('#v-song')); };
+const inLocked = n => { const el = n && (n.nodeType === 1 ? n : n.parentElement); return !!(el && el.closest('#v-song, #v-other')); };
 document.addEventListener('copy', e => { const s = document.getSelection(); if (accessOn() && s && inLocked(s.anchorNode)) e.preventDefault(); });
 document.addEventListener('contextmenu', e => { if (accessOn() && e.target.closest && e.target.closest('#v-song')) e.preventDefault(); });

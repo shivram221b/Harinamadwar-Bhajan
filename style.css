@@ -854,3 +854,17 @@ body.night .nx-tabs { border-color: var(--divider); }
 body.night .evc-date { background: #2A2418; }
 body.night .evc-b.songs { background: #3A3120; color: #E8B865; }
 body.night .evc-b.share { color: #fff; border-color: #2C3A50; }
+
+/* ---------- 4.18 · SCRUM-97: other songs (not in the app) ---------- */
+.o-title { margin: 2px 0 6px; color: var(--chap-text); font-size: 26px; line-height: 1.25; font-weight: 800; }
+.o-tag { display: inline-block; font-size: 12.5px; font-weight: 700; color: #8F5600; background: #FFF1D6; border-radius: 10px; padding: 2px 9px; }
+body.night .o-tag { color: #E8B865; background: #3A3120; }
+.o-about { margin: 10px 0 0; color: var(--muted); font-size: 16px; font-style: italic; line-height: 1.45; }
+.o-hint { display: flex; align-items: center; justify-content: flex-end; gap: 6px; margin: 12px 0 0; padding-bottom: 10px; border-bottom: 1px solid var(--divider); color: var(--muted); font-size: 14px; }
+.o-lyrics { margin-top: 14px; }
+.o-soon { margin: 26px 0; text-align: center; color: var(--muted); font-size: 17px; }
+.o-foot { padding: 6px 14px calc(8px + env(safe-area-inset-bottom)); border-top: 1px solid var(--divider); background: var(--page); }
+.o-foot .nav-row { margin-top: 0; }
+.pl-row .o-tag { flex-shrink: 0; }
+body.secure #v-other .scroll { background-image: var(--wm); background-repeat: repeat; background-attachment: local; }
+body.secure #v-other .text, body.secure #v-other .o-title { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }

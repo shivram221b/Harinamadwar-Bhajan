@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.17';
+const WEB_VERSION = '4.18';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -189,7 +189,7 @@ function toast(msg) {
 }
 
 // ---------- views ----------
-const VIEWS = ['v-home', 'v-about', 'v-index', 'v-song', 'v-settings', 'v-welcome', 'v-diary', 'v-learn', 'v-playlist', 'v-favs', 'v-tfd', 'v-share', 'v-login', 'v-locked'];
+const VIEWS = ['v-home', 'v-about', 'v-index', 'v-song', 'v-settings', 'v-welcome', 'v-diary', 'v-learn', 'v-playlist', 'v-favs', 'v-tfd', 'v-share', 'v-login', 'v-locked', 'v-other'];
 let homeScroll = 0;
 const scrollMem = {}; let prevView = '';
 function showView(id) {
@@ -201,6 +201,7 @@ function showView(id) {
   if (!$('v-home').classList.contains('hidden') && id !== 'v-home') homeScroll = $('home-scroll').scrollTop;  // SCRUM-51
   if (!$('v-index').classList.contains('hidden') && id !== 'v-index') indexScroll = $('index-scroll').scrollTop;
   if (!$('v-song').classList.contains('hidden') && id !== 'v-song') { stopAudio(); keepAwake(false); }
+  if (!$('v-other').classList.contains('hidden') && id !== 'v-other') keepAwake(false);
   for (const v of VIEWS) $(v).classList.toggle('hidden', v !== id);
 }
 
@@ -693,7 +694,7 @@ function setScale(v) {
 (function pinch() {
   let d0 = 0, s0 = 1;
   const dist = e => Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-  const el = $('v-song');
+  for (const el of [$('v-song'), $('v-other')]) {   // 4.18: also the words of an other song
   el.addEventListener('touchstart', e => { if (e.touches.length === 2) { d0 = dist(e); s0 = prefs.scale; } }, { passive: true });
   el.addEventListener('touchmove', e => {
     if (e.touches.length !== 2 || !d0) return;
@@ -701,6 +702,7 @@ function setScale(v) {
     setScale(s0 * dist(e) / d0);
   }, { passive: false });
   el.addEventListener('touchend', e => { if (e.touches.length < 2) d0 = 0; }, { passive: true });
+  }
   // iPhone Safari's own page zoom
   for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) document.addEventListener(ev, e => e.preventDefault(), { passive: false });
 })();
@@ -817,8 +819,10 @@ $('song-list').addEventListener('click', e => {
   if (r) openSong(+r.dataset.pos);
 });
 $('btn-back').onclick = closeSong;
-$('btn-prev').onclick = () => { const p = plStep(-1); if (p) return go(p); showSong(cur - 1, true); };
-$('btn-next').onclick = () => { const p = plStep(1); if (p) return go(p); showSong(cur + 1, true); };
+// 4.18: in a satsang's list, ‹ › take the place of the song (no new history entry), so Back always returns to the list (as on Android)
+function plGo(h) { replaceHash(h); route(); }
+$('btn-prev').onclick = () => { const p = plStep(-1); if (p) return plGo(p); showSong(cur - 1, true); };
+$('btn-next').onclick = () => { const p = plStep(1); if (p) return plGo(p); showSong(cur + 1, true); };
 $('btn-smaller').onclick = () => setScale(prefs.scale / STEP);
 $('btn-bigger').onclick = () => setScale(prefs.scale * STEP);
 $('btn-play').onclick = togglePlay;
@@ -925,6 +929,7 @@ function route() {
   if (h === '#favs') return showFavs();
   if (h === '#tfd') return showTfdList();
   if (h.startsWith('#tfd/')) return showTfd(h.slice(5));
+  if (h.startsWith('#other/')) return showOther(h.slice(7));
   if (h.startsWith('#share/')) return showShare(h.slice(7));
   if (h.startsWith('#book/') && BOOKS[h.slice(6)]) return showIndex(h.slice(6), !$('v-song').classList.contains('hidden'));
   for (const b of Object.values(BOOKS)) if (h.startsWith(b.hash)) return showSongRoute(b.id, h.slice(b.hash.length));
@@ -1144,7 +1149,7 @@ document.addEventListener('click', e => {
 
 /** Inner pages: Back and the small logo on top, the page title on its own line below (4.10). */
 function brandBars() {
-  const ids = ['v-welcome', 'v-diary', 'v-playlist', 'v-learn', 'v-favs', 'v-tfd', 'v-share', 'v-about', 'v-settings'];
+  const ids = ['v-welcome', 'v-diary', 'v-playlist', 'v-learn', 'v-favs', 'v-tfd', 'v-share', 'v-about', 'v-settings', 'v-other'];
   ids.forEach((id, k) => {
     const head = document.querySelector('#' + id + ' > header.bar');
     const row = head && head.querySelector('.bar-row');
@@ -1433,6 +1438,10 @@ async function learnValue(key) {
 async function practice() { const v = await learnValue('songs'); return v ? v.split(',').map(x => x.trim()).filter(Boolean) : []; }
 const pracRef = r => { const i = r.indexOf(':'); return i > 0 && BOOKS[r.slice(0, i)] ? { id: r.slice(0, i), number: r.slice(i + 1) } : { id: 'dns', number: r }; };
 async function pracSong(r) {
+  if (r.startsWith('other:')) {   // 4.18 · SCRUM-97: a song that is not in the app
+    const o = (await otherSongs()).get(r.slice(6));
+    return o ? { ref: r, id: 'other', number: o.id, title: o.title, sub: o.about, hash: '#other/' + o.id, other: true } : null;
+  }
   const { id, number } = pracRef(r);
   try {
     const s = (await loadBook(id)).songs.find(x => x.number === number); if (!s) return null;
@@ -1445,6 +1454,42 @@ async function pracSong(r) {
     return { ref: r, id, number, title, sub: id === 'dns' ? s.number + ' · ' + (s.displayRaga || s.chapter) : (id === 'ashta' ? T('ashtapadi') : T('pasuram')) + s.number + (s.displayRaga ? ' · ' + s.displayRaga : ''), hash: BOOKS[id].hash + number };
   } catch (e) { return null; }
 }
+
+// ---------- 4.18 · SCRUM-97: other songs (not in the app) that admins paste for a satsang ----------
+// community other.txt: "@@ id | name | about", then the lyrics (blank lines between verses kept) until the next "@@"
+async function otherSongs() {
+  let t = '';
+  try { t = await fetchText('community/other.txt'); } catch (e) { }
+  const m = new Map(); let cur = null;
+  for (const line of t.replace(/\r/g, '').split('\n')) {
+    if (line.startsWith('@@')) { const h = line.slice(2).split('|'); cur = { id: h[0].trim(), title: (h[1] || '').trim(), about: h.slice(2).join('|').trim(), lines: [] }; m.set(cur.id, cur); }
+    else if (cur) cur.lines.push(line);
+  }
+  for (const o of m.values()) { o.lyrics = o.lines.join('\n').trim(); delete o.lines; }
+  return m;
+}
+async function showOther(id) {
+  showView('v-other');
+  const o = (await otherSongs()).get(id), i = plIndex();
+  const bar = $('other-pl');
+  bar.classList.toggle('hidden', !(plNow && i >= 0));
+  if (plNow && i >= 0) bar.innerHTML = `${svgI('music')}<span class="pl-mid"><span>${esc(plNow.name)} · song ${i + 1} of ${plNow.hashes.length}</span></span><button class="pl-all" data-go="#satsang/${esc(plNow.last)}">All songs</button>`;
+  const p = plStep(-1), n = plStep(1);
+  $('other-prev').textContent = p ? '‹ ' + i + '. ' + short(plNow.titles[i - 1], 14) : '';
+  $('other-next').textContent = n ? (i + 2) + '. ' + short(plNow.titles[i + 1], 14) + ' ›' : '';
+  $('other-prev').style.visibility = p ? 'visible' : 'hidden'; $('other-next').style.visibility = n ? 'visible' : 'hidden';
+  $('other-prev').onclick = () => { if (p) plGo(p); };   // as on a song page: Back returns to the list
+  $('other-next').onclick = () => { if (n) plGo(n); };
+  $('other-box').innerHTML = !o ? `<p class="o-soon">This song is no longer in the list. Please go back.</p>`
+    : `<h2 class="o-title">${esc(o.title)}</h2><span class="o-tag">Other song · not in the app</span>` +
+      (o.about ? `<p class="o-about">${esc(o.about)}</p>` : '') +
+      `<div class="o-hint">Pinch to zoom, or use A− A+ above</div>` +
+      (o.lyrics ? `<div class="text o-lyrics">${esc(nb(o.lyrics))}</div>` : `<p class="o-soon">The words of this song will be added soon.</p>`);
+  $('other-scroll').scrollTop = 0;
+  keepAwake(true);
+}
+$('other-smaller').onclick = () => setScale(prefs.scale / STEP);
+$('other-bigger').onclick = () => setScale(prefs.scale * STEP);
 
 // Thought for the Day: @@ number | series | title | book:song, then paragraphs separated by blank lines
 // Tamil and Kannada translations: community/tfd_ta.txt, tfd_kn.txt (same numbers); a thought not yet translated shows in English
@@ -1647,8 +1692,9 @@ async function showPlaylist(last) {
     (list.length ? `<button class="btn-acc" data-go="${esc(list[0].hash)}" data-open-tab="0">${svgI('book')}Start from song 1</button>` : '') + `</div>`);
   out.push(`<div class="card list pl-list">` + list.map((s, i) =>
     `<div class="l-row pl-row"><span class="pl-n">${i + 1}</span>` +
-    `<button class="hc-t l-open" data-go="${esc(s.hash)}" data-open-tab="0"><b>${esc(s.title)}</b><span class="mut">${esc(s.sub)}</span></button>` +
-    `<button class="ibadge" data-go="${esc(s.hash)}" data-open-tab="2" aria-label="Listen to ${esc(s.title)}">${svgI('play')}</button></div>`).join('') + `</div>`);
+    `<button class="hc-t l-open" data-go="${esc(s.hash)}" data-open-tab="0"${s.other ? ' data-notr' : ''}><b>${esc(s.title)}</b><span class="mut">${esc(s.sub)}</span></button>` +
+    (s.other ? `<span class="o-tag">Other song</span></div>`   // 4.18: not in the app – words only
+      : `<button class="ibadge" data-go="${esc(s.hash)}" data-open-tab="2" aria-label="Listen to ${esc(s.title)}">${svgI('play')}</button></div>`)).join('') + `</div>`);
   out.push(`<p class="mut center small">Tap a song for its words and meaning, or ▶ for its recording. The list may change until the day of the satsang.</p>`);
   $('playlist-box').innerHTML = out.join('');
   restoreScroll('v-playlist');
