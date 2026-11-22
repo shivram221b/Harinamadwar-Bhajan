@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.15';
+const WEB_VERSION = '4.16';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -225,6 +225,7 @@ const isSlokam = s => /^(ślokam|shlōkam|slokam|shlokam|dhyāna ślokam)$/i.tes
 const recIcon = () => `<span class="ix-au" aria-label="Has a recording">${svgI('music')}</span>`;
 const chev = () => svgI('chevron', 'ix-chev');
 async function renderIndex(filter) {
+  indexLang = prefs.lang;   // SCRUM-96: remember which language the list is built in
   const lang = prefs.lang;
   const t = lang === 'en' ? null : await loadText(lyricsFile(lang));
   const am = await loadAudio();
@@ -841,8 +842,12 @@ async function useBook(id) {
   songs = d.songs; indexItems = d.indexItems;
 }
 
+let indexLang = '';   // SCRUM-96: the language the index list was last built in
 async function showIndex(id, fromSong) {
   const fresh = indexBook !== id;
+  // SCRUM-96: the list is kept for speed, but it was built in one language – if the language was changed elsewhere
+  // (e.g. on Home) since then, build it again in place, keeping the scroll position
+  const relang = !fresh && indexLang !== prefs.lang;
   $('book-title').textContent = bookTitle(id);
   $('search-input').placeholder = tr(BOOKS[id].search);
   $('empty').textContent = tr('No ' + BOOKS[id].unit + ' found');
@@ -859,7 +864,8 @@ async function showIndex(id, fromSong) {
     return;
   }
   $('loading').classList.add('hidden');
-  if (fresh) { indexBook = id; await renderIndex(''); $('index-scroll').scrollTop = 0; }
+  if (fresh) { indexBook = id; indexLang = prefs.lang; await renderIndex(''); $('index-scroll').scrollTop = 0; }
+  else if (relang) { indexLang = prefs.lang; await renderIndex($('search-input').value || ''); }
   if (fromSong && songs[cur]) {
     const row = document.querySelector(`.row[data-pos="${cur}"]`);
     if (row) row.scrollIntoView({ block: 'center' }); else $('index-scroll').scrollTop = indexScroll;
