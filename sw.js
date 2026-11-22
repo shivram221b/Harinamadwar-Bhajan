@@ -1,7 +1,7 @@
 /* Offline support: the app itself is kept on the phone; song and meaning files are
  * always fetched fresh when there is internet, and the last copy is used when there isn't.
  * Audio is streamed and not stored. */
-const SHELL = 'hg-shell-v24s';
+const SHELL = 'hg-shell-v25s';
 const DATA = 'hg-data';
 const SHELL_FILES = ['./', 'index.html', 'style.css', 'app.js', 'access.js', 'sruti.html', 'manifest.webmanifest',
   'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png',

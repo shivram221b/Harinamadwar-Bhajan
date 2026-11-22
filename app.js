@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.14';
+const WEB_VERSION = '4.15';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -219,7 +219,8 @@ const IX_UI = {
   listen: { en: 'Recording', ta: 'பதிவு', kn: 'ಧ್ವನಿ', sa: 'ध्वनिः' },
   ndpOf: { en: 'pāsurams of the Āzhvārs', ta: 'ஆழ்வார்களின் பாசுரங்கள்', kn: 'ಆಳ್ವಾರರ ಪಾಶುರಗಳು', sa: 'आळ्वाराणां पाशुराः' },
 };
-const ixT = k => IX_UI[k][prefs.lang] || IX_UI[k].en;
+// SCRUM-94: index labels and counts stay in English; only the book's own lines (ashtaOf, ndpOf) follow the language
+const ixT = k => (k === 'ashtaOf' || k === 'ndpOf') ? (IX_UI[k][prefs.lang] || IX_UI[k].en) : IX_UI[k].en;
 const isSlokam = s => /^(ślokam|shlōkam|slokam|shlokam|dhyāna ślokam)$/i.test((s.displayTitle || s.title || '').trim()) || /^shl?Okam$/i.test(s.title || '');
 const recIcon = () => `<span class="ix-au" aria-label="Has a recording">${svgI('music')}</span>`;
 const chev = () => svgI('chevron', 'ix-chev');
@@ -376,7 +377,7 @@ const NX_UI = {
   pas: { en: 'pāsurams', ta: 'பாசுரங்கள்', kn: 'ಪಾಶುರಗಳು', sa: 'पाशुराः' },
   dec: { en: 'decades', ta: 'பதிகங்கள்', kn: 'ಪದಿಗಗಳು', sa: 'दशकाः' },
 };
-const nxT = k => NX_UI[k][prefs.lang] || NX_UI[k].en;
+const nxT = k => NX_UI[k].en;   // SCRUM-94: counts in English
 let nxOpen = store.get('nxOpen', { work: '', dec: '' });   // remembered, so Back from a pāsuram returns to the same place
 function ndpTree() {
   const tree = [];
@@ -1196,7 +1197,10 @@ const UI = {
   pasuram: { en: 'Pāsuram ', ta: 'பாசுரம் ', kn: 'ಪಾಶುರ ', sa: 'पाशुरम् ' },
   ashtapadi: { en: 'Aṣṭapadi ', ta: 'அஷ்டபதி ', kn: 'ಅಷ್ಟಪದಿ ', sa: 'अष्टपदी ' },
 };
-const T = k => { const v = UI[k]; return v ? (v[prefs.lang] || v.en) : k; };
+// SCRUM-94 (Shiv, 21 Nov 2026): buttons, labels and headings stay in English in every language; only the books'
+// own names and the tagline follow the chosen language (lyrics, meanings and thoughts come from their own files)
+const T_CONTENT = new Set(['dns', 'ashta', 'tagline']);
+const T = k => { const v = UI[k]; return v ? (T_CONTENT.has(k) ? (v[prefs.lang] || v.en) : v.en) : k; };
 // ---------- SCRUM-74: every screen in the chosen language ----------
 // Exact English phrase → [Tamil, Kannada, Sanskrit]. Text on screen that matches is shown in the chosen language;
 // lyrics and meanings are never touched (they already come from the language's own file).
@@ -1334,7 +1338,20 @@ const LI = { ta: 0, kn: 1, sa: 2 };
 const trWrap = orig => orig.match(/^[\s\u00a0]*/)[0] + tr(i18nKey(orig)) + orig.match(/[\s\u00a0]*$/)[0];
 const i18nKey = s => s.replace(/[\s ]+/g, ' ').trim();
 /** a fixed English phrase in the chosen language */
-function tr(s) { const i = LI[prefs.lang]; if (i === undefined) return s; const v = I18N[i18nKey(s)]; return v ? v[i] : s; }
+// SCRUM-94: only book names and the sentences people must understand are translated (same list as Android Tr.java)
+const TR_KEEP = new Set(['A doorway to the Lord’s Name', 'Divya Nama Sankeertanam', 'Śrī Gīta Govindam', '24 Aṣṭapadis of Śrī Jayadeva',
+  'Bhajans of many saints', '4000 pāsurams of the Āzhvārs', 'The life and story of the saint who composed this song will be added here.',
+  'Continue', 'Your phone number', 'Invite code', 'Welcome to Harinamadwar', 'Enter the code you received on WhatsApp',
+  'No code? Ask your satsang admin.', 'I understand', 'For our class only', 'Tick a song when you can sing it. Only you see this.',
+  'All of this week’s songs. Wonderful!', 'Message from Janakiraman Ji', 'About this week’s songs',
+  'Tap a song to open it. Tap the heart to remove it.', 'No satsangs announced yet. Please check again soon.',
+  'How did this thought touch you?', 'New thoughts will appear here as they are shared.', 'The meaning of this song will be added soon.',
+  'A recording of this song will be added soon.', 'Could not load. Please check the internet.', 'How would you like to use Harinamadwar?',
+  'Listen and sing along', 'Bhajans, meanings and recordings', 'Join satsangs', 'Upcoming satsangs, photos and clips',
+  'Learn in the daily sessions', 'Daily session, this week’s songs, your own progress', 'Shri Janakiraman’s reflections',
+  'Your name (so we can greet you)', 'Choose any. We’ll keep your home page simple. You can change this any time.',
+  'Shri Janakiraman’s reflections on everyday life, newest first.', 'Your access is paused', 'Please connect to the internet']);
+function tr(s) { const i = LI[prefs.lang]; if (i === undefined) return s; const k = i18nKey(s), v = I18N[k]; return v && TR_KEEP.has(k) ? v[i] : (v ? k : s); }
 const trText = new Map();   // text node → its English original
 const trAttr = new Map();   // element → { attribute: English original }
 const TR_ATTRS = ['placeholder', 'aria-label', 'title'];
@@ -1502,11 +1519,21 @@ async function songOfTheDay() {
 // Watch live (opens the YouTube app) and Share, in the app's own colours
 const liveRow = e => `<div class="ev-live"><a class="ev-yt" href="${esc(e.live)}" target="_blank" rel="noopener"><span class="yt-mark">${svgI('play')}</span>Watch live</a>` +
   `<button class="ev-share" data-live="${esc(e.live)}" data-msg="${esc('🙏 Watch Harinamadwar live – ' + e.name + ', ' + e.when + ', at ' + e.place + '.\nYouTube: ' + e.live)}" aria-label="Share the live link">${svgI('share')}<span>Share</span></button></div>`;
-function eventRows(list, big) {
-  return list.map(e => `<div class="ev-row${big ? ' big' : ''}"><div class="ev-date"><span>${esc(e.month)}</span><b class="${e.days.length > 2 ? 'long' : ''}">${esc(e.days)}</b></div>` +
-    `<div class="ev-t"><b>${esc(e.name)}</b><span class="ev-where">${svgI('pin')}at ${esc(e.place)}</span>` +
-    (big && e.songs && e.songs.length ? `<button class="ev-pl" data-go="#satsang/${esc(e.last)}">${svgI('music')}<span class="ev-pl-t"><b>${e.songs.length} songs to be sung</b><span>See the list</span></span>${svgI('chevron', 'chev2')}</button>` : '') +
-    (big && e.live ? liveRow(e) : '') + `</div></div>`).join('');
+/** SCRUM-95: compact satsang tile – date, name and place, then songs · Watch · Share in one row.
+ *  detail = the satsang's own page: the name may take two lines and there is no songs button. */
+function eventRows(list, big, detail) {
+  if (!big) return list.map(e => `<div class="ev-row"><div class="ev-date"><span>${esc(e.month)}</span><b class="${e.days.length > 2 ? 'long' : ''}">${esc(e.days)}</b></div>` +
+    `<div class="ev-t"><b>${esc(e.name)}</b><span class="ev-where">${svgI('pin')}at ${esc(e.place)}</span></div></div>`).join('');
+  return list.map(e => {
+    const songs = !detail && e.songs && e.songs.length, open = songs ? ` data-go="#satsang/${esc(e.last)}"` : '';
+    const msg = e.live ? '🙏 Watch Harinamadwar live – ' + e.name + ', ' + e.when + ', at ' + e.place + '.\nYouTube: ' + e.live
+                       : '🙏 Harinamadwar satsang – ' + e.name + ', ' + e.when + ', at ' + e.place + '.';
+    return `<div class="evc${detail ? ' detail' : ''}"><div class="evc-top"${open}><div class="evc-date${e.days.length > 2 ? ' long' : ''}"><small>${esc(e.month)}</small><b>${esc(e.days)}</b></div>` +
+      `<div class="evc-t"><b>${esc(e.name)}</b><span>at ${esc(e.place)}</span></div></div><div class="evc-act">` +
+      (songs ? `<button class="evc-b songs" data-go="#satsang/${esc(e.last)}" aria-label="${e.songs.length} songs to be sung. See the list">${svgI('music')}<span>${e.songs.length} songs</span></button>` : '') +
+      (e.live ? `<a class="evc-b watch" href="${esc(e.live)}" target="_blank" rel="noopener" aria-label="Watch live on YouTube">${svgI('play')}<span>Watch</span></a>` : '') +
+      `<button class="evc-b share" data-live="1" data-msg="${esc(msg)}" aria-label="Share this satsang">${svgI('share')}<span>Share</span></button></div></div>`;
+  }).join('');
 }
 
 // ---------- home ----------
@@ -1607,7 +1634,7 @@ async function showPlaylist(last) {
   if (!e) { replaceHash('#diary'); return showDiary(); }
   const list = (await Promise.all(e.songs.map(pracSong))).filter(Boolean);
   plNow = { name: e.name, last, hashes: list.map(s => s.hash), titles: list.map(s => s.title) };
-  const out = [`<span class="lbl sect">UPCOMING SATSANG</span>` + eventRows([Object.assign({}, e, { songs: [] })], true)];
+  const out = [`<span class="lbl sect">UPCOMING SATSANG</span>` + eventRows([e], true, true)];
   out.push(`<div class="pl-sum"><span><b>${list.length} songs</b>, in the order they will be sung</span>` +
     (list.length ? `<button class="btn-acc" data-go="${esc(list[0].hash)}" data-open-tab="0">${svgI('book')}Start from song 1</button>` : '') + `</div>`);
   out.push(`<div class="card list pl-list">` + list.map((s, i) =>

@@ -830,3 +830,27 @@ body.night .ix-chev { color: #6F7F99; }
 body.night .h3-about { color: var(--text); }
 body.night .ix-chip { border-color: var(--divider); }
 body.night .nx-tabs { border-color: var(--divider); }
+
+/* 4.15 (SCRUM-95): compact satsang tiles – date, name, place; then songs · Watch · Share in one row */
+.evc { background: var(--card); border: 1px solid var(--divider); border-radius: 14px; padding: 8px 10px 9px; margin: 0 0 8px; }
+.evc-top { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.evc.detail .evc-top { cursor: default; }
+.evc-date { width: 46px; flex-shrink: 0; text-align: center; padding: 3px 0 4px; border-radius: 10px; border: 1.5px solid #E2B65A; background: #FFFBF1; }
+.evc-date.long { width: 54px; }
+.evc-date small { display: block; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--label); }
+.evc-date b { display: block; font-size: 18px; line-height: 1.1; color: var(--chap-text); }
+.evc-date.long b { font-size: 14px; }
+.evc-t { flex: 1; min-width: 0; }
+.evc-t b { display: block; font-size: 16px; line-height: 1.25; color: var(--chap-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.evc.detail .evc-t b { font-size: 18px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.evc-t span { display: block; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.evc-act { display: flex; gap: 6px; margin-top: 7px; }
+.evc-b { flex: 1; min-height: 36px; border-radius: 18px; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 13.5px; font-weight: 700; white-space: nowrap; padding: 0 6px; text-decoration: none; }
+.evc-b svg { width: 15px; height: 15px; flex-shrink: 0; }
+.evc-b.songs { flex: 1.25; background: #FFF3D6; color: #8A5300; }
+.evc-b.watch { background: #1D4E9E; color: #fff; }
+.evc-b.watch svg { fill: #fff; }
+.evc-b.share { background: var(--card); color: var(--chap-text); border: 1.5px solid var(--divider); }
+body.night .evc-date { background: #2A2418; }
+body.night .evc-b.songs { background: #3A3120; color: #E8B865; }
+body.night .evc-b.share { color: #fff; border-color: #2C3A50; }
