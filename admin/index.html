@@ -168,6 +168,12 @@ details.rec-g .pn { font-size: 13px; min-width: 30px; }
 .lchip.on { background: var(--deep); border-color: var(--deep); color: #fff; }
 .ra.lis { color: var(--ok); border-color: #BFE0CB; } .ra.lis.on { background: #E3F2E8; }
 .rec-act { flex-wrap: wrap; } .ra { min-width: 92px; }
+/* SCRUM-97: other songs (not in the app) */
+.oc { border: 1.5px solid #E8C98A; background: #FFFBF2; }
+.f textarea.oa { min-height: 84px; }
+.f textarea.ly { min-height: 220px; white-space: pre-wrap; }
+.otag { display: inline-block !important; font-size: 11.5px !important; font-weight: 700; color: var(--label) !important; background: #FFF1D6; border-radius: 9px; padding: 1px 8px; margin: 2px 6px 2px 0; }
+.oc-tip { background: #fff; border: 1px dashed #E8C98A; border-radius: 10px; padding: 8px 10px; }
 </style>
 </head>
 <body>
@@ -190,6 +196,7 @@ const DEMO = !SUPABASE_URL || /[?&]demo/.test(location.search);
 const ICON = {
   play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
   stop: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
+  pen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>',
   grip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 8h14M5 12h14M5 16h14"/></svg>',
   up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>',
   down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
@@ -243,6 +250,8 @@ const api = DEMO ? demoApi() : {
   events() { return this.table('events', { col: 'last_day', asc: true }); },
   saveEvent(e) { return this.rpc('admin_save_event', { p_id: e.id || null, p_first_day: e.first_day, p_last_day: e.last_day, p_when: e.when_text, p_month: e.month, p_days: e.days, p_name: e.name, p_place: e.place, p_songs: e.songs, p_live: e.live_url }); },
   deleteEvent(id) { return this.rpc('admin_delete_event', { p_id: id }); },
+  otherSongs() { return this.table('other_songs', { col: 'title', asc: true }); },   // SCRUM-97
+  saveOtherSong(o) { return this.rpc('admin_save_other_song', { p_id: o.id || null, p_title: o.title, p_about: o.about, p_lyrics: o.lyrics }); },
   thoughts() { return this.table('thoughts', { col: 'number', asc: false }); },
   saveThought(t) { return this.rpc('admin_save_thought', { p_number: t.number, p_series: t.series, p_title: t.title, p_song: t.song_ref, p_body: t.body, p_published: t.published }); },
   deleteThought(n) { return this.rpc('admin_delete_thought', { p_number: n }); },
@@ -274,6 +283,7 @@ function demoApi() {
   ];
   let E = [{ id: uid(), last_day: '2026-11-21', when_text: 'November 21st', month: 'NOV', days: '21', name: 'Ayyappan Bhajan', place: 'Mania’s house' },
     { id: uid(), last_day: '2026-11-29', when_text: 'Nov 28 and 29', month: 'NOV', days: '28–29', name: 'Radha Kalyanam', place: 'RP3 Bangalore', songs: '1.1,2.1,12.1,12.2,12.3,12.4,12.5,12.6,12.7,12.8,12.9,ashta:1.2,26.1' }];
+  let O = [{ id: uid(), title: 'Vitthala Vitthala Panduranga', about: 'A Marathi abhang on Lord Vitthala.', lyrics: 'विठ्ठल विठ्ठल जय हरि विठ्ठल\nविठ्ठल विठ्ठल जय हरि विठ्ठल\n\nपांडुरंग पांडुरंग\nजय जय पांडुरंग' }];   // SCRUM-97 other songs
   let T = [{ number: 253, series: 'Epic Series 123', title: 'Why Do We Suffer Twice?', song_ref: 'dns:8.4', body: 'Have you noticed how often we worry about things that haven’t even happened?\n\n…', published: true }];
   let R = [{ book: 'dns', number: '1.3', status: 'uploaded', url: APP_BASE_DEMO + 'Audio/2.1-BhajareManasa.m4a', by: 'shiv@gmail.com', at: new Date(now - 2 * day).toISOString() }];
   const set = { offline_days: 30, device_limit: 3, code_days: 7, meet_url: 'https://meet.google.com/kcv-uviq-vqe', practice_songs: '22.7,5.2,24.1' };
@@ -301,6 +311,8 @@ function demoApi() {
     events: () => wait(E.slice().sort((a, b) => a.last_day.localeCompare(b.last_day))),
     saveEvent(e) { if (e.id) Object.assign(E.find(x => x.id === e.id), e); else E.push({ ...e, id: uid() }); return wait(); },
     deleteEvent(id) { E = E.filter(x => x.id !== id); return wait(); },
+    otherSongs: () => wait(O.slice().sort((a, b) => a.title.localeCompare(b.title))),
+    saveOtherSong(o) { if (o.id) { Object.assign(O.find(x => x.id === o.id), o); return wait(o.id); } const id = uid(); O.push({ ...o, id }); return wait(id); },
     thoughts: () => wait(T.slice().sort((a, b) => b.number - a.number)),
     saveThought(t) { T = T.filter(x => x.number !== t.number); T.push(t); return wait(); },
     deleteThought(n) { T = T.filter(x => x.number !== n); return wait(); },
@@ -845,16 +857,50 @@ async function showContent() {
   }
 }
 
+// SCRUM-97: tidy a pasted song – no spaces at the ends of lines, at most one empty line between verses
+const tidyLyrics = t => String(t || '').replace(/\r/g, '').split('\n').map(x => x.replace(/^[ \t ]+|[ \t ]+$/g, '')).join('\n').replace(/\n{3,}/g, '\n\n').trim();
+const lyricLines = t => String(t || '').split('\n').filter(x => x.trim()).length;
 async function showEvent(e, keepState) {
   ticket();
   const MON = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
   const trees = {}; for (const id of Object.keys(BOOKS)) trees[id] = await loadTree(id, admLang);
-  const find = r => { const { id, n } = parseRef(r); for (const c of trees[id]) { const x = c.songs.find(s => s.n === n); if (x) return { ...x, id, chap: (id === 'dns' ? c.n + '. ' : '') + c.t, book: BOOKS[id].short }; } return null; };
+  // other songs (not in the app) are kept by the admin page, so they can be used again: "other:<id>" in the list
+  const others = (await guard(() => api.otherSongs())) || [];
+  const oById = new Map(others.map(o => [o.id, o]));
+  const find = r => {
+    if (r.startsWith('other:')) { const o = oById.get(r.slice(6)); return o ? { ...o, other: true } : null; }
+    const { id, n } = parseRef(r); for (const c of trees[id]) { const x = c.songs.find(s => s.n === n); if (x) return { ...x, id, chap: (id === 'dns' ? c.n + '. ' : '') + c.t, book: BOOKS[id].short }; } return null; };
   let f = { nm: e ? e.name : '', pl: e ? e.place : '', d1: e ? (e.first_day || e.last_day) : '', d2: e ? e.last_day : '', wt: e ? e.when_text : '', yt: e ? (e.live_url || '') : '' };
   // chap/dec '*' = the whole book / the whole work. sel = songs ticked but not yet added (kept while moving between chapters and books)
   let picked = String((e && e.songs) || '').split(/[,\s]+/).filter(r => r && find(r)), ps = newPick(), first = true;
-  if (keepState) { f = keepState.f; picked = keepState.picked; ps = keepState.ps; }   // after a language switch
-  const keep = () => { for (const k of ['nm', 'pl', 'd1', 'd2', 'wt', 'yt']) { const el = document.getElementById(k); if (el) f[k] = el.value; } };
+  const blankOther = () => ({ id: null, lib: '', title: '', about: '', lyrics: '', editing: false, err: '' });
+  let of = blankOther();   // the other-song card
+  if (keepState) { f = keepState.f; picked = keepState.picked; ps = keepState.ps; if (keepState.of) of = keepState.of; }   // after a language switch
+  const keep = () => {
+    for (const k of ['nm', 'pl', 'd1', 'd2', 'wt', 'yt']) { const el = document.getElementById(k); if (el) f[k] = el.value; }
+    const v = id => { const el = document.getElementById(id); return el ? el.value : null; };
+    if (v('on') !== null) { of.title = v('on'); of.about = v('oa'); of.lyrics = v('ol'); }
+  };
+  const otherCard = () => `<div class="card add-box oc" id="oc"><div class="lbl" style="margin:0">${of.editing ? 'CHANGE AN OTHER SONG' : 'OR ADD AN OTHER SONG (NOT IN THE APP)'}</div>
+    <div class="hint">For songs that are not in the app. Paste the words from WhatsApp, a website or a document, in any language; they show in the app exactly as pasted.</div>
+    ${!of.editing && others.length ? `<label class="f">Use a song added before<select id="olib"><option value="">Choose… (or type a new song below)</option>${others.map(o => `<option value="${esc(o.id)}" ${of.lib === o.id ? 'selected' : ''}>${esc(o.title)}${picked.includes('other:' + o.id) ? ' · in the list' : ''}</option>`).join('')}</select></label>` : ''}
+    <label class="f">Song name<input id="on" maxlength="80" value="${esc(of.title)}" placeholder="e.g. Vitthala Vitthala Panduranga"></label>
+    <label class="f">About the song (one or two sentences)<textarea id="oa" class="oa" maxlength="200" placeholder="e.g. A Marathi abhang on Lord Vitthala.">${esc(of.about)}</textarea></label>
+    <label class="f">Lyrics (paste here)<textarea id="ol" class="ly" maxlength="8000" placeholder="Paste the words here, in any language. Keep a blank line between verses.">${esc(of.lyrics)}</textarea></label>
+    <div class="pk-bar"><span class="hint" id="oli"></span><span class="pk-n" id="oac"></span></div>
+    <div class="hint oc-tip">When you add, extra spaces and runs of empty lines from the paste are tidied away; the verse breaks you keep stay. Songs you add are kept, so you can use them again at a later satsang.</div>
+    <div class="err" id="oer">${esc(of.err)}</div>
+    <div class="pair">${of.editing ? '<button class="btn line" id="ocx">Cancel</button>' : ''}<button class="btn deep" id="oad">${of.editing ? 'Save changes' : '+ Add to the list'}</button></div></div>`;
+  const row = (r, i) => { const x = find(r);
+    const mid = x.other
+      ? `<span class="rt"><b>${esc(x.title)}</b><span><span class="otag">Other song · not in the app</span>${esc((x.about ? x.about + ' · ' : '') + (x.lyrics ? lyricLines(x.lyrics) + ' lines of lyrics' : 'No lyrics yet'))}</span></span>
+         <button class="q-btn" data-ed="${i}" aria-label="Change this song">${ICON.pen}</button>`
+      : `<span class="rt"><b>${esc(x.title)}</b><span>${esc(x.n + ' · ' + x.book + ' · ' + x.chap)}</span></span>`;
+    return `<div class="q-row" data-i="${i}"${of.editing && picked[i] === 'other:' + of.id ? ' style="background:#FFF6E2"' : ''}>
+        <span class="q-grip" title="Drag to move" aria-label="Drag to move">${ICON.grip}</span>
+        <span class="q-pos">${i + 1}</span>${mid}
+        <button class="q-btn" data-up="${i}" aria-label="Move up" ${i ? '' : 'disabled'}>${ICON.up}</button><button class="q-btn" data-dn="${i}" aria-label="Move down" ${i < picked.length - 1 ? '' : 'disabled'}>${ICON.down}</button>
+        <button class="q-btn x" data-rm="${i}" aria-label="Remove">${ICON.x}</button></div>`; };
   const draw = () => {
     const y = first ? (keepState ? keepState.y : 0) : scrollY; first = false;
     page(e ? 'Edit satsang' : 'Add satsang', `
@@ -866,20 +912,46 @@ async function showEvent(e, keepState) {
     <label class="f">YouTube live link (optional)<input id="yt" type="url" inputmode="url" value="${esc(f.yt)}" placeholder="https://youtube.com/live/…"></label>
     <div class="hint">Paste the link of the live stream. Devotees get a “Watch live on YouTube” button, which opens the YouTube app, and a Share button.</div>
     ${langPicker(['en', 'ta'])}
-    ${pickerHtml(trees, ps, picked, '1 · CHOOSE SONGS', 'to the list')}
+    ${pickerHtml(trees, ps, picked, '1 · CHOOSE SONGS FROM THE BOOKS', 'to the list')}
+    ${otherCard()}
     <div class="lbl">2 · SONGS TO BE SUNG · ${picked.length}</div>
-    <div class="card q-list" id="ql">${picked.length ? picked.map((r, i) => { const x = find(r); return `<div class="q-row" data-i="${i}">
-        <span class="q-grip" title="Drag to move" aria-label="Drag to move">${ICON.grip}</span>
-        <span class="q-pos">${i + 1}</span><span class="rt"><b>${esc(x.title)}</b><span>${esc(x.n + ' · ' + x.book + ' · ' + x.chap)}</span></span>
-        <button class="q-btn" data-up="${i}" aria-label="Move up" ${i ? '' : 'disabled'}>${ICON.up}</button><button class="q-btn" data-dn="${i}" aria-label="Move down" ${i < picked.length - 1 ? '' : 'disabled'}>${ICON.down}</button>
-        <button class="q-btn x" data-rm="${i}" aria-label="Remove">${ICON.x}</button></div>`; }).join('')
+    <div class="card q-list" id="ql">${picked.length ? picked.map(row).join('')
       : '<div class="empty">No songs yet. Choose them above; they are added in book order and you can then move them.</div>'}</div>
-    <div class="hint">Drag ☰ or use the arrows to change the order. Devotees see this list under Upcoming Satsangs, in this order, with the words and recordings of each song.</div>
+    <div class="hint">Drag ☰ or use the arrows to change the order. Book songs and other songs sit in one list. Tap the pencil to change an other song or its lyrics. Devotees see this list under Upcoming Satsangs, in this order.</div>
     <div class="err" id="er"></div>
     <button class="btn deep" id="sv">Save</button>${e ? '<button class="btn bad" id="dl">Delete</button>' : ''}`, { back: showContent });
     if (y) scrollTo(0, y);
-    wireLang(() => { keep(); showEvent(e, { f, picked, ps, y: scrollY }); });   // stays where it was, keeps unsaved changes and ticks
+    wireLang(() => { keep(); showEvent(e, { f, picked, ps, of, y: scrollY }); });   // stays where it was, keeps unsaved changes and ticks
     wirePicker(trees, ps, picked, refs => { keep(); picked.push(...refs); draw(); }, () => { keep(); draw(); });
+    // other songs: live counts while typing (no redraw)
+    const oa = document.getElementById('oa'), ol = document.getElementById('ol');
+    const counts = () => { document.getElementById('oac').textContent = 'About: ' + oa.value.length + ' / 200';
+      const n = lyricLines(ol.value); document.getElementById('oli').textContent = n ? n + ' lines pasted' : 'No lyrics yet (you can add them later)'; };
+    oa.oninput = counts; ol.oninput = counts; counts();
+    document.getElementById('on').oninput = () => { document.getElementById('oer').textContent = ''; };
+    const lib = document.getElementById('olib');
+    if (lib) lib.onchange = () => { keep(); const o = oById.get(lib.value);
+      of = o ? { id: o.id, lib: o.id, title: o.title, about: o.about || '', lyrics: o.lyrics || '', editing: false, err: '' } : blankOther(); draw(); };
+    const ocx = document.getElementById('ocx'); if (ocx) ocx.onclick = () => { keep(); of = blankOther(); draw(); };
+    document.getElementById('oad').onclick = async () => {
+      keep();
+      const title = of.title.trim();
+      if (!title) { document.getElementById('oer').textContent = 'Please type the song name.'; document.getElementById('on').focus(); return; }
+      const o = { id: of.id, title, about: of.about.trim().replace(/\s+/g, ' '), lyrics: tidyLyrics(of.lyrics) };
+      const btn = document.getElementById('oad'); btn.disabled = true;
+      const id = await guard(() => api.saveOtherSong(o)); btn.disabled = false;
+      if (!id) return;
+      const rec = { ...o, id };
+      const k = others.findIndex(x => x.id === id); if (k >= 0) others[k] = rec; else { others.push(rec); others.sort((a, b) => a.title.localeCompare(b.title)); }
+      oById.set(id, rec);
+      const r = 'other:' + id, was = of.editing;
+      if (!picked.includes(r)) picked.push(r);
+      of = blankOther(); draw();
+      toast(was ? 'Song changed' : picked.indexOf(r) === picked.length - 1 ? 'Added to the list' : 'Already in the list');
+    };
+    on('[data-ed]', 'click', ev => { keep(); const o = oById.get(picked[+ev.currentTarget.dataset.ed].slice(6)); if (!o) return;
+      of = { id: o.id, lib: '', title: o.title, about: o.about || '', lyrics: o.lyrics || '', editing: true, err: '' }; draw();
+      document.getElementById('oc').scrollIntoView({ block: 'start' }); scrollBy(0, -80); });
     const d1 = document.getElementById('d1'), d2 = document.getElementById('d2'), wt = document.getElementById('wt');
     const auto = () => {
       if (!d1.value) return; if (!d2.value || d2.value < d1.value) d2.value = d1.value;
@@ -889,14 +961,16 @@ async function showEvent(e, keepState) {
     d1.onchange = auto; d2.onchange = auto; wt.oninput = () => { wt.dataset.typed = 1; };
     on('[data-up]', 'click', ev => { keep(); const i = +ev.currentTarget.dataset.up; [picked[i - 1], picked[i]] = [picked[i], picked[i - 1]]; draw(); });
     on('[data-dn]', 'click', ev => { keep(); const i = +ev.currentTarget.dataset.dn; [picked[i + 1], picked[i]] = [picked[i], picked[i + 1]]; draw(); });
-    on('[data-rm]', 'click', ev => { keep(); picked.splice(+ev.currentTarget.dataset.rm, 1); draw(); });
+    on('[data-rm]', 'click', ev => { keep(); const r = picked.splice(+ev.currentTarget.dataset.rm, 1)[0]; if (of.editing && r === 'other:' + of.id) of = blankOther(); draw(); });
     dragToReorder(document.getElementById('ql'), (from, to) => { keep(); const [m] = picked.splice(from, 1); picked.splice(to, 0, m); draw(); });
     document.getElementById('sv').onclick = async () => {
+      keep();
       const nm = document.getElementById('nm').value.trim(), pl = document.getElementById('pl').value.trim();
       if (!nm || !pl || !d1.value) return (document.getElementById('er').textContent = 'Please fill in the name, place and first day.');
       const yt = document.getElementById('yt').value.trim();
       if (yt && !/^https:\/\/(www\.|m\.)?(youtube\.com|youtu\.be)\/\S+$/.test(yt)) return (document.getElementById('er').textContent = 'Please paste a YouTube link (https://youtube.com/… or https://youtu.be/…).');
       if (!(await tickedNotAdded(ps))) return;
+      if (of.title.trim() && !of.editing && !picked.includes('other:' + of.id) && !(await ask('The other song “' + of.title.trim() + '” is not added to the list yet. Save without it?', 'Save anyway'))) return;
       auto();
       const a = new Date(d1.value + 'T12:00'), b = new Date(d2.value + 'T12:00');
       const ok = await guard(async () => { await api.saveEvent({ id: e && e.id, first_day: d1.value, last_day: d2.value, when_text: wt.value.trim(), month: MON[a.getMonth()],
