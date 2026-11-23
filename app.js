@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.20';
+const WEB_VERSION = '4.21';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -1531,8 +1531,16 @@ async function tfdsIn(lang) {
 }
 const tfdSeg = () => `<div class="tfd-seg" role="group" aria-label="Language of the thoughts" data-notr>` + TFD_LANGS.map(([c, n]) =>
   `<button class="${c === tfdLang ? 'on' : ''}" data-tl="${c}" aria-pressed="${c === tfdLang}" lang="${c}">${n}</button>`).join('') + '</div>';
+let tfdKeepY = null;
 function wireTfdSeg(redraw) {
-  document.querySelectorAll('[data-tl]').forEach(b => b.onclick = () => { if (tfdLang === b.dataset.tl) return; tfdLang = b.dataset.tl; store.set('tfdLang', tfdLang); redraw(); });
+  // 4.21: the page stays exactly where it was when the language changes (never jumps)
+  document.querySelectorAll('[data-tl]').forEach(b => b.onclick = async () => {
+    if (tfdLang === b.dataset.tl) return;
+    const sc = $('tfd-scroll'), y = sc ? sc.scrollTop : 0;
+    tfdLang = b.dataset.tl; store.set('tfdLang', tfdLang);
+    tfdKeepY = y; try { await redraw(); } finally { tfdKeepY = null; }
+    if (sc) sc.scrollTop = y;
+  });
 }
 const TFD_SOON = { ta: 'இந்தச் சிந்தனையின் தமிழ் மொழிபெயர்ப்பு விரைவில் வரும். இப்போது ஆங்கிலத்தில்:', kn: 'ಈ ಚಿಂತನೆಯ ಕನ್ನಡ ಅನುವಾದ ಶೀಘ್ರದಲ್ಲೇ ಬರಲಿದೆ. ಈಗ ಇಂಗ್ಲಿಷ್‌ನಲ್ಲಿ:' };
 async function tfds(lang) {
@@ -1817,7 +1825,8 @@ async function showTfdList() {
     const el = $('tfd-box').querySelector(`[data-go="#tfd/${CSS.escape(tfdFocus)}"]`);
     sc.scrollTop = el ? Math.max(0, el.offsetTop - 140) : tfdListY;
     if (el) { el.classList.add('was'); setTimeout(() => el.classList.remove('was'), 1600); }
-  } else if (!q) sc.scrollTop = tfdBack ? tfdListY : 0;
+  } else if (tfdKeepY != null) sc.scrollTop = tfdKeepY;   // language changed: stay put
+  else if (!q) sc.scrollTop = tfdBack ? tfdListY : 0;
   tfdFocus = null; tfdBack = false;
   wireTfdSeg(showTfdList);
 }
@@ -1937,7 +1946,7 @@ async function showTfd(number) {
       ttsSpeak([t.title].concat(t.paras.filter(p => !/^[\u0900-\u097F\s।॥0-9.,]+$/.test(p))), lang);   // Devanagari verses are skipped
     };
   }
-  if (fresh) $('tfd-scroll').scrollTop = 0;
+  if (tfdKeepY != null) $('tfd-scroll').scrollTop = tfdKeepY; else if (fresh) $('tfd-scroll').scrollTop = 0;
   if (ACCESS.url) loadReactions(+t.number);
   $('tfd-box').querySelectorAll('[data-tfd]').forEach(b => { b.onclick = () => { replaceHash('#tfd/' + b.dataset.tfd); showTfd(b.dataset.tfd); }; });   // Back still goes where you came from
   $('t-all').onclick = () => {
