@@ -868,3 +868,6 @@ body.night .o-tag { color: #E8B865; background: #3A3120; }
 .pl-row .o-tag { flex-shrink: 0; }
 body.secure #v-other .scroll { background-image: var(--wm); background-repeat: repeat; background-attachment: local; }
 body.secure #v-other .text, body.secure #v-other .o-title { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+
+/* 4.19 · SCRUM-103: "Content updated: …" on its own line */
+#version-info { white-space: pre-line; }

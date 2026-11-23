@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.18';
+const WEB_VERSION = '4.19';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -60,7 +60,7 @@ function fetchText(name) {
 let openCommunityP = null;
 function openCommunity(file) {
   if (!openCommunityP) openCommunityP = fetch(REC_URL + '/rest/v1/rpc/app_community', { method: 'POST', headers: { apikey: REC_KEY, 'Content-Type': 'application/json' }, body: '{}' })
-    .then(r => r.ok ? r.json() : null).catch(() => null);
+    .then(r => r.ok ? r.json() : null).then(r => { if (r && r.version != null) seenContent('comm', r.version); return r; }).catch(() => null);
   const github = () => fetch('community/' + file, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(file + ' ' + r.status); return r.text(); });
   return openCommunityP.then(r => r && typeof r[file] === 'string' ? r[file] : github());
 }
@@ -140,7 +140,7 @@ const REC_URL = 'https://rjjpgxiyncgjrwmvnbhg.supabase.co', REC_KEY = 'sb_publis
 let recP = null;
 function adminRecordings() {
   if (!recP) recP = fetch(REC_URL + '/rest/v1/rpc/app_recordings', { method: 'POST', headers: { apikey: REC_KEY, 'Content-Type': 'application/json' }, body: '{}' })
-    .then(r => r.ok ? r.json() : Promise.reject(r.status)).then(l => { store.set('recs', l); return l; })
+    .then(r => r.ok ? r.json() : Promise.reject(r.status)).then(l => { store.set('recs', l); seenContent('recs', l.map(x => x.path + '@' + x.at).sort().join(',')); return l; })
     .catch(() => store.get('recs', []));
   return recP;
 }
@@ -733,9 +733,9 @@ function togglePlay() {
   a.addEventListener('play', () => { setPlayIcon(true); cpState('Playing'); });
   a.addEventListener('pause', () => { setPlayIcon(false); if (a.getAttribute('src')) cpState('Paused'); });
   a.addEventListener('playing', () => { $('audio-status').textContent = ''; });
-  a.addEventListener('loadedmetadata', () => { $('len').textContent = fmt(a.duration); seek.disabled = false; });
+  a.addEventListener('loadedmetadata', () => { const ok = isFinite(a.duration); $('len').textContent = ok ? fmt(a.duration) : '–:––'; seek.disabled = !ok; });   // SCRUM-101: a file without its length
   a.addEventListener('timeupdate', () => {
-    if (seeking || !a.duration) return;
+    if (seeking || !a.duration || !isFinite(a.duration)) return;
     seek.value = Math.round(1000 * a.currentTime / a.duration); setSeekFill(seek.value);
     $('pos').textContent = fmt(a.currentTime);
   });
@@ -796,7 +796,7 @@ function openSettings() {
   const ver = f => fetchText(f).then(t => (t.match(/version=(\d+)/) || [])[1] || '?').catch(() => '?');
   Promise.all([ver('manifest.txt'), ver('ashtapathy/manifest.txt'), ver('prabandham/manifest.txt')]).then(([a, b, c]) => {
     $('admin-link').classList.remove('hidden');   // the admin page asks admins to sign in
-    $('version-info').textContent = 'Web app ' + WEB_VERSION + '  ·  Divyanama content ' + a + '  ·  Ashtapathy content ' + b + '  ·  Prabandham content ' + c;
+    $('version-info').textContent = (store.get('contentAt', 0) ? 'Content updated: ' + new Date(store.get('contentAt', 0)).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }) + '\n' : '') + 'Web app ' + WEB_VERSION + '  ·  Divyanama content ' + a + '  ·  Ashtapathy content ' + b + '  ·  Prabandham content ' + c;
   });
   showView('v-settings');
 }
@@ -1047,7 +1047,7 @@ $('lg-code').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin()
 $('lk-go').onclick = retryLocked;
 document.querySelectorAll('[data-about]').forEach(b => { b.onclick = () => go('#about'); });
 
-// feedback & suggestions: goes only to Janakiraman Ji, by WhatsApp or email (nothing is stored anywhere)
+// feedback & suggestions: goes only to Shri Janakiraman (Jani), by WhatsApp or email (nothing is stored anywhere)
 const FEEDBACK_WHATSAPP = '919845204620', FEEDBACK_EMAIL = 'utah.ram@gmail.com';
 let fbKind = 'Suggestion';
 document.querySelectorAll('.fb-k').forEach(b => { b.onclick = () => {
@@ -1065,12 +1065,35 @@ $('fb-wa').onclick = () => sendFeedback(true);
 $('fb-em').onclick = () => sendFeedback(false);
 
 // ---------- start ----------
+// ---------- 4.19 · SCRUM-103: "Contents updated" when new songs, satsangs, thoughts or recordings arrive ----------
+let updToastAt = 0;
+function contentChanged() {
+  store.set('contentAt', Date.now());
+  const n = Date.now(); if (n - updToastAt < 4000) return; updToastAt = n;   // several kinds often arrive together: one message
+  setTimeout(() => toast(tr('Contents updated')), 400);
+}
+/** Remembers what this phone has; a later change shows the message (never on the first open after installing). */
+function seenContent(key, value) {
+  value = String(value); const k = 'seen.' + key, old = store.get(k, null);
+  if (old === value) return;
+  store.set(k, value);
+  if (old !== null) contentChanged();
+}
+window.seenContent = seenContent;
+async function checkUpdates() {
+  for (const b of ['', 'ashtapathy/', 'prabandham/']) {
+    try { const t = await fetch(b + 'manifest.txt', { cache: 'no-store' }).then(r => r.ok ? r.text() : ''); const v = (t.match(/version=(\d+)/) || [])[1]; if (v) seenContent('man.' + (b || 'dns/'), v); } catch (e) { }
+  }
+  adminRecordings();
+  fetchText('community/events.txt').catch(() => {});   // also brings the satsangs/Learn/thoughts version
+}
 async function start() {
   applyLook();
   document.querySelectorAll('[data-back]').forEach(b => { b.onclick = () => back(); });
   if (!location.hash) splash();
   await accessStart();
   route();
+  setTimeout(checkUpdates, 2500);   // SCRUM-103
   if (accessState !== 'open') return;   // sign in first; welcome comes after
   if (!store.get('interestsDone', false)) go('#welcome');
   else if (!prefs.setupDone) go('#settings');
@@ -1081,7 +1104,7 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(() => {});
   });
   navigator.serviceWorker.addEventListener('message', e => {
-    if (e.data === 'content-updated') toast('Songs and meanings updated');
+    if (e.data === 'content-updated') contentChanged();
   });
 }
 const ICONS = {"scroll": "<path d=\"M7,4h11a2,2 0,0 1,2 2v1h-3 M7,4a2,2 0,0 0,-2 2v12a2,2 0,0 0,2 2h10a2,2 0,0 0,2 -2V7 M7,4a2,2 0,0 1,2 2v12a2,2 0,0 1,-2 2 M11,9h5 M11,12h5 M11,15h3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "book": "<path d=\"M4,19.5A2.5,2.5 0,0 1,6.5 17H20V3H6.5A2.5,2.5 0,0 0,4 5.5v14zM8,7h8M8,11h6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "lotus": "<path d=\"M12,3c2,3 2,6 0,9 -2,-3 -2,-6 0,-9z M12,12c3,-2 6,-2 8,0 -2,3 -5,3 -8,0z M12,12c-3,-2 -6,-2 -8,0 2,3 5,3 8,0z M5,17h14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "music": "<path d=\"M9,18V5l12,-2v13 M3,18a3,3 0,1 0,6 0a3,3 0,1 0,-6 0 M15,16a3,3 0,1 0,6 0a3,3 0,1 0,-6 0\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "phone": "<path d=\"M22,16.9v3a2,2 0,0 1,-2.2 2 19.8,19.8 0,0 1,-8.6 -3.1 19.5,19.5 0,0 1,-6 -6A19.8,19.8 0,0 1,2.1 4.2 2,2 0,0 1,4.1 2h3a2,2 0,0 1,2 1.7c0.1,0.9 0.4,1.8 0.7,2.7a2,2 0,0 1,-0.5 2.1L8,9.8a16,16 0,0 0,6 6l1.3,-1.3a2,2 0,0 1,2.1 -0.4c0.9,0.3 1.8,0.6 2.7,0.7a2,2 0,0 1,1.7 2z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "mail": "<path d=\"M5,4h14a3,3 0,0 1,3 3v10a3,3 0,0 1,-3 3H5a3,3 0,0 1,-3 -3V7a3,3 0,0 1,3 -3z M3,6l9,7 9,-7\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "chat": "<path d=\"M21,15a2,2 0,0 1,-2 2H7l-4,4V5a2,2 0,0 1,2 -2h14a2,2 0,0 1,2 2z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "chevron": "<path d=\"M9,6l6,6 -6,6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "calendar": "<path d=\"M6,5h12a3,3 0,0 1,3 3v10a3,3 0,0 1,-3 3H6a3,3 0,0 1,-3 -3V8a3,3 0,0 1,3 -3z M3,10h18 M8,3v4 M16,3v4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "check": "<path d=\"M5,12.5l4.5,4.5L19,7.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "class": "<path d=\"M2,9l10,-5 10,5 -10,5z M6,11v5c3,3 9,3 12,0v-5 M22,9v6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "event": "<path d=\"M6,5h12a3,3 0,0 1,3 3v10a3,3 0,0 1,-3 3H6a3,3 0,0 1,-3 -3V8a3,3 0,0 1,3 -3z M3,10h18 M8,3v4 M16,3v4 M12,12.5l1.2,2.4 2.6,0.4 -1.9,1.8 0.5,2.6 -2.4,-1.3 -2.4,1.3 0.5,-2.6 -1.9,-1.8 2.6,-0.4z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "feather": "<path d=\"M20,4c-6,0 -12,4 -14,12l-2,4 M20,4c0,6 -4,12 -12,14 M20,4L8,16 M14,7l1,4 M11,10l1,3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "heart": "<path d=\"M20.8,4.6a5.5,5.5 0,0 0,-7.8 0L12,5.7l-1,-1.1a5.5,5.5 0,0 0,-7.8 7.8l1,1.1L12,21l7.8,-7.6 1,-1.1a5.5,5.5 0,0 0,0 -7.8z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "heart_on": "<path d=\"M20.8,4.6a5.5,5.5 0,0 0,-7.8 0L12,5.7l-1,-1.1a5.5,5.5 0,0 0,-7.8 7.8l1,1.1L12,21l7.8,-7.6 1,-1.1a5.5,5.5 0,0 0,0 -7.8z\" fill=\"currentColor\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "history": "<path d=\"M3,12a9,9 0,1 0,3 -6.7 M3,4v5h5 M12,8v4l3,2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "home": "<path d=\"M3,10.5L12,3l9,7.5 M5,9v11a1,1 0,0 0,1 1h4v-6h4v6h4a1,1 0,0 0,1 -1V9\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "photo": "<path d=\"M5,4h14a2,2 0,0 1,2 2v12a2,2 0,0 1,-2 2H5a2,2 0,0 1,-2 -2V6a2,2 0,0 1,2 -2z M8.5,10a1.5,1.5 0,1 0,0 -3a1.5,1.5 0,1 0,0 3z M21,15l-5,-5L5,20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "pin": "<path d=\"M12,22s7,-6.5 7,-12a7,7 0,0 0,-14 0c0,5.5 7,12 7,12z M12,12.5a2.5,2.5 0,1 0,0 -5a2.5,2.5 0,1 0,0 5z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "play": "<path d=\"M8,5l11,7 -11,7z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "share": "<path d=\"M18,8a3,3 0,1 0,0 -6a3,3 0,1 0,0 6z M6,15a3,3 0,1 0,0 -6a3,3 0,1 0,0 6z M18,22a3,3 0,1 0,0 -6a3,3 0,1 0,0 6z M8.6,13.5l6.8,4 M15.4,6.5l-6.8,4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "user": "<path d=\"M20,21v-2a4,4 0,0 0,-4 -4H8a4,4 0,0 0,-4 4v2 M12,11a4,4 0,1 0,0 -8a4,4 0,1 0,0 8z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "video": "<path d=\"M4,6h11a2,2 0,0 1,2 2v8a2,2 0,0 1,-2 2H4a2,2 0,0 1,-2 -2V8a2,2 0,0 1,2 -2z M17,10.5l5,-3v9l-5,-3z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>", "settings": "<path d=\"M19.14,12.94c0.04,-0.3 0.06,-0.61 0.06,-0.94c0,-0.32 -0.02,-0.64 -0.07,-0.94l2.03,-1.58c0.18,-0.14 0.23,-0.41 0.12,-0.61l-1.92,-3.32c-0.12,-0.22 -0.37,-0.29 -0.59,-0.22l-2.39,0.96c-0.5,-0.38 -1.03,-0.7 -1.62,-0.94L14.4,2.81c-0.04,-0.24 -0.24,-0.41 -0.48,-0.41h-3.84c-0.24,0 -0.43,0.17 -0.47,0.41L9.25,5.35C8.66,5.59 8.12,5.92 7.63,6.29L5.24,5.33c-0.22,-0.08 -0.47,0 -0.59,0.22L2.74,8.87C2.62,9.08 2.66,9.34 2.86,9.48l2.03,1.58C4.84,11.36 4.8,11.69 4.8,12s0.02,0.64 0.07,0.94l-2.03,1.58c-0.18,0.14 -0.23,0.41 -0.12,0.61l1.92,3.32c0.12,0.22 0.37,0.29 0.59,0.22l2.39,-0.96c0.5,0.38 1.03,0.7 1.62,0.94l0.36,2.54c0.05,0.24 0.24,0.41 0.48,0.41h3.84c0.24,0 0.44,-0.17 0.47,-0.41l0.36,-2.54c0.59,-0.24 1.13,-0.56 1.62,-0.94l2.39,0.96c0.22,0.08 0.47,0 0.59,-0.22l1.92,-3.32c0.12,-0.22 0.07,-0.47 -0.12,-0.61L19.14,12.94zM12,15.6c-1.98,0 -3.6,-1.62 -3.6,-3.6s1.62,-3.6 3.6,-3.6s3.6,1.62 3.6,3.6S13.98,15.6 12,15.6z\" fill=\"currentColor\"/>", "back": "<path d=\"M15.4,5.4L14,4l-8,8 8,8 1.4,-1.4L8.8,12z\" fill=\"currentColor\"/>", "close": "<path d=\"M19,6.41L17.59,5 12,10.59 6.41,5 5,6.41 10.59,12 5,17.59 6.41,19 12,13.41 17.59,19 19,17.59 13.41,12z\" fill=\"currentColor\"/>"};
@@ -1300,10 +1323,11 @@ const I18N = {
   'MY PROGRESS': ['என் முன்னேற்றம்', 'ನನ್ನ ಪ್ರಗತಿ', 'मम प्रगतिः'],
   'Hide my progress': ['என் முன்னேற்றத்தை மறை', 'ನನ್ನ ಪ್ರಗತಿ ಮರೆಮಾಡಿ', 'मम प्रगतिं गोपयत'],
   'Show my progress': ['என் முன்னேற்றத்தைக் காட்டு', 'ನನ್ನ ಪ್ರಗತಿ ತೋರಿಸಿ', 'मम प्रगतिं दर्शयत'],
-  'THIS WEEK’S SONGS FROM JANAKIRAMAN JI': ['ஜானகிராமன் ஜியின் இந்த வாரப் பாடல்கள்', 'ಜಾನಕಿರಾಮನ್ ಜಿ ಅವರ ಈ ವಾರದ ಹಾಡುಗಳು', 'जानकिरामन्-महोदयस्य अस्य सप्ताहस्य गीतानि'],
+  'THIS WEEK’S SONGS FROM SHRI JANAKIRAMAN (JANI)': ['ஸ்ரீ ஜானகிராமன் (ஜானி) அவர்களின் இந்த வாரப் பாடல்கள்', 'ಶ್ರೀ ಜಾನಕಿರಾಮನ್ (ಜಾನಿ) ಅವರ ಈ ವಾರದ ಹಾಡುಗಳು', 'श्रीजानकिरामन् (जानि) महोदयस्य अस्य सप्ताहस्य गीतानि'],
   'Tick a song when you can sing it. Only you see this.': ['பாட முடிந்ததும் பாடலைக் குறியிடுங்கள். இது உங்களுக்கு மட்டுமே தெரியும்.', 'ಹಾಡಲು ಬಂದಾಗ ಹಾಡನ್ನು ಗುರುತಿಸಿ. ಇದು ನಿಮಗೆ ಮಾತ್ರ ಕಾಣುತ್ತದೆ.', 'यदा गातुं शक्नुथ तदा गीतं चिह्नयत। एतत् भवद्भिः एव दृश्यते।'],
   'All of this week’s songs. Wonderful!': ['இந்த வாரப் பாடல்கள் அனைத்தும். அருமை!', 'ಈ ವಾರದ ಎಲ್ಲಾ ಹಾಡುಗಳು. ಅದ್ಭುತ!', 'अस्य सप्ताहस्य सर्वाणि गीतानि। अद्भुतम्!'],
-  'Message from Janakiraman Ji': ['ஜானகிராமன் ஜியின் செய்தி', 'ಜಾನಕಿರಾಮನ್ ಜಿ ಅವರ ಸಂದೇಶ', 'जानकिरामन्-महोदयस्य सन्देशः'],
+  'Contents updated': ['உள்ளடக்கம் புதுப்பிக்கப்பட்டது', 'ವಿಷಯಗಳು ನವೀಕರಿಸಲಾಗಿದೆ', 'विषयाः नवीकृताः'],
+  'Message from Shri Janakiraman (Jani)': ['ஸ்ரீ ஜானகிராமன் (ஜானி) அவர்களின் செய்தி', 'ಶ್ರೀ ಜಾನಕಿರಾಮನ್ (ಜಾನಿ) ಅವರ ಸಂದೇಶ', 'श्रीजानकिरामन् (जानि) महोदयस्य सन्देशः'],
   'About this week’s songs': ['இந்த வாரப் பாடல்கள் பற்றி', 'ಈ ವಾರದ ಹಾಡುಗಳ ಬಗ್ಗೆ', 'अस्य सप्ताहस्य गीतविषये'],
   'Audio message · coming soon': ['ஒலிச் செய்தி · விரைவில்', 'ಧ್ವನಿ ಸಂದೇಶ · ಶೀಘ್ರದಲ್ಲೇ', 'श्रव्यसन्देशः · शीघ्रम्'],
   'No favourites yet': ['இன்னும் பிடித்தவை இல்லை', 'ಇನ್ನೂ ಮೆಚ್ಚಿನವು ಇಲ್ಲ', 'अद्यापि प्रियाणि न सन्ति'],
@@ -1354,7 +1378,7 @@ const TR_KEEP = new Set(['A doorway to the Lord’s Name', 'Divya Nama Sankeerta
   'Bhajans of many saints', '4000 pāsurams of the Āzhvārs', 'The life and story of the saint who composed this song will be added here.',
   'Continue', 'Your phone number', 'Invite code', 'Welcome to Harinamadwar', 'Enter the code you received on WhatsApp',
   'No code? Ask your satsang admin.', 'I understand', 'For our class only', 'Tick a song when you can sing it. Only you see this.',
-  'All of this week’s songs. Wonderful!', 'Message from Janakiraman Ji', 'About this week’s songs',
+  'All of this week’s songs. Wonderful!', 'Contents updated', 'Message from Shri Janakiraman (Jani)', 'About this week’s songs',
   'Tap a song to open it. Tap the heart to remove it.', 'No satsangs announced yet. Please check again soon.',
   'How did this thought touch you?', 'New thoughts will appear here as they are shared.', 'The meaning of this song will be added soon.',
   'A recording of this song will be added soon.', 'Could not load. Please check the internet.', 'How would you like to use Harinamadwar?',
@@ -1716,14 +1740,14 @@ async function showLearn() {
     `<span class="mut">${prac.length && done >= prac.length ? 'All of this week’s songs. Wonderful!' : 'Tick a song when you can sing it. Only you see this.'}</span></span></div>`);
   out.push(`<button class="l-toggle" id="l-toggle">${showP ? 'Hide my progress' : 'Show my progress'}</button>`);
   // tap the name: the song's lyrics · tap ▶: the song's recording (Audio tab) · Back returns here
-  out.push(`<span class="lbl sect">THIS WEEK’S SONGS FROM JANAKIRAMAN JI</span><div class="card list">` + list.map(s => {
+  out.push(`<span class="lbl sect">THIS WEEK’S SONGS FROM SHRI JANAKIRAMAN (JANI)</span><div class="card list">` + list.map(s => {
     const on = learnt(s.ref);
     return `<div class="l-row"><button class="tickbox${on ? ' on' : ''}" data-n="${esc(s.ref)}" aria-label="${on ? 'I can sing this' : 'Mark as a song I can sing'}">${on ? svgI('check') : ''}</button>` +
       `<button class="hc-t l-open" data-go="${esc(s.hash)}" data-open-tab="0"><b>${esc(s.title)}</b><span class="mut">${esc(s.sub)}</span></button>` +
       `<button class="ibadge" data-go="${esc(s.hash)}" data-open-tab="2" aria-label="Listen to ${esc(s.title)}">${svgI('play')}</button></div>`;
   }).join('') + `</div>`);
   // Record with sruti: on hold for now (feature kept in sruti.html)
-  out.push(`<div class="l-msg"><img src="icons/about-jk.jpg" alt=""><span class="hc-t"><span class="l-msg-l">Message from Janakiraman Ji</span><b>About this week’s songs</b><span class="soon">Audio message · coming soon</span></span></div>`);
+  out.push(`<div class="l-msg"><img src="icons/about-jk.jpg" alt=""><span class="hc-t"><span class="l-msg-l">Message from Shri Janakiraman (Jani)</span><b>About this week’s songs</b><span class="soon">Audio message · coming soon</span></span></div>`);
   $('learn-box').innerHTML = out.join('');
   restoreScroll('v-learn');
   $('l-toggle').onclick = () => { store.set('showProgress', !showP); keepScroll('learn', showLearn); };

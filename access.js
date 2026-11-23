@@ -180,7 +180,7 @@ function applyWatermark() {
 let communityP = null;
 function communityFile(name) {
   if (!communityP) {
-    communityP = rpc('app_community').then(r => { acc.set('community', r); return r; })
+    communityP = rpc('app_community').then(r => { acc.set('community', r); if (r && r.version != null && window.seenContent) window.seenContent('comm', r.version); return r; })   // SCRUM-103
       .catch(() => acc.get('community', null));
   }
   return communityP.then(r => { if (!r || r[name] === undefined) throw new Error('no ' + name); return r[name]; });
