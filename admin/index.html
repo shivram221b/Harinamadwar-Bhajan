@@ -264,8 +264,11 @@ const api = DEMO ? demoApi() : {
   reactions() { return this.rpc('admin_reactions'); },
   recordings() { return this.table('recordings', { col: 'number', asc: true }); },
   async saveRecording(book, number, blob) {
-    const ty = blob.type || '', path = book + '/' + number + '.' + (/mp4|m4a|aac/.test(ty) ? 'm4a' : /ogg/.test(ty) ? 'ogg' : /mpeg|mp3/.test(ty) ? 'mp3' : /wav/.test(ty) ? 'wav' : 'webm');
-    const up = await sb.storage.from('recordings').upload(path, blob, { upsert: true, contentType: (blob.type || 'audio/webm').split(';')[0] }); if (up.error) throw up.error;
+    const ty = (blob.type || '') + ' ' + (blob.name || '').toLowerCase();
+    // SCRUM-101: WebM / Ogg recordings sound distorted on iPhones – only M4A, MP3, AAC or WAV are accepted
+    if (/webm|ogg|opus/.test(ty)) throw new Error('This file is WebM/Ogg, which sounds distorted on iPhones. Please upload an M4A or MP3 file (the phone’s voice recorder makes M4A).');
+    const ext = /mpeg|mp3/.test(ty) ? 'mp3' : /wav/.test(ty) ? 'wav' : 'm4a', path = book + '/' + number + '.' + ext;
+    const up = await sb.storage.from('recordings').upload(path, blob, { upsert: true, contentType: { mp3: 'audio/mpeg', wav: 'audio/wav', m4a: 'audio/mp4' }[ext] }); if (up.error) throw up.error;
     return this.rpc('admin_save_recording', { p_book: book, p_number: number, p_path: path });
   },
   completeRecording(book, number) { return this.rpc('admin_complete_recording', { p_book: book, p_number: number }); },
@@ -687,6 +690,12 @@ function dragToReorder(list, done) {
 }
 
 // ---------------------------------------------------------------- Recordings: what still needs audio, record or upload it, listen, mark it complete
+// SCRUM-101: true when a recording is much quieter than our older recordings (peak under 30 % of full volume)
+async function quietCheck(blob) {
+  try { const ab = await new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 1, 44100).decodeAudioData(await blob.arrayBuffer());
+    let pk = 0; for (let c = 0; c < ab.numberOfChannels; c++) { const ch = ab.getChannelData(c); for (let i = 0; i < ch.length; i += 7) pk = Math.max(pk, Math.abs(ch[i])); } return pk < 0.3;
+  } catch (e) { return false; }
+}
 const recUrl = r => r.url || (SUPABASE_URL + '/storage/v1/object/public/recordings/' + r.path.split('/').map(encodeURIComponent).join('/') + '?v=' + Date.parse(r.at || 0));
 let recOpen = {}, recShowDone = false;
 const player = new Audio(); let playingKey = '';
@@ -810,11 +819,15 @@ function recordSheet(book, number, save) {
   $('rb').onclick = async () => {
     if (mr && mr.state === 'recording') { mr.stop(); return; }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
-      const mt = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm'].find(m => MediaRecorder.isTypeSupported(m)) || '';
-      mr = new MediaRecorder(stream, mt ? { mimeType: mt } : undefined); chunks = [];
+      // SCRUM-101: record only as M4A (AAC), the format every iPhone and Android phone plays cleanly.
+      // WebM/Opus (what Chrome and newer iPhones pick by default) sounded distorted on iPhones and has no length on iPhone recordings.
+      const mt = ['audio/mp4;codecs=mp4a.40.2', 'audio/mp4'].find(m => window.MediaRecorder && MediaRecorder.isTypeSupported(m));
+      if (!mt) { $('rh').textContent = 'This phone’s browser can’t make a recording that plays well on iPhones. Please record with the phone’s voice recorder app, then use Upload on this song.'; return; }
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 } });
+      mr = new MediaRecorder(stream, { mimeType: mt, audioBitsPerSecond: 128000 }); chunks = [];
       mr.ondataavailable = e => chunks.push(e.data);
-      mr.onstop = () => { stream.getTracks().forEach(t => t.stop()); done(); blob = new Blob(chunks, { type: (mr.mimeType || 'audio/webm').split(';')[0] }); $('ra').src = URL.createObjectURL(blob); $('ra').classList.remove('hidden'); $('rs').classList.remove('hidden'); $('rb').classList.remove('on'); d.querySelector('.lyr').classList.remove('live'); $('rh').textContent = 'Listen, then save · or tap red to record again'; };
+      mr.onstop = () => { stream.getTracks().forEach(t => t.stop()); done(); blob = new Blob(chunks, { type: (mr.mimeType || 'audio/mp4').split(';')[0] }); $('ra').src = URL.createObjectURL(blob); $('ra').classList.remove('hidden'); $('rs').classList.remove('hidden'); $('rb').classList.remove('on'); d.querySelector('.lyr').classList.remove('live'); $('rh').textContent = 'Listen, then save · or tap red to record again';
+        quietCheck(blob).then(q => { if (q) $('rh').textContent = 'This recording is very quiet. Hold the phone a little closer and record again, or Save if it sounds fine.'; }); };
       mr.start(); t0 = Date.now(); $('rb').classList.add('on'); d.querySelector('.lyr').classList.add('live'); $('rh').textContent = 'Recording… tap to stop'; $('ra').classList.add('hidden'); $('rs').classList.add('hidden');
       try { lock = await navigator.wakeLock.request('screen'); } catch (e) {}   // keep the screen on while singing
       tick = setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); $('rt').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }, 250);
