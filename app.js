@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.23';
+const WEB_VERSION = '4.24';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -664,7 +664,9 @@ function selectTab(t) {
   const meaningChips = t === 1 && +($('mean-chips').dataset.n || 0) > 0;
   $('mean-chips').classList.toggle('hidden', !meaningChips);
   $('lang-chips').classList.toggle('hidden', t === 1 || t === 3);
-  $('song-meta').textContent = t === 1 ? ({ en: 'Meaning in English', ta: 'தமிழில் பொருள்', kn: 'ಕನ್ನಡದಲ್ಲಿ ಅರ್ಥ', sa: 'अर्थः आङ्ग्लभाषायाम्' })[prefs.lang]
+  // Prabandham has Tamil meanings only for now: say so instead of "Meaning in English"
+  const tamilOnly = typeof book !== 'undefined' && book && book.id === 'ndp' && prefs.lang !== 'ta';
+  $('song-meta').textContent = t === 1 ? (tamilOnly ? 'Meaning in Tamil (other languages coming soon)' : ({ en: 'Meaning in English', ta: 'தமிழில் பொருள்', kn: 'ಕನ್ನಡದಲ್ಲಿ ಅರ್ಥ', sa: 'अर्थः आङ्ग्लभाषायाम्' })[prefs.lang])
     : ($('song-meta').dataset.raga || '');
 }
 
@@ -794,6 +796,7 @@ function openSettings() {
   $('sw-night').checked = prefs.night;
   const standalone = window.navigator.standalone || matchMedia('(display-mode: standalone)').matches;
   $('install-h').classList.toggle('hidden', standalone);
+  if (/Android/i.test(navigator.userAgent)) $('install-text').innerHTML = 'In <b>Chrome</b>, tap the <b>three dots ⋮</b> at the top right, then <b>Add to Home screen</b> (or <b>Install app</b>), then <b>Add</b>. The app then opens from its own icon and works without internet after the first visit (audio needs internet).';
   $('install-text').classList.toggle('hidden', standalone);
   const ver = f => fetchText(f).then(t => (t.match(/version=(\d+)/) || [])[1] || '?').catch(() => '?');
   Promise.all([ver('manifest.txt'), ver('ashtapathy/manifest.txt'), ver('prabandham/manifest.txt')]).then(([a, b, c]) => {
