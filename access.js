@@ -14,7 +14,7 @@
 const ACCESS = {
   url: 'https://rjjpgxiyncgjrwmvnbhg.supabase.co',
   key: 'sb_publishable_v_qO0MNpMCGvuaEo3oWGEQ_NyiOylEM',   // the public "publishable" key (safe to publish)
-  privateContent: false,   // true once songs and meanings are moved off public GitHub (phase 2)
+  privateContent: true,    // songs and meanings come from the private store, only to signed-in phones (27 Nov 2026)
 };
 const accessOn = () => !!(ACCESS.url && ACCESS.key);
 
@@ -71,6 +71,8 @@ async function accessCheck() {
   try {
     const r = await rpc('app_check', { p_device_key: deviceKey(), p_token: acc.get('token', '') });
     if (!r || !r.ok) return;
+    if (r.content != null) acc.set('contentStamp', String(r.content));
+    if (r.status === 'removed' || r.status === 'ended') clearPrivate();
     if (r.status === 'removed') {
       acc.set('token', null); acc.set('status', null);
       acc.set('message', 'This device was removed by the satsang admin. Please ask them for a new code.');
@@ -145,7 +147,7 @@ async function doLogin() {
       ? await rpc('app_redeem', { p_phone: phone, p_code: code, p_device_key: deviceKey(), p_label: deviceLabel(), p_platform: 'ios' })
       : await rpc('app_event_join', { p_name: name, p_phone: phone, p_device_key: deviceKey(), p_label: deviceLabel(), p_platform: 'web' });
     if (!r.ok) { $('lg-err').textContent = LOGIN_ERR[r.error] || 'Could not sign in. Please try again.'; return; }
-    acc.set('token', r.token); acc.set('name', r.name); acc.set('status', r.status);
+    acc.set('token', r.token); acc.set('name', r.name); acc.set('status', r.status); acc.set('phone4', '••' + digits.slice(-4));
     acc.set('offlineDays', r.offline_days || 30); acc.set('lastOk', Date.now()); acc.set('message', null);
     if (!store.get('name', '')) store.set('name', (r.name || '').split(' ')[0]);
     accessState = computeState(); applyWatermark();
@@ -193,8 +195,9 @@ function showNotice(then) {
 function applyWatermark() {
   const name = accessOn() ? acc.get('name', '') : '';
   if (!name) { document.documentElement.style.removeProperty('--wm'); return; }
-  const t = (name + ' · Harinamadwar').replace(/[<&>"]/g, '');
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200"><text x="20" y="120" transform="rotate(-24 160 100)" font-family="Mukta, sans-serif" font-size="20" fill="#7a8aa6" fill-opacity="0.13">${t}</text></svg>`;
+  const ph = String(acc.get('phone4', '') || '');
+  const t = (name + (ph ? ' · ' + ph : '') + ' · Harinamadwar').replace(/[<&>"]/g, '');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="170"><text x="10" y="105" transform="rotate(-24 150 85)" font-family="Mukta, sans-serif" font-size="18" fill="#7a8aa6" fill-opacity="0.17">${t}</text></svg>`;
   document.documentElement.style.setProperty('--wm', `url("data:image/svg+xml,${encodeURIComponent(svg)}")`);
 }
 
@@ -209,12 +212,38 @@ function communityFile(name) {
 }
 
 // ---------- songs and meanings from the private store (phase 2) ----------
-function privateFile(path) {
-  return rpc('app_content', { p_device_key: deviceKey(), p_token: acc.get('token', ''), p_path: path })
-    .then(t => { if (typeof t !== 'string' || !t) throw new Error('no ' + path); return t; });
+// Songs and meanings: fetched from the private store and kept on this phone for offline use.
+// The stored copy is refreshed when the server says the content changed, and wiped when access ends.
+const PRIV = 'hg-private';
+function clearPrivate() { try { caches.delete(PRIV); } catch (e) { } }
+async function privateFile(path) {
+  const key = location.origin + '/__private__/' + path, stamp = String(acc.get('contentStamp', ''));
+  let c = null; try { c = await caches.open(PRIV); } catch (e) { }
+  if (c && stamp) { const hit = await c.match(key); if (hit && hit.headers.get('x-stamp') === stamp) return hit.text(); }
+  try {
+    const t = await rpc('app_content', { p_device_key: deviceKey(), p_token: acc.get('token', ''), p_path: path });
+    if (typeof t !== 'string') throw new Error('no ' + path);
+    if (c) c.put(key, new Response(t, { headers: { 'content-type': 'text/plain; charset=utf-8', 'x-stamp': stamp } })).catch(() => { });
+    return t;
+  } catch (e) {
+    if (c && accessState !== 'ended') { const hit = await c.match(key); if (hit) return hit.text(); }   // offline: last stored copy
+    throw e;
+  }
 }
 
 // no copying out of lyrics, meanings and thoughts
 const inLocked = n => { const el = n && (n.nodeType === 1 ? n : n.parentElement); return !!(el && el.closest('#v-song, #v-other')); };
 document.addEventListener('copy', e => { const s = document.getSelection(); if (accessOn() && s && inLocked(s.anchorNode)) e.preventDefault(); });
-document.addEventListener('contextmenu', e => { if (accessOn() && e.target.closest && e.target.closest('#v-song')) e.preventDefault(); });
+const PROTECTED = '#v-song, #v-other, #v-playlist';
+document.addEventListener('contextmenu', e => { if (accessOn() && e.target.closest && e.target.closest(PROTECTED + ', audio, img')) e.preventDefault(); });
+['cut', 'dragstart', 'selectstart'].forEach(ev => document.addEventListener(ev, e => { if (accessOn() && e.target.closest && e.target.closest(PROTECTED)) e.preventDefault(); }));
+// computers: no Copy / Select all / Print / Save on song pages
+document.addEventListener('keydown', e => {
+  if (!accessOn() || !(e.ctrlKey || e.metaKey)) return;
+  if (['c', 'a', 'p', 's', 'u', 'x'].includes((e.key || '').toLowerCase()) && document.querySelector(PROTECTED.split(', ').map(s => s + ':not(.hidden)').join(','))) e.preventDefault();
+});
+// hide the words while the app is in the background (app switcher pictures) or being printed
+document.addEventListener('visibilitychange', () => document.body.classList.toggle('shield', accessOn() && document.hidden));
+['pointerdown', 'touchstart', 'focus'].forEach(ev => window.addEventListener(ev, () => document.body.classList.remove('shield'), { passive: true }));
+window.addEventListener('beforeprint', () => { if (accessOn()) document.body.classList.add('shield'); });
+window.addEventListener('afterprint', () => document.body.classList.remove('shield'));

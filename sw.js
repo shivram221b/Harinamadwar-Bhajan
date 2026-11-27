@@ -1,19 +1,15 @@
 /* Offline support: the app itself is kept on the phone; song and meaning files are
  * always fetched fresh when there is internet, and the last copy is used when there isn't.
  * Audio is streamed and not stored. */
-const SHELL = 'hg-shell-v34s';
+const SHELL = 'hg-shell-v35s';
 const DATA = 'hg-data';
 const SHELL_FILES = ['./', 'index.html', 'style.css', 'app.js', 'access.js', 'sruti.html', 'manifest.webmanifest',
   'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png',
   'icons/logo.jpg', 'icons/about-group.jpg', 'icons/about-jk.jpg', 'icons/icon.svg',
   'fonts/baloo-tamma-2-kannada-400-normal.woff2', 'fonts/baloo-tamma-2-kannada-700-normal.woff2', 'fonts/mukta-devanagari-400-normal.woff2', 'fonts/mukta-devanagari-700-normal.woff2', 'fonts/mukta-latin-400-normal.woff2', 'fonts/mukta-latin-600-normal.woff2', 'fonts/mukta-latin-700-normal.woff2', 'fonts/mukta-latin-ext-400-normal.woff2', 'fonts/mukta-latin-ext-700-normal.woff2', 'fonts/mukta-malar-tamil-400-normal.woff2', 'fonts/mukta-malar-tamil-700-normal.woff2'];
 
-const DATA_FILES = ['songs.txt', 'songs_ta.txt', 'songs_kn.txt', 'songs_sa.txt',
-  'meanings_ta.txt', 'meanings_en.txt', 'meanings_kn.txt', 'audio.txt', 'manifest.txt',
-  'ashtapathy/songs.txt', 'ashtapathy/songs_ta.txt', 'ashtapathy/songs_kn.txt', 'ashtapathy/songs_sa.txt',
-  'ashtapathy/meanings_ta.txt', 'ashtapathy/meanings_en.txt', 'ashtapathy/meanings_kn.txt',
-  'ashtapathy/audio.txt', 'ashtapathy/manifest.txt',
-  'community/events.txt', 'community/learn.txt', 'community/tfd.txt', 'community/tfd_ta.txt', 'community/tfd_kn.txt', 'community/manifest.txt'];
+// songs and meanings are no longer public files: the app gets them from the private store after sign-in
+const DATA_FILES = ['community/events.txt', 'community/learn.txt', 'community/tfd.txt', 'community/tfd_ta.txt', 'community/tfd_kn.txt', 'community/manifest.txt'];
 
 self.addEventListener('install', e => {
   e.waitUntil(Promise.all([
@@ -25,7 +21,7 @@ self.addEventListener('install', e => {
 });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(keys => Promise.all(
-    keys.filter(k => k.startsWith('hg-shell-') && k !== SHELL).map(k => caches.delete(k))
+    keys.filter(k => (k.startsWith('hg-shell-') && k !== SHELL) || k === DATA).map(k => caches.delete(k))
   )).then(() => self.clients.claim()));
 });
 

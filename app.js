@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.24';
+const WEB_VERSION = '4.25';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -1086,7 +1086,7 @@ function seenContent(key, value) {
 window.seenContent = seenContent;
 async function checkUpdates() {
   for (const b of ['', 'ashtapathy/', 'prabandham/']) {
-    try { const t = await fetch(b + 'manifest.txt', { cache: 'no-store' }).then(r => r.ok ? r.text() : ''); const v = (t.match(/version=(\d+)/) || [])[1]; if (v) seenContent('man.' + (b || 'dns/'), v); } catch (e) { }
+    try { const t = accessOn() && ACCESS.privateContent ? await fetchText(b + 'manifest.txt') : await fetch(b + 'manifest.txt', { cache: 'no-store' }).then(r => r.ok ? r.text() : ''); const v = (t.match(/version=(\d+)/) || [])[1]; if (v) seenContent('man.' + (b || 'dns/'), v); } catch (e) { }
   }
   adminRecordings();
   fetchText('community/events.txt').catch(() => {});   // also brings the satsangs/Learn/thoughts version
