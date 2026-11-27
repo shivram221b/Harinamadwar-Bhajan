@@ -54,6 +54,12 @@ label.f { display: flex; flex-direction: column; gap: 6px; font-size: 15px; font
 .f input:focus, .f textarea:focus { border-color: var(--bar); }
 .f textarea { min-height: 180px; resize: vertical; line-height: 1.5; }
 .hint { font-size: 14px; color: var(--muted); }
+.card.ev { padding: 14px; display: flex; flex-direction: column; gap: 10px; } .ev-top { display: flex; align-items: center; gap: 8px; font-size: 16px; }
+.ev-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--ok); flex: none; } .card.ev.off .ev-dot { background: var(--bad); }
+.card.ev .stats { margin: 0; } .card.ev .btn.small { align-self: flex-start; }
+.tag { font-style: normal; font-size: 12px; font-weight: 700; color: #7A2E1F; background: #F9ECE7; border-radius: 8px; padding: 1px 7px; margin-left: 6px; vertical-align: middle; }
+.seg { display: flex; gap: 6px; flex-wrap: wrap; margin: 4px 0 10px; } .seg button { border: 1.5px solid var(--line); border-radius: 18px; padding: 6px 12px; font-size: 14px; font-weight: 600; color: var(--muted); background: #fff; }
+.seg button.on { background: var(--deep); border-color: var(--deep); color: #fff; }
 .err { color: var(--bad); font-size: 15px; font-weight: 600; }
 .code-card { padding: 18px; border-radius: 18px; background: #FFF8EA; border: 1.5px solid #E8D3A6; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
 .code { font-size: 40px; font-weight: 800; letter-spacing: 4px; color: var(--deep); line-height: 1.1; user-select: all; }
@@ -326,7 +332,7 @@ function demoApi() {
     removeAdmin(e) { if (e === 'you@gmail.com') return wait({ ok: false, error: 'self' }); A = A.filter(x => x.email !== e); return wait({ ok: true }); },
     dashboard: () => wait({ students: S.length, active: S.filter(s => s.status === 'active').length, paused: S.filter(s => s.status === 'paused').length,
       no_device: S.filter(s => !s.dev.length).length, codes_waiting: S.filter(s => s.code && !s.dev.length).length, devices: S.reduce((n, s) => n + s.dev.length, 0),
-      seen_7_days: S.filter(s => s.dev.some(d => d.last_seen > now - 7 * day)).length, upcoming_events: E.length, thoughts: T.length, last_thought: 253, reactions_7_days: 9 }),
+      seen_7_days: S.filter(s => s.dev.some(d => d.last_seen > now - 7 * day)).length, upcoming_events: E.length, thoughts: T.length, last_thought: 253, reactions_7_days: 9, event_open: set.event_open !== false, event_people: 2, event_devices: 2, event_today: 1 }),
     reactions: () => wait([{ tfd: 253, emoji: '🙏', n: 6 }, { tfd: 253, emoji: '❤️', n: 3 }]),
     recordings: () => wait(R.slice()),
     saveRecording(book, number, blob) { R = R.filter(r => !(r.book === book && r.number === number)); R.push({ book, number, status: 'uploaded', url: URL.createObjectURL(blob), by: 'you@gmail.com', at: new Date().toISOString() }); return wait(); },
@@ -406,7 +412,14 @@ async function showDashboard() {
   page('Dashboard', '<div class="empty">Loading…</div>');
   const [d, p] = await Promise.all([guard(() => api.dashboard()), pending()]); if (!d || !live()) return;
   const tile = (n, t) => `<div><b>${n == null ? '–' : n}</b><span>${t}</span></div>`;
-  page('Dashboard', `<div class="lbl">STUDENTS</div><div class="stats">${tile(d.students, 'Students')}${tile(d.seen_7_days, 'Opened the app this week')}${tile(d.devices, 'Devices signed in')}</div>
+  const evOn = d.event_open !== false;
+  const weekend = `<div class="lbl">ONLINE APP · NAME + PHONE SIGN-IN</div>
+    <div class="card ev ${evOn ? 'on' : 'off'}"><div class="ev-top"><span class="ev-dot"></span><b>${evOn ? 'Open – people can sign in with name and phone' : 'Switched off – weekend sign-ins are locked'}</b></div>
+      <div class="stats">${tile(d.event_people, 'People signed in')}${tile(d.event_today, 'Opened in the last 24 h')}${tile(d.event_devices, 'Phones / iPads')}</div>
+      <button class="btn ${evOn ? 'bad' : 'deep'}" id="ev-sw">${evOn ? 'Switch off now' : 'Switch on again'}</button>
+      <div class="hint">${evOn ? 'Switching off locks everyone who signed in with name + phone (and stops new sign-ins) within a day at most – straight away for anyone who opens the app online. Students you added with a code are not affected.' : 'People who signed in before will get back in when you switch on again.'}</div>
+      <button class="btn line small" id="ev-list">See who signed in ›</button></div>`;
+  page('Dashboard', weekend + `<div class="lbl">STUDENTS</div><div class="stats">${tile(d.students, 'Students')}${tile(d.seen_7_days, 'Opened the app this week')}${tile(d.devices, 'Devices signed in')}</div>
     <div class="stats">${tile(d.codes_waiting, 'Codes not yet used')}${tile(d.no_device, 'Not signed in yet')}${tile(d.paused, 'Paused')}</div>
     <div class="lbl">APP CONTENT</div><div class="stats">${tile(d.upcoming_events, 'Upcoming satsangs')}${tile(d.last_thought ? 'TFD ' + d.last_thought : null, 'Latest thought')}${tile(d.reactions_7_days, 'Reactions this week')}</div>
     <div class="lbl">STILL TO DO IN THE BOOKS</div>` +
@@ -417,10 +430,15 @@ async function showDashboard() {
       missingBlock('Gita Govindam · recordings', 'Items with no audio yet (of ' + p.aTotal + ')', p.aAudio, '#ashta/')
       : '<div class="empty">Could not read the book files. Please check the internet.</div>') +
     '<div class="hint">Tap a section to see the list. Each song opens in the app.</div>');
+  document.getElementById('ev-sw').onclick = async () => {
+    if (!await ask(evOn ? 'Switch off the online app for everyone who signed in with name and phone? They will see “The preview has ended”. You can switch it on again any time.' : 'Switch the online app on again for name + phone sign-in?', evOn ? 'Switch off' : 'Switch on', evOn)) return;
+    await guard(() => api.setSetting('event_open', !evOn)); toast(evOn ? 'Switched off' : 'Switched on'); showDashboard();
+  };
+  document.getElementById('ev-list').onclick = () => { filter = ''; studentView = 'event'; tab = 'students'; go(); };
 }
 
 // ---------------------------------------------------------------- B · students
-let filter = '';
+let filter = '', studentView = 'all';
 async function showStudents() {
   const live = ticket();
   page('Students', '<div class="empty">Loading…</div>');
@@ -429,19 +447,27 @@ async function showStudents() {
   const lim = st.device_limit || 3;
   const status = s => s.status === 'paused' ? ['paused', 'Paused'] : s.devices > 0 ? ['active', 'Active'] : s.code_expires ? ['sent', 'Code sent'] : ['none', 'No code'];
   const draw = () => {
-    const f = filter.toLowerCase().replace(/\s/g, ''), shown = list.filter(s => !f || (s.name + s.phone).toLowerCase().replace(/\s/g, '').includes(f));
+    const f = filter.toLowerCase().replace(/\s/g, ''), shown = list.filter(s => (studentView === 'all' || (s.source || 'admin') === studentView) && (!f || (s.name + s.phone).toLowerCase().replace(/\s/g, '').includes(f)));
     document.getElementById('rows').innerHTML = shown.length ? shown.map(s => {
       const [c, t] = status(s);
-      return `<button class="row" data-id="${esc(s.id)}"><span class="av">${esc(s.name.trim()[0] || '?').toUpperCase()}</span><span class="rt"><b>${esc(s.name)}</b>` +
+      return `<button class="row" data-id="${esc(s.id)}"><span class="av">${esc(s.name.trim()[0] || '?').toUpperCase()}</span><span class="rt"><b>${esc(s.name)}${s.source === 'event' ? ' <i class="tag">Weekend</i>' : ''}</b>` +
         `<span>${esc(fmtPhone(s.phone))} · devices ${s.devices} of ${lim}${s.devices >= lim ? ' · <b style="color:var(--bad);display:inline">Full</b>' : ''}${!s.devices && s.status !== 'paused' ? (s.code_expires ? ' · Not joined' : '') : ''}</span></span><span class="st ${c}">${t}</span></button>`;
-    }).join('') : `<div class="empty">${list.length ? 'No one matches “' + esc(filter) + '”' : 'No students yet. Tap “Add student” to begin.'}</div>`;
+    }).join('') : `<div class="empty">${filter ? 'No one matches “' + esc(filter) + '”' : studentView === 'event' ? 'No one has signed in with name and phone yet.' : list.length ? 'No one here yet.' : 'No students yet. Tap “Add student” to begin.'}</div>`;
     on('#rows .row', 'click', e => showStudent(e.currentTarget.dataset.id));
   };
   page('Students', `<div class="stats"><div><b>${list.filter(s => s.status === 'active' && s.devices).length}</b><span>active</span></div>` +
     `<div><b style="color:var(--label)">${list.filter(s => !s.devices).length}</b><span>not joined</span></div><div><b>${list.length}</b><span>students</span></div></div>` +
+    `<div class="seg">${[['all', 'Everyone'], ['event', 'Weekend sign-ins (' + list.filter(s => s.source === 'event').length + ')'], ['admin', 'Students with a code']].map(([k, t]) => `<button data-sv="${k}" class="${studentView === k ? 'on' : ''}">${t}</button>`).join('')}</div>` +
     `<input class="search" id="q" type="search" placeholder="Search name or phone" value="${esc(filter)}"><div class="card list" id="rows"></div>` +
-    `<button class="btn acc" id="add">+ Add student</button>`);
+    `<button class="btn acc" id="add">+ Add student</button><button class="btn line" id="csv" style="margin-top:10px">Download the list (Excel / CSV)</button>`);
   draw();
+  on('[data-sv]', 'click', e => { studentView = e.currentTarget.dataset.sv; document.querySelectorAll('[data-sv]').forEach(b => b.classList.toggle('on', b.dataset.sv === studentView)); draw(); });
+  document.getElementById('csv').onclick = () => {
+    const rows = [['Name', 'Phone', 'How they joined', 'Signed up', 'Devices', 'Last opened', 'Status']].concat(list.filter(s => studentView === 'all' || (s.source || 'admin') === studentView).map(s =>
+      [s.name, s.phone, s.source === 'event' ? 'Name + phone (weekend)' : 'Invite code', s.created_at ? new Date(s.created_at).toLocaleString('en-IN') : '', s.devices, s.last_seen ? new Date(s.last_seen).toLocaleString('en-IN') : '', s.status]));
+    const csv = '\ufeff' + rows.map(r => r.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'harinamadwar-people-' + new Date().toISOString().slice(0, 10) + '.csv'; a.click();
+  };
   document.getElementById('q').oninput = e => { filter = e.target.value; draw(); };
   document.getElementById('add').onclick = () => showAdd();
 }

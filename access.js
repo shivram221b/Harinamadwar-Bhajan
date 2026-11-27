@@ -12,8 +12,8 @@
  */
 'use strict';
 const ACCESS = {
-  url: '',                 // e.g. https://abcd1234.supabase.co
-  key: '',                 // the public key: "anon" (eyJ…) or "publishable" (sb_publishable_…)
+  url: 'https://rjjpgxiyncgjrwmvnbhg.supabase.co',
+  key: 'sb_publishable_v_qO0MNpMCGvuaEo3oWGEQ_NyiOylEM',   // the public "publishable" key (safe to publish)
   privateContent: false,   // true once songs and meanings are moved off public GitHub (phase 2)
 };
 const accessOn = () => !!(ACCESS.url && ACCESS.key);
@@ -52,12 +52,14 @@ async function rpc(fn, args) {
   try { return JSON.parse(t); } catch (e) { return t; }
 }
 
-// 'open' | 'login' | 'paused' | 'expired'
+// 'open' | 'login' | 'paused' | 'ended' | 'expired'
+// Weekend sign-in (27 Nov 2026): name + phone, no code. 'ended' = the admin switched weekend access off.
 let accessState = 'open';
 function computeState() {
   if (!accessOn()) return 'open';
   if (!acc.get('token', '')) return 'login';
   if (acc.get('status', 'active') === 'paused') return 'paused';
+  if (acc.get('status', 'active') === 'ended') return 'ended';
   const days = acc.get('offlineDays', 30), last = acc.get('lastOk', 0);
   if (Date.now() - last > days * 864e5) return 'expired';
   return 'open';
@@ -98,6 +100,7 @@ async function accessStart() {
 /** Called first in route(): returns true when it showed the sign-in or a lock screen instead. */
 const OPEN_TO_ALL = h => h === '#about' || h === '#diary' || h === '#tfd' || h.startsWith('#tfd/');
 function accessGate(hash) {
+  if (accessState === 'ended') { showLocked('ended'); return true; }   // nothing stays open after the weekend
   if (accessState === 'open' || OPEN_TO_ALL(hash)) return false;
   if (accessState === 'login') showLogin(); else showLocked(accessState);
   return true;
@@ -109,6 +112,7 @@ function showLogin() {
   const msg = acc.get('message', '');
   $('lg-msg').textContent = msg; $('lg-msg').classList.toggle('hidden', !msg);
   $('lg-err').textContent = '';
+  $('lg-havecode').onclick = () => { $('lg-codebox').classList.toggle('hidden'); $('lg-err').textContent = ''; };
 }
 const LOGIN_ERR = {
   wrong: 'The phone number or code does not match. Please check both and try again.',
@@ -117,14 +121,29 @@ const LOGIN_ERR = {
   full: 'All your device places are used. Please ask your satsang admin to remove an old phone or iPad first.',
   locked: 'Too many tries. Please wait 15 minutes and try again.',
   missing: 'Please enter your phone number and the code.',
+  // weekend sign-in (name + phone)
+  name: 'Please type your name.',
+  phone: 'Please type your 10-digit mobile number (for another country, start with + and the country code).',
+  mismatch: 'This number belongs to a satsang student under another name. Please type your name as the satsang has it, or use your invite code.',
+  closed: 'Thank you for joining us! The Harinamadwar preview has ended. We will let you know when the app opens again. 🙏',
 };
 async function doLogin() {
-  const phone = $('lg-phone').value.trim(), code = $('lg-code').value.trim();
-  if (phone.replace(/\D/g, '').length < 10 || code.replace(/[^A-Za-z0-9]/g, '').length < 4) { $('lg-err').textContent = LOGIN_ERR.missing; return; }
+  const withCode = !$('lg-codebox').classList.contains('hidden');
+  const name = $('lg-name').value.trim().replace(/\s+/g, ' '), phone = $('lg-phone').value.trim(), code = $('lg-code').value.trim();
+  const digits = phone.replace(/\D/g, '');
+  if (withCode) {
+    if (digits.length < 10 || code.replace(/[^A-Za-z0-9]/g, '').length < 4) { $('lg-err').textContent = LOGIN_ERR.missing; return; }
+  } else {
+    if (name.length < 2 || !/\p{L}/u.test(name)) { $('lg-err').textContent = LOGIN_ERR.name; $('lg-name').focus(); return; }
+    const local = digits.replace(/^(91|0)(?=\d{10}$)/, '');
+    if (!(/^[6-9]\d{9}$/.test(local) || (phone.startsWith('+') && digits.length >= 8 && digits.length <= 15))) { $('lg-err').textContent = LOGIN_ERR.phone; $('lg-phone').focus(); return; }
+  }
   if (!navigator.onLine) { $('lg-err').textContent = 'Please connect to the internet for this first step.'; return; }
   const btn = $('lg-go'); btn.disabled = true; btn.textContent = 'Checking…';
   try {
-    const r = await rpc('app_redeem', { p_phone: phone, p_code: code, p_device_key: deviceKey(), p_label: deviceLabel(), p_platform: 'ios' });
+    const r = withCode
+      ? await rpc('app_redeem', { p_phone: phone, p_code: code, p_device_key: deviceKey(), p_label: deviceLabel(), p_platform: 'ios' })
+      : await rpc('app_event_join', { p_name: name, p_phone: phone, p_device_key: deviceKey(), p_label: deviceLabel(), p_platform: 'web' });
     if (!r.ok) { $('lg-err').textContent = LOGIN_ERR[r.error] || 'Could not sign in. Please try again.'; return; }
     acc.set('token', r.token); acc.set('name', r.name); acc.set('status', r.status);
     acc.set('offlineDays', r.offline_days || 30); acc.set('lastOk', Date.now()); acc.set('message', null);
@@ -147,11 +166,14 @@ function afterUnlock() {
 // ---------- paused / needs internet ----------
 function showLocked(kind) {
   showView('v-locked');
-  const paused = kind === 'paused';
-  $('lk-h').textContent = paused ? 'Your access is paused' : 'Please connect to the internet';
-  $('lk-p').textContent = paused
+  const paused = kind === 'paused', ended = kind === 'ended';
+  $('lk-open').classList.toggle('hidden', ended);
+  $('lk-h').textContent = ended ? 'Thank you for joining us 🙏' : paused ? 'Your access is paused' : 'Please connect to the internet';
+  $('lk-p').textContent = ended
+    ? 'The Harinamadwar preview has ended. We are gathering your feedback to make the app even better, and will let you know when it opens again. Hari Om!'
+    : paused
     ? 'Your satsang admin has paused the songs on this device for now. Please contact them to resume.'
-    : 'It has been a while since the app last checked in. Connect to Wi-Fi or mobile data once, then tap Try again. After that it works offline again.';
+    : 'It has been a while since the app last checked in. Connect to Wi-Fi or mobile data once, then tap Try again.';
 }
 async function retryLocked() {
   $('lk-go').disabled = true;
