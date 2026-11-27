@@ -198,7 +198,7 @@ const ANDROID_APP = '';         // link where the APK is shared, if any
 
 const $app = document.getElementById('app');
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const DEMO = !SUPABASE_URL || /[?&]demo/.test(location.search);
+const DEMO = !SUPABASE_URL || (/[?&]demo/.test(location.search) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname));   // demo only when testing on a computer
 const ICON = {
   play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
   stop: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',

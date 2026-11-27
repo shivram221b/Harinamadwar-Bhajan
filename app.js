@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.22';
+const WEB_VERSION = '4.23';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -797,7 +797,6 @@ function openSettings() {
   $('install-text').classList.toggle('hidden', standalone);
   const ver = f => fetchText(f).then(t => (t.match(/version=(\d+)/) || [])[1] || '?').catch(() => '?');
   Promise.all([ver('manifest.txt'), ver('ashtapathy/manifest.txt'), ver('prabandham/manifest.txt')]).then(([a, b, c]) => {
-    $('admin-link').classList.remove('hidden');   // the admin page asks admins to sign in
     $('version-info').textContent = (store.get('contentAt', 0) ? 'Content updated: ' + new Date(store.get('contentAt', 0)).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }) + '\n' : '') + 'Web app ' + WEB_VERSION + '  ·  Divyanama content ' + a + '  ·  Ashtapathy content ' + b + '  ·  Prabandham content ' + c;
   });
   showView('v-settings');
