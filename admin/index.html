@@ -461,7 +461,7 @@ async function showStudents() {
     document.getElementById('rows').innerHTML = shown.length ? shown.map(s => {
       const [c, t] = status(s);
       return `<button class="row" data-id="${esc(s.id)}"><span class="av">${esc(s.name.trim()[0] || '?').toUpperCase()}</span><span class="rt"><b>${esc(s.name)}${viewOf(s) === 'event' ? ' <i class="tag">Weekend</i>' : ''}</b>` +
-        `<span>${esc(fmtPhone(s.phone))} · devices ${s.devices} of ${lim}${s.devices >= lim ? ' · <b style="color:var(--bad);display:inline">Full</b>' : ''}${!s.devices && s.status !== 'paused' ? (s.code_expires ? ' · Not joined' : '') : ''}</span></span><span class="st ${c}">${t}</span></button>`;
+        `<span>${esc(fmtPhone(s.phone))} · devices ${s.devices} of ${lim}${s.devices >= lim ? ' · <b style="color:var(--bad);display:inline">Full</b>' : ''}${!s.devices && s.status !== 'paused' ? (s.code_expires ? ' · Not joined' : '') : ''}${s.signed_in_at ? '<br>Signed in ' + new Date(s.signed_in_at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) + (s.last_seen ? ' · last opened ' + new Date(s.last_seen).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : '') : ''}</span></span><span class="st ${c}">${t}</span></button>`;
     }).join('') : `<div class="empty">${filter ? 'No one matches “' + esc(filter) + '”' : studentView === 'event' ? 'No one has signed in with name and phone yet.' : list.length ? 'No one here yet.' : 'No students yet. Tap “Add student” to begin.'}</div>`;
     on('#rows .row', 'click', e => showStudent(e.currentTarget.dataset.id));
   };
