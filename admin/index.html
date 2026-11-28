@@ -447,7 +447,14 @@ async function showDashboard() {
 }
 
 // ---------------------------------------------------------------- B · students
-let filter = '', studentView = 'all';
+let filter = '', studentView = 'all', studentSort = 'az';
+// when they signed up: first name + phone sign-in, else when the admin added them
+const joinedAt = s => s.signed_in_at || s.created_at || '';
+const sortStudents = arr => studentSort === 'az' ? arr : arr.slice().sort((a, b) => {
+  const x = joinedAt(a), y = joinedAt(b); if (!x || !y) return !x - !y;
+  return studentSort === 'new' ? (y > x ? 1 : y < x ? -1 : 0) : (x > y ? 1 : x < y ? -1 : 0);
+});
+const fmtWhen = t => new Date(t).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
 const viewOf = s => (s.weekend || s.source === 'event' || s.by_name) ? 'event' : 'admin';   // using the app this weekend: new, or already a student
 async function showStudents() {
   const live = ticket();
@@ -457,24 +464,26 @@ async function showStudents() {
   const lim = st.device_limit || 3;
   const status = s => s.status === 'paused' ? ['paused', 'Paused'] : s.devices > 0 ? ['active', 'Active'] : s.code_expires ? ['sent', 'Code sent'] : ['none', 'No code'];
   const draw = () => {
-    const f = filter.toLowerCase().replace(/\s/g, ''), shown = list.filter(s => (studentView === 'all' || viewOf(s) === studentView) && (!f || (s.name + s.phone).toLowerCase().replace(/\s/g, '').includes(f)));
+    const f = filter.toLowerCase().replace(/\s/g, ''), shown = sortStudents(list).filter(s => (studentView === 'all' || viewOf(s) === studentView) && (!f || (s.name + s.phone).toLowerCase().replace(/\s/g, '').includes(f)));
     document.getElementById('rows').innerHTML = shown.length ? shown.map(s => {
       const [c, t] = status(s);
       return `<button class="row" data-id="${esc(s.id)}"><span class="av">${esc(s.name.trim()[0] || '?').toUpperCase()}</span><span class="rt"><b>${esc(s.name)}${s.source === 'event' ? ' <i class="tag">New</i>' : viewOf(s) === 'event' ? ' <i class="tag">Weekend</i>' : ''}</b>` +
-        `<span>${esc(fmtPhone(s.phone))} · devices ${s.devices} of ${lim}${s.devices >= lim ? ' · <b style="color:var(--bad);display:inline">Full</b>' : ''}${!s.devices && s.status !== 'paused' ? (s.code_expires ? ' · Not joined' : '') : ''}${s.signed_in_at ? '<br>Signed in ' + new Date(s.signed_in_at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) + (s.last_seen ? ' · last opened ' + new Date(s.last_seen).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : '') : ''}</span></span><span class="st ${c}">${t}</span></button>`;
+        `<span>${esc(fmtPhone(s.phone))} · devices ${s.devices} of ${lim}${s.devices >= lim ? ' · <b style="color:var(--bad);display:inline">Full</b>' : ''}${!s.devices && s.status !== 'paused' ? (s.code_expires ? ' · Not joined' : '') : ''}${s.signed_in_at ? '<br>Signed in ' + fmtWhen(s.signed_in_at) + (s.last_seen ? ' · last opened ' + fmtWhen(s.last_seen) : '') : studentSort !== 'az' && s.created_at ? '<br>Added ' + fmtWhen(s.created_at) + (s.last_seen ? ' · last opened ' + fmtWhen(s.last_seen) : '') : ''}</span></span><span class="st ${c}">${t}</span></button>`;
     }).join('') : `<div class="empty">${filter ? 'No one matches “' + esc(filter) + '”' : studentView === 'event' ? 'No one has signed in with name and phone yet.' : list.length ? 'No one here yet.' : 'No students yet. Tap “Add student” to begin.'}</div>`;
     on('#rows .row', 'click', e => showStudent(e.currentTarget.dataset.id));
   };
   page('Students', `<div class="stats"><div><b>${list.filter(s => s.status === 'active' && s.devices).length}</b><span>active</span></div>` +
     `<div><b style="color:var(--label)">${list.filter(s => !s.devices).length}</b><span>not joined</span></div><div><b>${list.length}</b><span>students</span></div></div>` +
     `<div class="seg">${[['all', 'Everyone'], ['event', 'This weekend (' + list.filter(s => viewOf(s) === 'event').length + ')'], ['admin', 'Not seen this weekend']].map(([k, t]) => `<button data-sv="${k}" class="${studentView === k ? 'on' : ''}">${t}</button>`).join('')}</div>` +
+    `<div class="seg" id="sortbar"><span style="align-self:center;font-size:13px;color:var(--muted);font-weight:600">Sort:</span>${[['az', 'A–Z'], ['new', 'Newest sign-up first'], ['old', 'First to sign up']].map(([k, t]) => `<button data-so="${k}" class="${studentSort === k ? 'on' : ''}">${t}</button>`).join('')}</div>` +
     `<input class="search" id="q" type="search" placeholder="Search name or phone" value="${esc(filter)}"><div class="card list" id="rows"></div>` +
     `<button class="btn acc" id="add">+ Add student</button><button class="btn line" id="csv" style="margin-top:10px">Download the list (Excel / CSV)</button>`);
   draw();
+  on('[data-so]', 'click', e => { studentSort = e.currentTarget.dataset.so; document.querySelectorAll('[data-so]').forEach(b => b.classList.toggle('on', b.dataset.so === studentSort)); draw(); });
   on('[data-sv]', 'click', e => { studentView = e.currentTarget.dataset.sv; document.querySelectorAll('[data-sv]').forEach(b => b.classList.toggle('on', b.dataset.sv === studentView)); draw(); });
   document.getElementById('csv').onclick = () => {
-    const rows = [['Name', 'Phone', 'How they joined', 'Signed in with name + phone', 'Devices', 'Last opened', 'Status']].concat(list.filter(s => studentView === 'all' || viewOf(s) === studentView).map(s =>
-      [s.name, s.phone, s.source === 'event' ? 'New – name + phone (weekend)' : (s.by_name ? 'Existing student – signed in with name + phone' : (s.weekend ? 'Existing student – opened the app this weekend' : 'Existing student')), s.signed_in_at ? new Date(s.signed_in_at).toLocaleString('en-IN') : '', s.devices, s.last_seen ? new Date(s.last_seen).toLocaleString('en-IN') : '', s.status]));
+    const rows = [['Name', 'Phone', 'How they joined', 'Signed in with name + phone', 'Added on', 'Devices', 'Last opened', 'Status']].concat(sortStudents(list).filter(s => studentView === 'all' || viewOf(s) === studentView).map(s =>
+      [s.name, s.phone, s.source === 'event' ? 'New – name + phone (weekend)' : (s.by_name ? 'Existing student – signed in with name + phone' : (s.weekend ? 'Existing student – opened the app this weekend' : 'Existing student')), s.signed_in_at ? new Date(s.signed_in_at).toLocaleString('en-IN') : '', s.created_at ? new Date(s.created_at).toLocaleString('en-IN') : '', s.devices, s.last_seen ? new Date(s.last_seen).toLocaleString('en-IN') : '', s.status]));
     const csv = '\ufeff' + rows.map(r => r.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'harinamadwar-people-' + new Date().toISOString().slice(0, 10) + '.csv'; a.click();
   };
