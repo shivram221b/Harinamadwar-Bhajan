@@ -867,7 +867,7 @@ body.night .o-tag { color: #E8B865; background: #3A3120; }
 .o-foot { padding: 6px 14px calc(8px + env(safe-area-inset-bottom)); border-top: 1px solid var(--divider); background: var(--page); }
 .o-foot .nav-row { margin-top: 0; }
 .pl-row .o-tag { flex-shrink: 0; }
-body.secure #v-other .scroll { background-image: var(--wm); background-repeat: repeat; background-attachment: local; }
+body.secure #v-other .scroll, body.secure #tfd-scroll { background-image: var(--wm); background-repeat: repeat; background-attachment: local; }
 body.secure #v-other .text, body.secure #v-other .o-title { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 
 /* 4.19 · SCRUM-103: "Content updated: …" on its own line */

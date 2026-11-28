@@ -198,7 +198,15 @@ function applyWatermark() {
   if (!name) { document.documentElement.style.removeProperty('--wm'); return; }
   const ph = String(acc.get('phone4', '') || '');
   const t = (name + (ph ? ' · ' + ph : '') + ' · Harinamadwar').replace(/[<&>"]/g, '');
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="170"><text x="10" y="105" transform="rotate(-24 150 85)" font-family="Mukta, sans-serif" font-size="18" fill="#7a8aa6" fill-opacity="0.17">${t}</text></svg>`;
+  // 28 Nov: darker and tiled more closely so it's harder to crop out of a screenshot.
+  // The line is drawn at the neighbouring tile positions too, so it runs on seamlessly across tile edges.
+  const fs = Math.max(10, Math.min(15, Math.floor(270 / (t.length * 0.52)))), W = 270, H = 96;
+  let lines = '';
+  for (const dx of [-1, 0, 1]) for (const dy of [-1, 0, 1]) {
+    const x = W / 2 + dx * W, y = H / 2 + dy * H;
+    lines += `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle" transform="rotate(-22 ${x} ${y})">${t}</text>`;
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><g font-family="Mukta, sans-serif" font-size="${fs}" font-weight="600" fill="#6f7f9c" fill-opacity="0.24">${lines}</g></svg>`;
   document.documentElement.style.setProperty('--wm', `url("data:image/svg+xml,${encodeURIComponent(svg)}")`);
 }
 
