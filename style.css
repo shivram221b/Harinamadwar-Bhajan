@@ -881,3 +881,7 @@ body.secure img { -webkit-user-drag: none; -webkit-touch-callout: none; }
   body.secure > * { display: none !important; }
   body.secure::after { content: "Harinamadwar songs and meanings are for the Harinamadwar Satsangs only and cannot be printed."; display: block; padding: 40px; font: 20px sans-serif; }
 }
+
+/* no text selection anywhere while signed-in mode is on (28 Nov 2026); typing boxes still work */
+body.secure, body.secure .view, body.secure .sheet { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+body.secure input, body.secure textarea { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }

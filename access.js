@@ -100,7 +100,8 @@ async function accessStart() {
 }
 
 /** Called first in route(): returns true when it showed the sign-in or a lock screen instead. */
-const OPEN_TO_ALL = h => h === '#about' || h === '#diary' || h === '#tfd' || h.startsWith('#tfd/');
+// before sign-in only these two are open (Shiv, 28 Nov): Thought for the Day needs sign-in too
+const OPEN_TO_ALL = h => h === '#about' || h === '#diary';
 function accessGate(hash) {
   if (accessState === 'ended') { showLocked('ended'); return true; }   // nothing stays open after the weekend
   if (accessState === 'open' || OPEN_TO_ALL(hash)) return false;
@@ -232,15 +233,17 @@ async function privateFile(path) {
 }
 
 // no copying out of lyrics, meanings and thoughts
-const inLocked = n => { const el = n && (n.nodeType === 1 ? n : n.parentElement); return !!(el && el.closest('#v-song, #v-other')); };
+// no copying anywhere in the app (only the sign-in boxes and admin forms can be typed in and copied)
+const inLocked = n => { const el = n && (n.nodeType === 1 ? n : n.parentElement); return !!(el && !el.closest('input, textarea, [contenteditable]')); };
 document.addEventListener('copy', e => { const s = document.getSelection(); if (accessOn() && s && inLocked(s.anchorNode)) e.preventDefault(); });
-const PROTECTED = '#v-song, #v-other, #v-playlist';
-document.addEventListener('contextmenu', e => { if (accessOn() && e.target.closest && e.target.closest(PROTECTED + ', audio, img')) e.preventDefault(); });
-['cut', 'dragstart', 'selectstart'].forEach(ev => document.addEventListener(ev, e => { if (accessOn() && e.target.closest && e.target.closest(PROTECTED)) e.preventDefault(); }));
+const PROTECTED = '.view, .sheet';
+const typing = el => !!(el && el.closest && el.closest('input, textarea, [contenteditable]'));
+document.addEventListener('contextmenu', e => { if (accessOn() && !typing(e.target)) e.preventDefault(); });
+['cut', 'dragstart', 'selectstart'].forEach(ev => document.addEventListener(ev, e => { if (accessOn() && e.target.closest && !typing(e.target)) e.preventDefault(); }));
 // computers: no Copy / Select all / Print / Save on song pages
 document.addEventListener('keydown', e => {
   if (!accessOn() || !(e.ctrlKey || e.metaKey)) return;
-  if (['c', 'a', 'p', 's', 'u', 'x'].includes((e.key || '').toLowerCase()) && document.querySelector(PROTECTED.split(', ').map(s => s + ':not(.hidden)').join(','))) e.preventDefault();
+  if (['c', 'a', 'p', 's', 'u', 'x'].includes((e.key || '').toLowerCase()) && !typing(e.target)) e.preventDefault();
 });
 // hide the words while the app is in the background (app switcher pictures) or being printed
 document.addEventListener('visibilitychange', () => document.body.classList.toggle('shield', accessOn() && document.hidden));
