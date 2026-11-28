@@ -3,7 +3,7 @@
  * meanings_<lang>.txt, audio.txt and the Audio/ folder, from the same place it is served. */
 'use strict';
 
-const WEB_VERSION = '4.27';
+const WEB_VERSION = '4.28';
 // The three books. Each book's files sit in its own folder (Divyanama at the top, Ashtapathy in ashtapathy/, Prabandham in prabandham/).
 const BOOKS = {
   dns: { id: 'dns', base: '', hash: '#song/', title: 'Divya Nama Sankeertanam', search: 'Search: section no. or song title', unit: 'songs' },
@@ -1958,8 +1958,9 @@ async function showTfd(number) {
   };
   $('t-share').onclick = () => {
     // only the title and the first two lines: the rest is read in the app after signing in (Shiv, 28 Nov)
-    const lines = t.paras.join('\n').split('\n').map(s => s.trim()).filter(Boolean).slice(0, 2);
-    const text = 'Harinamadwar · Thought for the Day (TFD ' + t.number + ')\n' + t.title + '\n\n' + lines.join('\n') + ' …\n\nRead the full thought in the Harinamadwar app 🙏\n' + location.origin + location.pathname;
+    const sentences = (t.paras.join(' ').replace(/\s+/g, ' ').match(/[^.!?।]+[.!?।]+["'’”]?/g) || [t.paras[0] || '']).slice(0, 2).map(s => s.trim());
+    let teaser = sentences.join(' '); if (teaser.length > 220) teaser = teaser.slice(0, 217).replace(/\s+\S*$/, '');
+    const text = 'Harinamadwar · Thought for the Day (TFD ' + t.number + ')\n' + t.title + '\n\n' + teaser + ' …\n\nRead the full thought in the Harinamadwar app 🙏\n' + location.origin + location.pathname;
     if (navigator.share) navigator.share({ title: t.title, text }).catch(() => {});
     else if (navigator.clipboard) navigator.clipboard.writeText(text).then(() => toast('Copied. You can paste it in WhatsApp.'));
   };
