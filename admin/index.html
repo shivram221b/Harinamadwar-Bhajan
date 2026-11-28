@@ -387,7 +387,15 @@ function showSignIn(note) {
 // ---------------------------------------------------------------- dashboard (SCRUM-70)
 // The app's own files (same place as the app): what is still missing, so anyone can pick up the next piece of work.
 const APP_BASE = /\/admin\/?(index\.html)?$/.test(location.pathname) ? new URL('../', location.href).href : IPHONE_APP;
-async function appFile(path) { try { const r = await fetch(APP_BASE + path, { cache: 'no-store' }); return r.ok ? await r.text() : ''; } catch (e) { return ''; } }
+// Song and meaning files are private since 27 Nov 2026: admins read them from the database (admin_content).
+const appFileCache = {};
+async function appFile(path) {
+  if (!DEMO && sb) {
+    if (!appFileCache[path]) appFileCache[path] = sb.rpc('admin_content', { p_path: path }).then(({ data, error }) => { if (error) { delete appFileCache[path]; return ''; } return data || ''; });
+    return appFileCache[path];
+  }
+  try { const r = await fetch(APP_BASE + path, { cache: 'no-store' }); return r.ok ? await r.text() : ''; } catch (e) { return ''; }
+}
 const heads = t => [...t.replace(/\r/g, '').matchAll(/^@@\s*([^|\n]+?)\s*\|\s*([^|\n]*)/gm)].map(m => ({ n: m[1], title: m[2].trim() }));
 const nonEmpty = t => { const m = new Set(); t.replace(/\r/g, '').split(/\n(?=@@)/).forEach(b => { const h = b.match(/^@@\s*([^|\n]+?)\s*\|/); if (h && b.split('\n').slice(1).join('').trim()) m.add(h[1]); }); return m; };
 const audioSet = t => new Set(t.replace(/\r/g, '').split('\n').filter(l => /^[^#\s][^|]*\|\s*\S/.test(l)).map(l => l.split('|')[0].trim()));
